@@ -20,13 +20,14 @@ file(GLOB_RECURSE SRC
 
 add_library(${PROJECT_NAME}_lib ${SRC})
 
-# Adds the include Path PROJECT_SOURCE_DIR/src to the target breakupModel
-# The Cmake of tetgen does not expose the headers, therefor we need to include them here
+# Adds the include Path PROJECT_SOURCE_DIR/src to the target polyhedralGravity
+# The CMake of tetgen does not expose the headers, therefor we need to include them here
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
         "${PROJECT_SOURCE_DIR}/src"
         "${tetgen_SOURCE_DIR}"
         )
 
+# Link libaries
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
         spdlog
         tetgen
@@ -35,6 +36,7 @@ target_link_libraries(${PROJECT_NAME}_lib PUBLIC
 # Building the standalone Executable
 add_executable(${PROJECT_NAME} ${mainFile})
 
+# Link executable with library
 target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib)
 
 # Option to build tests or not
