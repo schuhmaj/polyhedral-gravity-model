@@ -1,6 +1,8 @@
 #include <iostream>
 
+#include "spdlog/spdlog.h"
+
 int main(int argc, char *argv[]) {
-    std::cout << "The answer to your question is 42!" << std::endl;
+    SPDLOG_INFO("The answer to your question is 42!");
     return 0;
 }
