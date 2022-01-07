@@ -9,6 +9,7 @@ The project uses the following dependencies:
 
 - GoogleTest 1.11.0 (only required for testing, automatically set-up via CMake)
 - spdlog 1.9.2 (required for logging, automatically set-up via CMake)
+- tetgen 1.6 (required for I/O, automatically set-up via CMake)
 
 ## Build
 The program is build by using CMake. So first make sure that you installed

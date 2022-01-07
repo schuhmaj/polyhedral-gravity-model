@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 include(spdlog)
+include(tetgen)
 
 # Main file, containing the gravity model's driver
 set(mainFile ${PROJECT_SOURCE_DIR}/src/main.cpp)
@@ -20,12 +21,15 @@ file(GLOB_RECURSE SRC
 add_library(${PROJECT_NAME}_lib ${SRC})
 
 # Adds the include Path PROJECT_SOURCE_DIR/src to the target breakupModel
+# The Cmake of tetgen does not expose the headers, therefor we need to include them here
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
         "${PROJECT_SOURCE_DIR}/src"
+        "${tetgen_SOURCE_DIR}"
         )
 
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
         spdlog
+        tetgen
         )
 
 # Building the standalone Executable
