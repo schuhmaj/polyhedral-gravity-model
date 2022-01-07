@@ -32,6 +32,6 @@ with TODO arguments.
 
 ## Testing
 The project uses GoogleTest for testing. In oder to execute those
-test just execute the following command in the build directory:
+tests just execute the following command in the build directory:
 
     ctest
