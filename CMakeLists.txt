@@ -9,6 +9,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 include(spdlog)
 include(tetgen)
+include(yaml)
 
 # Main file, containing the gravity model's driver
 set(mainFile ${PROJECT_SOURCE_DIR}/src/main.cpp)
@@ -31,6 +32,7 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
 target_link_libraries(${PROJECT_NAME}_lib PUBLIC
         spdlog
         tetgen
+        yaml-cpp
         )
 
 # Building the standalone Executable
