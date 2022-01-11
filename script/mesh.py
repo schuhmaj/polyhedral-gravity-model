@@ -27,7 +27,8 @@ def read_pk_file(filename):
 def write_to_node_file(filename, nodes, elems):
     with open(filename, "a") as f:
         f.write("# Node count, 3 dimensions, no attribute, no boundary marker\n")
-        f.write("{} {} {} {}\n".format(nodes.size / 3, 3, 0, 0))
+        # TODO Very ugly division! Can cause problems, fix this
+        f.write("{} {} {} {}\n".format(int(nodes.size / 3), 3, 0, 0))
         f.write("# Node index, node coordinates\n")
         index = 1
         for n in nodes:
