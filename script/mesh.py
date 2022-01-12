@@ -54,18 +54,6 @@ def write_to_node_faces_ele_file(filename, nodes, faces, ele):
             index += 1
 
 
-def write_to_ele_file(filename, ele):
-    with open(filename + ".ele", "a") as f:
-        f.write("# number of tetrahedra, number of nodes per tet, no region attribute\n")
-        # TODO Very ugly division! Can cause problems, fix this
-        f.write("{} {} {}\n".format(int(ele.size / 4), 4, 0))
-        f.write("# tetrahedra index, nodes\n")
-        index = 0
-        for tet in ele:
-            f.write("{} {} {} {} {}\n".format(index, tet[0], tet[1], tet[2], tet[3]))
-            index += 1
-
-
 def main():
     print("Reading file...")
     mesh_points, mesh_triangles = read_pk_file("../mesh/Eros.pk")
