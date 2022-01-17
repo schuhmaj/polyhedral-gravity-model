@@ -16,9 +16,9 @@ Polyhedron TetgenAdapter::getPolyhedron() {
 }
 
 void TetgenAdapter::readNode(const std::string &filename) {
-    if (!_hasFaces) {
+    if (!_hasNodes) {
         _tetgenio.load_node(const_cast<char *>(filename.c_str()));
-        _hasFaces = true;
+        _hasNodes = true;
     } else {
         throw std::runtime_error(
                 "The Polyhedron already has well defined nodes! The information of " + filename
