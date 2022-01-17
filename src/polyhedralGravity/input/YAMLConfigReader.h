@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ConfigSource.h"
+#include "TetgenAdapter.h"
 #include "yaml-cpp/yaml.h"
 #include <string>
 #include <vector>

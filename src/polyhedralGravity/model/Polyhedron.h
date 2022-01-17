@@ -29,6 +29,13 @@ class Polyhedron {
 public:
 
     /**
+     * Generates an empty polyhedron.
+     */
+    Polyhedron()
+            : nodes{},
+              faces{} {}
+
+    /**
      * Generates a polyhedron from nodes and faces.
      * @param nodes - vector containing the nodes
      * @param faces - vector containing the triangle faces.

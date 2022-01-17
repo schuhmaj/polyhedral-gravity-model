@@ -11,7 +11,7 @@ std::vector<std::array<double, 3>> YAMLConfigReader::getPointsOfInterest() {
 std::shared_ptr<DataSource> YAMLConfigReader::getDataSource() {
     if (_file[ROOT][INPUT] && _file[ROOT][INPUT][INPUT_POLYHEDRON]) {
         auto vectorOfFiles = _file[ROOT][INPUT][INPUT_POLYHEDRON].as<std::vector<std::string>>();
-        return nullptr;
+        return std::make_shared<TetgenAdapter>(vectorOfFiles);
     } else {
         throw std::runtime_error{"There happened an error parsing the DataSource of the Polyhedron from the config file"};
     }
