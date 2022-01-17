@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <vector>
+#include <array>
 
 /**
  * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
