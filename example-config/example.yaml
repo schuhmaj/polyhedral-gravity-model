@@ -1,0 +1,9 @@
+---
+gravityModel:
+  input:
+    polyhedron:
+      - "../mesh/Eros.node"
+      - "../mesh/Eros.face"
+      - "../mesh/Eros.ele"
+    points:
+      - [0, 0, 0]
