@@ -25,7 +25,7 @@ class TetgenAdapter : public DataSource {
     /**
      * The file names from which to read in the polyhedron
      */
-    std::vector<std::string> _fileNames;
+    const std::vector<std::string> _fileNames;
 
 public:
 
@@ -89,5 +89,11 @@ private:
      * Does the polyhedron have elements?
      */
     bool _hasElements{false};
+
+    /**
+     * Converts the tetgenio structure to a more slim Polyhedron used by this implementation.
+     * @return a Polyhedron
+     */
+    [[nodiscard]] Polyhedron convertTetgenToPolyhedron() const;
 };
 
