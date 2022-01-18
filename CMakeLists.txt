@@ -22,10 +22,8 @@ file(GLOB_RECURSE SRC
 add_library(${PROJECT_NAME}_lib ${SRC})
 
 # Adds the include Path PROJECT_SOURCE_DIR/src to the target polyhedralGravity
-# The CMake of tetgen does not expose the headers, therefor we need to include them here
 target_include_directories(${PROJECT_NAME}_lib PUBLIC
         "${PROJECT_SOURCE_DIR}/src"
-        "${tetgen_SOURCE_DIR}"
         )
 
 # Link libaries
