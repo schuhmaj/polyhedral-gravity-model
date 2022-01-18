@@ -16,10 +16,14 @@ if(NOT tetgen_POPULATED)
     # without polluting the global include path (with would lead to more uglier issues)
     if(NOT EXISTS ${tetgen_SOURCE_DIR}/tetgen_mod.cxx)
         message(STATUS "Creating modified tetgen.cxx in order to prevent console output from library")
-        file(READ ${tetgen_SOURCE_DIR}/tetgen.cxx TETGEN_CXX OFFSET 3748)
+        file(READ ${tetgen_SOURCE_DIR}/tetgen.cxx TETGEN_CXX)
 
-        file(APPEND ${tetgen_SOURCE_DIR}/tetgen_mod.cxx
+        string(REPLACE
+                "#include \"tetgen.h\""
                 "#include \"tetgen.h\"\n#define printf(fmt, ...) (0)\n"
+                TETGEN_CXX "${TETGEN_CXX}")
+
+        file(WRITE ${tetgen_SOURCE_DIR}/tetgen_mod.cxx
                 "${TETGEN_CXX}"
                 )
     endif()
