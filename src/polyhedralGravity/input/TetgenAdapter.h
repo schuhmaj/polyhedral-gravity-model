@@ -7,6 +7,7 @@
 #include <functional>
 #include <utility>
 #include <exception>
+#include <stdexcept>
 
 /**
  * An adapter to the Tetgen Library. This is the interface between tetgen's data structures and I/O
