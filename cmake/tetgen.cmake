@@ -13,7 +13,7 @@ if(NOT tetgen_POPULATED)
 
     # This is ugly, but functional
     # We modify one source file in order to prevent console output from the printf function
-    # without polluting the global include path (with would lead to more uglier issues)
+    # without polluting the global include path (which would cause to more uglier issues)
     if(NOT EXISTS ${tetgen_SOURCE_DIR}/tetgen_mod.cxx)
         message(STATUS "Creating modified tetgen.cxx in order to prevent console output from library")
         file(READ ${tetgen_SOURCE_DIR}/tetgen.cxx TETGEN_CXX)
