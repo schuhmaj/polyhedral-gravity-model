@@ -2,8 +2,7 @@
 gravityModel:
   input:
     polyhedron:
-      - "../mesh/Eros.node"
-      - "../mesh/Eros.face"
-      - "../mesh/Eros.ele"
+      - "../example-config/data/tsoulis.node"
+      - "../example-config/data/tsoulis.face"
     points:
       - [0, 0, 0]
