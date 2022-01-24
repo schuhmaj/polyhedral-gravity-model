@@ -10,14 +10,13 @@
 namespace util {
 
     /**
-     * Applies a binary function to elements of two objects piece by piece. The objects must
-     * be iterable and should have the same size. If they have not the same size the function is applied as long
-     * as the smaller one still have elements.
+     * Applies a binary function to elements of two containers piece by piece. The objects must
+     * be iterable and should have the same size!
      * @tparam Container - a iterable object like an array or vector
      * @tparam BinOp - a binary function to apply
      * @param lhs - the first container
      * @param rhs - the second container
-     * @param binOp - the binary function
+     * @param binOp - a binary function like +, -, *, /
      * @return a container containing the result
      * TODO Vectorize this!
      */
@@ -29,15 +28,15 @@ namespace util {
     }
 
     /**
-     * Applies a binary function to elements of two objects piece by piece. The objects must
-     * be iterable and should have the same size. If they have not the same size the function is applied as long
-     * as the smaller one still have elements.
+     * Applies a binary function to elements of one container piece by piece. The objects must
+     * be iterable. The resulting container consist of the containers' object after the application
+     * of the binary function with the scalar as parameter.
      * @tparam Container - a iterable object like an array or vector
      * @tparam Scalar - a scalar to use on each element
      * @tparam BinOp - a binary function to apply
      * @param lhs - the first container
      * @param scalar - a scalar to use on each element
-     * @param binOp - the binary function
+     * @param binOp - a binary function like +, -, *, /
      * @return a container containing the result
      * TODO Vectorize this
      */
@@ -51,7 +50,7 @@ namespace util {
     }
 
     /**
-     * Applies the Operation Minus to two Container piece by piece.
+     * Applies the Operation Minus to two Containers piece by piece.
      * @example {1, 2, 3} - {1, 1, 1} = {0, 1, 2}
      * @tparam Container
      * @param lhs - minuend
@@ -64,7 +63,7 @@ namespace util {
     }
 
     /**
-    * Applies the Operation Plus to two Container piece by piece.
+    * Applies the Operation Plus to two Containers piece by piece.
     * @example {1, 2, 3} + {1, 1, 1} = {2, 3, 4}
     * @tparam Container
     * @param lhs - addend
@@ -77,7 +76,7 @@ namespace util {
     }
 
     /**
-    * Applies the Operation * to two Container piece by piece.
+    * Applies the Operation * to two Containers piece by piece.
     * @example {1, 2, 3} * {2, 2, 2} = {2, 4, 6}
     * @tparam Container
     * @param lhs - multiplicand
@@ -90,7 +89,7 @@ namespace util {
     }
 
     /**
-    * Applies the Operation / to two Container piece by piece.
+    * Applies the Operation / to two Containers piece by piece.
     * @example {1, 2, 3} * {1, 2, 3} = {1, 1, 1}
     * @tparam Container
     * @param lhs - multiplicand

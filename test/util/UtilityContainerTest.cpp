@@ -24,3 +24,23 @@ TEST(UtilityContainer, VectorScalarPlus) {
     auto actualResult = a + b;
     ASSERT_EQ(actualResult, expectedResult);
 }
+
+TEST(UtilityContainer, VectorContainerMul) {
+    using namespace ::util;
+    std::array<int, 3> a{3, 4, 5};
+    std::array<int, 3> b{6, 8, 10};
+
+    std::array<int, 3> expectedResult{18, 32, 50};
+    auto actualResult = a * b;
+    ASSERT_EQ(actualResult, expectedResult);
+}
+
+TEST(UtilityContainer, VectorScalarMul) {
+    using namespace ::util;
+    std::array<int, 3> a{3, 4, 5};
+    int b = 100;
+
+    std::array<int, 3> expectedResult{300, 400, 500};
+    auto actualResult = a * b;
+    ASSERT_EQ(actualResult, expectedResult);
+}
