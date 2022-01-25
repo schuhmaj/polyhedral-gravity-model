@@ -15,5 +15,6 @@ int main(int argc, char *argv[]) {
 
     grav.calculate();
 
+    SPDLOG_INFO("Finished.");
     return 0;
 }

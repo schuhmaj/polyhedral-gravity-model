@@ -45,6 +45,8 @@ public:
 
     void calculate();
 
+    std::vector<std::array<std::array<double, 3>, 3>> calculateGij();
+
     /**
      * Calculates the LN_pq values based on Equation (14).
      * The subscript q is the polyhedral segment of one face p of the complete polyhedron.
@@ -52,8 +54,6 @@ public:
      * @param q - the polyhedral segment
      */
     double calculateLNpq(size_t p , size_t q);
-
-    std::vector<std::array<std::array<double, 3>, 3>> calculateGij();
 
 
 };

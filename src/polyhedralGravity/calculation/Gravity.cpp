@@ -9,12 +9,15 @@ std::vector<std::array<std::array<double, 3>, 3>> Gravity::calculateGij() {
     using util::operator-;
     std::vector<std::array<std::array<double, 3>, 3>> g;
     g.reserve(_polyhedron.size());
-    for (auto &plane : _polyhedron.getPolyhedralSegments()) {
-        std::array<std::array<double, 3>, 3> gi{};
-        for (int j = 0; j < gi.size(); ++j) {
-            gi[j] = plane.at(j).second - plane.at(j).first;
-        }
-        g.push_back(gi);
+    for (auto &face: _polyhedron.getFaces()) {
+        auto &node0 = _polyhedron.getNode(face[0]);
+        auto &node1 = _polyhedron.getNode(face[1]);
+        auto &node2 = _polyhedron.getNode(face[2]);
+        g.push_back({
+                            node1 - node0,
+                            node2 - node1,
+                            node0 - node2
+                    });
     }
     return g;
 }

@@ -49,6 +49,10 @@ public:
         return _nodes;
     }
 
+    [[nodiscard]] const std::array<double, 3> &getNode(size_t index) const {
+        return _nodes[index];
+    }
+
     /**
      * The number of points (nodes) that make up the polyhedron.
      * @return a size_t
@@ -69,15 +73,6 @@ public:
      */
     [[nodiscard]] std::pair<const std::array<double, 3> &, const std::array<double, 3> &>
     getPolyhedralSegment(size_t p, size_t q) const;
-
-
-    /**
-     * Returns a vector consisting of the three segments making up a plane/ face.
-     * Every segment is a pair consisting of references to the two cartesian points defining it.
-     * @return vector of segments per plane
-     */
-    [[nodiscard]] std::vector<std::array<std::pair<const std::array<double, 3> &, const std::array<double, 3> &>, 3>>
-    getPolyhedralSegments() const;
 
 };
 
