@@ -2,6 +2,8 @@
 
 #include "polyhedralGravity/model/Polyhedron.h"
 #include "polyhedralGravity/model/GravityResult.h"
+#include "polyhedralGravity/util/UtilityConstants.h"
+#include "polyhedralGravity/util/UtilityContainer.h"
 #include "spdlog/spdlog.h"
 
 class Gravity {
@@ -13,8 +15,9 @@ class Gravity {
 
     /**
      * The constant density of the polyhedron in [kg/m^3].
+     * The density is initialized with the default constant density 2670.0 from Tsoulis Paper (above (4)).
      */
-    const double _density;
+    const double _density{util::defaultConstantDensity};
 
     /**
      * The result of the evaluation of the gravity model
@@ -26,11 +29,9 @@ public:
     /**
      * Construct as new Gravity Calculation with an polyhedron as input
      * @param polyhedron - Poylhedron
-     * The density is initialized with the default density for asteroids (2 g/cm^3 = 2000 kg/m^3).
      */
     explicit Gravity(const Polyhedron &polyhedron)
-            : _polyhedron{polyhedron},
-              _density{2000.0} {}
+            : _polyhedron{polyhedron} {}
 
     /**
      * Construct as new Gravity Calculation with an polyhedron as input
