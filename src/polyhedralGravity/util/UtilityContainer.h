@@ -18,7 +18,6 @@ namespace util {
      * @param rhs - the second container
      * @param binOp - a binary function like +, -, *, /
      * @return a container containing the result
-     * TODO Vectorize this!
      */
     template<typename Container, typename BinOp>
     Container applyBinaryFunction(const Container &lhs, const Container &rhs, BinOp binOp) {
@@ -38,7 +37,6 @@ namespace util {
      * @param scalar - a scalar to use on each element
      * @param binOp - a binary function like +, -, *, /
      * @return a container containing the result
-     * TODO Vectorize this
      */
     template<typename Container, typename Scalar,typename BinOp>
     Container applyBinaryFunction(const Container &lhs, const Scalar &scalar, BinOp binOp) {
