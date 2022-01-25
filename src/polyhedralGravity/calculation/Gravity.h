@@ -53,5 +53,7 @@ public:
      */
     double calculateLNpq(size_t p , size_t q);
 
+    std::vector<std::array<std::array<double, 3>, 3>> calculateGij();
+
 
 };
