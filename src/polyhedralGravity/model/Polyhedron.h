@@ -18,6 +18,9 @@ class Polyhedron {
     /**
      * A vector containing the faces (triangles) of the polyhedron.
      * Each face is an array of size three containing the indices of the nodes forming the face.
+     * Since every face consist of three nodes, every face consist of three segments. Each segment consists of
+     * two nodes.
+     * @example face consisting of {1, 2, 3} --> segments: {1, 2}, {2, 3}, {3, 1}
      */
     const std::vector<std::array<size_t, 3>> _faces;
 
@@ -49,6 +52,15 @@ public:
     [[nodiscard]] const std::vector<std::array<size_t, 3>> &getFaces() const {
         return _faces;
     }
+
+    /**
+     * Returns the endpoints (nodes) of a given polyhedral segment.
+     * @param p - the polyhedral face
+     * @param q - the index of the segment inside the polyhedral face
+     * @return a pair of two 3-dimensional coordinate points
+     */
+    [[nodiscard]] std::pair<const std::array<double, 3> &, const std::array<double, 3> &>
+    getPolyhedralSegment(size_t p, size_t q) const;
 
 };
 
