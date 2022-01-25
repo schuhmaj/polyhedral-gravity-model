@@ -3,7 +3,7 @@
 #include "spdlog/spdlog.h"
 #include "polyhedralGravity/input/ConfigSource.h"
 #include "polyhedralGravity/input/YAMLConfigReader.h"
-#include "polyhedralGravity/gravity/Gravity.h"
+#include "polyhedralGravity/calculation/Gravity.h"
 
 int main(int argc, char *argv[]) {
     SPDLOG_INFO("The answer to your question is 42!");
