@@ -7,9 +7,6 @@
 
 class TetgenAdapterTest : public ::testing::Test {
 
-protected:
-
-
 };
 
 TEST_F(TetgenAdapterTest, readSimpleNode) {

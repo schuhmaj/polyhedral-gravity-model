@@ -38,7 +38,7 @@ namespace polyhedralGravity::util {
      * @param binOp - a binary function like +, -, *, /
      * @return a container containing the result
      */
-    template<typename Container, typename Scalar,typename BinOp>
+    template<typename Container, typename Scalar, typename BinOp>
     Container applyBinaryFunction(const Container &lhs, const Scalar &scalar, BinOp binOp) {
         Container ret = lhs;
         std::transform(std::begin(lhs), std::end(lhs), std::begin(ret), [&binOp, &scalar](const Scalar &element) {
@@ -215,10 +215,12 @@ namespace polyhedralGravity::util {
         return os;
     }
 
-    template <typename T>
-    struct is_stdarray : std::false_type {};
+    template<typename T>
+    struct is_stdarray : std::false_type {
+    };
 
-    template <typename T, std::size_t N>
-    struct is_stdarray<std::array<T, N>> : std::true_type {};
+    template<typename T, std::size_t N>
+    struct is_stdarray<std::array<T, N>> : std::true_type {
+    };
 
 }
