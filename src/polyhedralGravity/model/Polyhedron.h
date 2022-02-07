@@ -67,14 +67,14 @@ namespace polyhedralGravity {
             return _faces;
         }
 
-        /**
-         * Returns the endpoints (nodes) of a given polyhedral segment.
-         * @param p - the polyhedral face
-         * @param q - the index of the segment inside the polyhedral face
-         * @return a pair of two 3-dimensional coordinate points
-         */
-        [[nodiscard]] std::pair<const std::array<double, 3> &, const std::array<double, 3> &>
-        getPolyhedralSegment(size_t p, size_t q) const;
+    /**
+     * Returns references to the endpoints (nodes) of a given polyhedral segment.
+     * @param p - the polyhedral face
+     * @param q - the index of the segment inside the polyhedral face
+     * @return a pair of two 3-dimensional coordinate points
+     */
+    [[nodiscard]] std::pair<const std::array<double, 3> &, const std::array<double, 3> &>
+    getPolyhedralSegment(size_t p, size_t q) const;
 
     };
 
