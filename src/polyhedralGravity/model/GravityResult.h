@@ -34,9 +34,16 @@ public:
      */
     std::array<double, 6> gradiometricTensor{};
 
+    /**
+     * Creates a new empty Result for the origin in P(0, 0, 0)
+     */
     GravityResult()
             : p{0, 0, 0} {}
 
+    /**
+     * Creates new empty Result for a specific point P
+     * @param p1 - point p
+     */
     explicit GravityResult(const std::array<double, 3> &p1)
             : p{p1} {}
 
