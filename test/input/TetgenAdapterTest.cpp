@@ -9,9 +9,6 @@ class TetgenAdapterTest : public ::testing::Test {
 
 protected:
 
-    virtual void SetUp() {
-
-    }
 
 };
 
