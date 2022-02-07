@@ -12,7 +12,7 @@ namespace polyhedralGravity::util {
     /**
      * Applies a binary function to elements of two containers piece by piece. The objects must
      * be iterable and should have the same size!
-     * @tparam Container - a iterable object like an array or vector
+     * @tparam Container - an iterable object like an array or vector
      * @tparam BinOp - a binary function to apply
      * @param lhs - the first container
      * @param rhs - the second container
