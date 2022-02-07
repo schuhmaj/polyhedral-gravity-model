@@ -53,7 +53,7 @@ void TetgenAdapter::readElements(const std::string &filename) {
 
 Polyhedron TetgenAdapter::convertTetgenToPolyhedron() const {
     std::vector<std::array<double, 3>> nodes{};
-    nodes.reserve(_tetgenio.numberofpoints * 3);
+    nodes.reserve(_tetgenio.numberofpoints);
     for (size_t i = 0; i < _tetgenio.numberofpoints * 3; i += 3) {
         nodes.push_back({_tetgenio.pointlist[i],
                          _tetgenio.pointlist[i+1],
@@ -61,7 +61,7 @@ Polyhedron TetgenAdapter::convertTetgenToPolyhedron() const {
     }
 
     std::vector<std::array<size_t, 3>> faces{};
-    faces.reserve(_tetgenio.numberoftrifaces * 3);
+    faces.reserve(_tetgenio.numberoftrifaces);
     for (size_t i = 0; i < _tetgenio.numberoftrifaces * 3; i += 3) {
         faces.push_back({static_cast<size_t>(_tetgenio.trifacelist[i]),
                          static_cast<size_t>(_tetgenio.trifacelist[i+1]),
