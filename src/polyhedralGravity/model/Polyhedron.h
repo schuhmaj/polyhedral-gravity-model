@@ -66,7 +66,7 @@ public:
     }
 
     /**
-     * Returns the endpoints (nodes) of a given polyhedral segment.
+     * Returns references to the endpoints (nodes) of a given polyhedral segment.
      * @param p - the polyhedral face
      * @param q - the index of the segment inside the polyhedral face
      * @return a pair of two 3-dimensional coordinate points
