@@ -6,7 +6,7 @@ void Gravity::calculate() {
 }
 
 std::vector<std::array<std::array<double, 3>, 3>> Gravity::calculateGij() {
-    using util::operator-;
+    using ::util::operator-;
     std::vector<std::array<std::array<double, 3>, 3>> g;
     g.reserve(_polyhedron.size());
     for (auto &face: _polyhedron.getFaces()) {
