@@ -25,9 +25,10 @@ TEST_F(TetgenAdapterTest, readSimpleNode) {
             {-20, 10, 15}
     };
 
-    std::vector<std::string> simpleFiles;
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.node");
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.face");
+    std::vector<std::string> simpleFiles {
+        "resources/TetgenAdapterTestReadSimple.node",
+        "resources/TetgenAdapterTestReadSimple.face",
+    };
 
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
