@@ -15,6 +15,13 @@ public:
     virtual ~ConfigSource() = default;
 
     /**
+     * Returns the constant density rho of the given polyhedron in [kg/m^3].
+     * The density is required for the calculation.
+     * @return density as double
+     */
+    virtual double getDensity() = 0;
+
+    /**
      * The vector contains the points for which the polyhedral gravity model should
      * be evaluated.
      * @return vector of points

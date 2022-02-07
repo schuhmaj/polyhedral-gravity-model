@@ -16,6 +16,7 @@ class YAMLConfigReader : public ConfigSource {
     static constexpr char ROOT[] = "gravityModel";
     static constexpr char INPUT[] = "input";
     static constexpr char INPUT_POLYHEDRON[] = "polyhedron";
+    static constexpr char INPUT_DENSITY[] = "density";
     static constexpr char INPUT_POINTS[] = "points";
 
     const YAML::Node _file;
@@ -45,6 +46,8 @@ public:
             throw std::runtime_error{"The YAML file does not contain a specification for the \"gravityModel\"!"};
         }
     }
+
+    double getDensity() override;
 
     std::vector<std::array<double, 3>> getPointsOfInterest() override;
 

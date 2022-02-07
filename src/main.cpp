@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "spdlog/spdlog.h"
 #include "polyhedralGravity/input/ConfigSource.h"
 #include "polyhedralGravity/input/YAMLConfigReader.h"
@@ -10,8 +8,9 @@ int main(int argc, char *argv[]) {
 
     std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>("../example-config/example.yaml");
     auto poly = config->getDataSource()->getPolyhedron();
+    auto density = config->getDensity();
 
-    Gravity grav{poly};
+    Gravity grav{poly, density};
 
     grav.calculate();
 
