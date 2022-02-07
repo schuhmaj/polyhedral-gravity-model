@@ -70,8 +70,9 @@ namespace polyhedralGravity {
         /**
          * Returns references to the endpoints (nodes) of a given polyhedral segment.
          * @param p - the polyhedral face
-         * @param q - the index of the segment inside the polyhedral face
+         * @param q - the index of the segment inside the polyhedral face (triangle, so q is in [0, 2])
          * @return a pair of two 3-dimensional coordinate points
+         * @example p = 1 and q = 2 will return the third segment from the second face
          */
         [[nodiscard]] std::pair<const std::array<double, 3> &, const std::array<double, 3> &>
         getPolyhedralSegment(size_t p, size_t q) const;
