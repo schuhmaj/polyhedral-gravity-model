@@ -11,7 +11,7 @@ namespace polyhedralGravity {
     class Gravity {
 
         /**
-         * The Polyhedron for which to evaluated the gravity at point P
+         * The Polyhedron for which we evaluated the gravity at point P
          */
         const Polyhedron _polyhedron;
 
