@@ -1,6 +1,6 @@
 #pragma once
 
-namespace util {
+namespace polyhedralGravity::util {
 
     /**
      * The gravitational constant G in [m^3/(kg*s^2)].
@@ -13,6 +13,5 @@ namespace util {
      * @related in his paper above Equation (4)
      */
     constexpr double defaultConstantDensity = 2670.0;
-
 
 }

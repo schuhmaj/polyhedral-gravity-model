@@ -7,52 +7,55 @@
 #include <vector>
 #include <array>
 
-class YAMLConfigReader : public ConfigSource {
+namespace polyhedralGravity {
 
-    /*
-     * The following static variables contain the names of the YAML nodes.
-     * Note: C++20 would allow constexpr std::string which would be more appropriate instead of char[]
-     */
-    static constexpr char ROOT[] = "gravityModel";
-    static constexpr char INPUT[] = "input";
-    static constexpr char INPUT_POLYHEDRON[] = "polyhedron";
-    static constexpr char INPUT_DENSITY[] = "density";
-    static constexpr char INPUT_POINTS[] = "points";
+    class YAMLConfigReader : public ConfigSource {
 
-    const YAML::Node _file;
+        /*
+         * The following static variables contain the names of the YAML nodes.
+         * Note: C++20 would allow constexpr std::string which would be more appropriate instead of char[]
+         */
+        static constexpr char ROOT[] = "gravityModel";
+        static constexpr char INPUT[] = "input";
+        static constexpr char INPUT_POLYHEDRON[] = "polyhedron";
+        static constexpr char INPUT_DENSITY[] = "density";
+        static constexpr char INPUT_POINTS[] = "points";
 
-public:
+        const YAML::Node _file;
 
-    /**
-     * Creates a new YAML Config Reader.
-     * @param filename - a reference to a string
-     * @throws an exception if the file is malformed or cannot be loaded or if the ROOT node is not found
-     */
-    explicit YAMLConfigReader(const std::string &filename)
-            : _file{YAML::LoadFile(filename)} {
-        if (!_file[ROOT]) {
-            throw std::runtime_error{"The YAML file does not contain a specification for the \"gravityModel\"!"};
+    public:
+
+        /**
+         * Creates a new YAML Config Reader.
+         * @param filename - a reference to a string
+         * @throws an exception if the file is malformed or cannot be loaded or if the ROOT node is not found
+         */
+        explicit YAMLConfigReader(const std::string &filename)
+                : _file{YAML::LoadFile(filename)} {
+            if (!_file[ROOT]) {
+                throw std::runtime_error{"The YAML file does not contain a specification for the \"gravityModel\"!"};
+            }
         }
-    }
 
-    /**
-     * Creates a new YAML Config Reader.
-     * @param filename - a movable string
-     * @throws an exception if the file is malformed or cannot be loaded or if the ROOT node is not found
-     */
-    explicit YAMLConfigReader(std::string &&filename)
-    : _file{YAML::LoadFile(filename)} {
-        if (!_file[ROOT]) {
-            throw std::runtime_error{"The YAML file does not contain a specification for the \"gravityModel\"!"};
+        /**
+         * Creates a new YAML Config Reader.
+         * @param filename - a movable string
+         * @throws an exception if the file is malformed or cannot be loaded or if the ROOT node is not found
+         */
+        explicit YAMLConfigReader(std::string &&filename)
+                : _file{YAML::LoadFile(filename)} {
+            if (!_file[ROOT]) {
+                throw std::runtime_error{"The YAML file does not contain a specification for the \"gravityModel\"!"};
+            }
         }
-    }
 
-    double getDensity() override;
+        double getDensity() override;
 
-    std::vector<std::array<double, 3>> getPointsOfInterest() override;
+        std::vector<std::array<double, 3>> getPointsOfInterest() override;
 
-    std::shared_ptr<DataSource> getDataSource() override;
+        std::shared_ptr<DataSource> getDataSource() override;
 
 
-};
+    };
 
+}

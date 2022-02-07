@@ -6,7 +6,7 @@
 
 
 TEST(UtilityContainer, VectorContainerPlus) {
-    using namespace ::util;
+    using namespace ::polyhedralGravity::util;
     std::array<int, 3> a{3, 4, 5};
     std::array<int, 3> b{6, 8, 10};
 
@@ -16,7 +16,7 @@ TEST(UtilityContainer, VectorContainerPlus) {
 }
 
 TEST(UtilityContainer, VectorScalarPlus) {
-    using namespace ::util;
+    using namespace ::polyhedralGravity::util;
     std::array<int, 3> a{3, 4, 5};
     int b = 100;
 
@@ -26,7 +26,7 @@ TEST(UtilityContainer, VectorScalarPlus) {
 }
 
 TEST(UtilityContainer, VectorContainerMul) {
-    using namespace ::util;
+    using namespace ::polyhedralGravity::util;
     std::array<int, 3> a{3, 4, 5};
     std::array<int, 3> b{6, 8, 10};
 
@@ -36,7 +36,7 @@ TEST(UtilityContainer, VectorContainerMul) {
 }
 
 TEST(UtilityContainer, VectorScalarMul) {
-    using namespace ::util;
+    using namespace ::polyhedralGravity::util;
     std::array<int, 3> a{3, 4, 5};
     int b = 100;
 

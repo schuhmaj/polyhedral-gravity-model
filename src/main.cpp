@@ -4,6 +4,7 @@
 #include "polyhedralGravity/calculation/Gravity.h"
 
 int main(int argc, char *argv[]) {
+    using namespace polyhedralGravity;
     SPDLOG_INFO("The answer to your question is 42!");
 
     std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>("../example-config/example.yaml");

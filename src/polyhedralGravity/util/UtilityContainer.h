@@ -7,7 +7,7 @@
 #include <string>
 #include <iostream>
 
-namespace util {
+namespace polyhedralGravity::util {
 
     /**
      * Applies a binary function to elements of two containers piece by piece. The objects must

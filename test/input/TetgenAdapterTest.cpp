@@ -17,6 +17,7 @@ protected:
 
 TEST_F(TetgenAdapterTest, readSimpleNode) {
     using namespace testing;
+    using namespace ::polyhedralGravity;
     std::vector<std::array<double, 3>> expectedNodes = {
             {-20, 0,  25},
             {0,   0,  25},
@@ -41,6 +42,7 @@ TEST_F(TetgenAdapterTest, readSimpleNode) {
 
 TEST_F(TetgenAdapterTest, readSimpleFace) {
     using namespace testing;
+    using namespace ::polyhedralGravity;
     std::vector<std::array<size_t, 3>> expectedFaces = {
             {4, 2, 1},
             {4, 3, 2},
