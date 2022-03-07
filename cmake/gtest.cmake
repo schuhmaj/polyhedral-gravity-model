@@ -1,5 +1,7 @@
 include(FetchContent)
 
+message(STATUS "Setting up gtest")
+
 #Adapted from https://cliutils.gitlab.io/modern-cmake/chapters/testing/googletest.html
 #Fetches the version 1.11.0 from the official github for googletest
 FetchContent_Declare(googletest

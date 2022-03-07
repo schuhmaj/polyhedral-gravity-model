@@ -1,5 +1,7 @@
 include(FetchContent)
 
+message(STATUS "Setting up yaml-cpp")
+
 #Fetches the version 0.7.0 for yaml-cpp
 FetchContent_Declare(yaml-cpp
         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git

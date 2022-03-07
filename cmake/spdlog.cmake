@@ -1,5 +1,7 @@
 include(FetchContent)
 
+message(STATUS "Setting up spdlog")
+
 #Fetches the version 1.9.2 for spdlog
 FetchContent_Declare(spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
