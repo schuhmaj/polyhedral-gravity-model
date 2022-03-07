@@ -36,7 +36,21 @@ namespace polyhedralGravity {
     Gravity::calculateSegmentUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g,
                                          const std::vector<std::array<double, 3>> &planeUnitNormals) {
         std::vector<std::array<std::array<double, 3>, 3>> segmentUnitNormal{_polyhedron.countFaces()};
-
+        //Outer "loop" over G_i (running i) and N_i calculating n_i
+        std::transform(g.cbegin(), g.cend(), planeUnitNormals.cbegin(), segmentUnitNormal.begin(),
+                       [](const std::array<std::array<double, 3>, 3> &gi, const std::array<double, 3> &Ni)
+                               -> std::array<std::array<double, 3>, 3> {
+                           std::array<std::array<double, 3>, 3> ni{};
+                           //Inner "loop" over G_ij (fixed i, running j) with parameter N_i calculating n_ij
+                           std::transform(gi.cbegin(), gi.end(), ni.begin(),
+                                          [&Ni](const auto &gij) -> std::array<double, 3> {
+                                              using namespace util;
+                                              const std::array<double, 3> crossProduct = cross(gij, Ni);
+                                              const double norm = euclideanNorm(crossProduct);
+                                              return crossProduct / norm;
+                                          });
+                           return ni;
+                       });
         return segmentUnitNormal;
     }
 
