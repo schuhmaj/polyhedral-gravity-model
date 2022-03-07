@@ -64,18 +64,24 @@ namespace polyhedralGravity {
          * Calculate the N_i vectors according to Tsoulis equation (19).
          *
          * The dimension of i will be equal to the number of faces.
+         * @param g - the G_ij vectors
          * @return plane unit normals
          */
-        std::vector<std::array<double, 3>> calculatePlaneUnitNormals();
+        std::vector<std::array<double, 3>>
+        calculatePlaneUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g);
 
         /**
          * Calculates the segment unit normals according to Tsoulis equation (20).
          *
          * The dimension of i will be equal to the number of faces, whereas the dimension j mirrors the number of
          * segments forming one face. Since we always use triangles, j will be 3.
+         * @param g - the G_ij vectors
+         * @param planeUnitNormals - the plane unit normals
          * @return segment unit normals
          */
-        std::vector<std::array<std::array<double, 3>, 3>> calculateSegmentUnitNormals();
+        std::vector<std::array<std::array<double, 3>, 3>>
+        calculateSegmentUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g,
+                                    const std::vector<std::array<double, 3>> &planeUnitNormals);
 
 
     };
