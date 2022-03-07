@@ -1,3 +1,4 @@
+#include <chrono>
 #include "spdlog/spdlog.h"
 #include "polyhedralGravity/input/ConfigSource.h"
 #include "polyhedralGravity/input/YAMLConfigReader.h"
@@ -13,7 +14,12 @@ int main(int argc, char *argv[]) {
 
     Gravity grav{poly, density};
 
+    auto start = std::chrono::high_resolution_clock::now();
     grav.calculate();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = end - start;
+    auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+    SPDLOG_INFO("The calculation took {} microseconds", ms.count());
 
     SPDLOG_INFO("Finished.");
     return 0;

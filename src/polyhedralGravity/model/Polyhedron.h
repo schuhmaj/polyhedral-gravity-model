@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <array>
+#include <algorithm>
 #include <exception>
 #include <stdexcept>
 

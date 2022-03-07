@@ -27,11 +27,21 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC
         )
 
 # Link libaries
-target_link_libraries(${PROJECT_NAME}_lib PUBLIC
+target_link_libraries(${PROJECT_NAME}_lib
         spdlog
         tetgen
         yaml-cpp
         )
+
+# For future parallelization of the std algorithms?!
+#if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+#    message(STATUS "Linking tbb libary")
+#    find_library(TBB
+#            NAME tbb
+#            HINTS "/opt/homebrew/lib/")
+#    target_link_libraries(${PROJECT_NAME}_lib
+#            ${TBB})
+#endif()
 
 # Building the standalone Executable
 add_executable(${PROJECT_NAME} ${mainFile})
