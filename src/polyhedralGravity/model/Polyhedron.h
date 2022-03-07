@@ -3,12 +3,15 @@
 #include <utility>
 #include <vector>
 #include <array>
+#include <exception>
+#include <stdexcept>
 
 namespace polyhedralGravity {
 
-/**
- * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
- */
+    /**
+     * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
+     * The index always starts with zero!
+    */
     class Polyhedron {
 
         /**
@@ -40,10 +43,20 @@ namespace polyhedralGravity {
          * Generates a polyhedron from nodes and faces.
          * @param nodes - vector containing the nodes
          * @param faces - vector containing the triangle faces.
+         *
+         * ASSERTS PRE-CONDITION
+         * @throws runtime_error if the no face contains the node zero indicating mathematical index
          */
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
                 : _nodes{std::move(nodes)},
-                  _faces{std::move(faces)} {}
+                  _faces{std::move(faces)} {
+            if (faces.end() == std::find_if(faces.begin(), faces.end(), [](std::array<size_t, 3>& face) {
+                return face[0] == 0 || face[1] == 0 || face[2] == 0;
+            }) ) {
+                throw std::runtime_error("The node with index zero (0) was never used in any face! This is "
+                                         "no valid polyhedron. Probable issue: Started counting at one (1).");
+            }
+        }
 
         ~Polyhedron() = default;
 
