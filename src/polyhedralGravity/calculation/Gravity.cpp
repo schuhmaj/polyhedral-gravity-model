@@ -9,8 +9,7 @@ namespace polyhedralGravity {
 
     std::vector<std::array<std::array<double, 3>, 3>> Gravity::calculateGij() {
         using util::operator-;
-        std::vector<std::array<std::array<double, 3>, 3>> g;
-        g.resize(_polyhedron.countFaces() * 3);
+        std::vector<std::array<std::array<double, 3>, 3>> g{_polyhedron.countFaces() * 3};
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), g.begin(),
                        [&](const auto& face) -> std::array<std::array<double, 3>, 3> {
             const auto &node0 = _polyhedron.getNode(face[0]);
