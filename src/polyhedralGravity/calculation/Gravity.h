@@ -44,18 +44,38 @@ namespace polyhedralGravity {
                 : _polyhedron{polyhedron},
                   _density{density} {}
 
-
+        /**
+         * Executes the whole calculation.
+         * TODO: return values or via getResult()?
+         */
         void calculate();
 
+        /**
+         * Calculates the G_ij vectors according to Tsoulis equation (18). These vectors are required to further
+         * compute the plane unit and segment unit normals.
+         *
+         * The dimension of i will be equal to the number of faces, whereas the dimension j will be equal to 3 as the
+         * given polyhedral's faces always consist of three segments/ nodes (triangles).
+         * @return G vectors
+         */
         std::vector<std::array<std::array<double, 3>, 3>> calculateGij();
 
         /**
-         * Calculates the LN_pq values based on Equation (14).
-         * The subscript q is the polyhedral segment of one face p of the complete polyhedron.
-         * @param p - the index of the polyhedral face
-         * @param q - the polyhedral segment
+         * Calculate the N_i vectors according to Tsoulis equation (19).
+         *
+         * The dimension of i will be equal to the number of faces.
+         * @return plane unit normals
          */
-        double calculateLNpq(size_t p, size_t q);
+        std::vector<std::array<double, 3>> calculatePlaneUnitNormals();
+
+        /**
+         * Calculates the segment unit normals according to Tsoulis equation (20).
+         *
+         * The dimension of i will be equal to the number of faces, whereas the dimension j mirrors the number of
+         * segments forming one face. Since we always use triangles, j will be 3.
+         * @return segment unit normals
+         */
+        std::vector<std::array<std::array<double, 3>, 3>> calculateSegmentUnitNormals();
 
 
     };
