@@ -72,8 +72,16 @@ namespace polyhedralGravity {
          * The number of points (nodes) that make up the polyhedron.
          * @return a size_t
          */
-        [[nodiscard]] size_t size() const {
+        [[nodiscard]] size_t countNodes() const {
             return _nodes.size();
+        }
+
+        /**
+         * Returns the number of faces (triangles) that make up the polyhedral.
+         * @return a size_t
+         */
+        [[nodiscard]] size_t  countFaces() const {
+            return _faces.size();
         }
 
         [[nodiscard]] const std::vector<std::array<size_t, 3>> &getFaces() const {

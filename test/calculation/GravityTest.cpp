@@ -89,7 +89,7 @@ TEST_F(GravityTest, gij_vectors) {
 
     for (int i = 0; i < 12; ++i) {
         for(int j = 0; j < 3; ++j) {
-            ASSERT_EQ(actualGij[i][j], expectedGij[i * 3 + j]) << "The vector G_ij was not not equal at (i,j)=(" << i
+            ASSERT_EQ(actualGij.at(i).at(j), expectedGij.at(i * 3 + j)) << "The vector G_ij was not not equal at (i,j)=(" << i
             << ", " << j << ")";
         }
     }
