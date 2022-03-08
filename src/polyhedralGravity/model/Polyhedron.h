@@ -10,6 +10,30 @@
 namespace polyhedralGravity {
 
     /**
+     * A struct describing a plane in Hessian Normal Form:
+     * ax + by + cz + d = 0
+     * where a,b,c are the plane's normal
+     * and d as the signed distance to the plane from the origin along the normal.
+     */
+    struct HessianPlane {
+        double a;
+        double b;
+        double c;
+        double d;
+
+        bool operator==(const HessianPlane &rhs) const {
+            return a == rhs.a &&
+                   b == rhs.b &&
+                   c == rhs.c &&
+                   d == rhs.d;
+        }
+
+        bool operator!=(const HessianPlane &rhs) const {
+            return !(rhs == *this);
+        }
+    };
+
+    /**
      * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
      * The index always starts with zero!
     */
@@ -51,9 +75,9 @@ namespace polyhedralGravity {
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
                 : _nodes{std::move(nodes)},
                   _faces{std::move(faces)} {
-            if (_faces.end() == std::find_if(_faces.begin(), _faces.end(), [&](auto& face) {
+            if (_faces.end() == std::find_if(_faces.begin(), _faces.end(), [&](auto &face) {
                 return face[0] == 0 || face[1] == 0 || face[2] == 0;
-            }) ) {
+            })) {
                 throw std::runtime_error("The node with index zero (0) was never used in any face! This is "
                                          "no valid polyhedron. Probable issue: Started counting at one (1).");
             }
@@ -81,7 +105,7 @@ namespace polyhedralGravity {
          * Returns the number of faces (triangles) that make up the polyhedral.
          * @return a size_t
          */
-        [[nodiscard]] size_t  countFaces() const {
+        [[nodiscard]] size_t countFaces() const {
             return _faces.size();
         }
 

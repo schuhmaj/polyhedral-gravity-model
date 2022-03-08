@@ -139,6 +139,36 @@ protected:
 
     };
 
+    std::vector<polyhedralGravity::HessianPlane> expectedHessianPlane {
+            { 0.0000000000000000, 0.0000000000000000, -200.00000000000000, 5000.0000000000000},
+            { 0.0000000000000000, 0.0000000000000000, -200.00000000000000, 5000.0000000000000},
+            { 0.0000000000000000, 200.00000000000000, 0.0000000000000000, -0.0000000000000000},
+            { 0.0000000000000000, 200.00000000000000, 0.0000000000000000, -0.0000000000000000},
+            { 100.00000000000000, 0.0000000000000000, 0.0000000000000000, 2000.0000000000000},
+            { 100.00000000000000, 0.0000000000000000, -0.0000000000000000, 2000.0000000000000},
+            { -100.00000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000},
+            { -100.00000000000000, -0.0000000000000000, -0.0000000000000000, 0.0000000000000000},
+            { 0.0000000000000000, -200.00000000000000, 0.0000000000000000, 2000.0000000000000},
+            { 0.0000000000000000, -200.00000000000000, 0.0000000000000000, 2000.0000000000000},
+            { 0.0000000000000000, -0.0000000000000000, 200.00000000000000, -3000.0000000000000},
+            { 0.0000000000000000, 0.0000000000000000, 200.00000000000000, -3000.0000000000000}
+    };
+
+    std::vector<double> expectedPlaneDistance{
+            25.000000000000000,
+            25.000000000000000,
+            0.0000000000000000,
+            0.0000000000000000,
+            20.000000000000000,
+            20.000000000000000,
+            0.0000000000000000,
+            0.0000000000000000,
+            10.000000000000000,
+            10.000000000000000,
+            15.000000000000000,
+            15.000000000000000
+    };
+
 };
 
 TEST_F(GravityTest, GijVectors) {
@@ -163,5 +193,36 @@ TEST_F(GravityTest, SegmentUnitNormals) {
     auto actualSegmentUnitNormals = systemUnderTest.calculateSegmentUnitNormals(expectedGij, expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualSegmentUnitNormals, ContainerEq(expectedSegmentUnitNormals));
+}
+
+TEST_F(GravityTest, SimpleHessianPlane) {
+    using namespace testing;
+    using namespace polyhedralGravity;
+
+    HessianPlane expectedHessian {2, -8, 5, -18};
+
+    auto actualHessianPlane = systemUnderTest.computeHessianPlane({1, -2, 0}, {3, 1, 4}, {0, -1, 2});
+
+    ASSERT_EQ(actualHessianPlane.a, expectedHessian.a);
+    ASSERT_EQ(actualHessianPlane.b, expectedHessian.b);
+    ASSERT_EQ(actualHessianPlane.c, expectedHessian.c);
+    ASSERT_EQ(actualHessianPlane.d, expectedHessian.d);
+}
+
+TEST_F(GravityTest, HessianPlane) {
+    using namespace testing;
+    using namespace polyhedralGravity;
+
+    auto actualHessianPlane = systemUnderTest.calculateFaceToHessianPlane();
+
+    ASSERT_EQ(actualHessianPlane, expectedHessianPlane);
+}
+
+TEST_F(GravityTest, PlaneDistances) {
+    using namespace testing;
+
+    auto actualPlaneDistances = systemUnderTest.calculatePlaneDistance(expectedHessianPlane);
+
+    ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistance));
 }
 

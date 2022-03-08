@@ -8,6 +8,9 @@
 
 namespace polyhedralGravity {
 
+    /**
+     * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
+     */
     class Gravity {
 
         /**
@@ -83,6 +86,35 @@ namespace polyhedralGravity {
         calculateSegmentUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g,
                                     const std::vector<std::array<double, 3>> &planeUnitNormals);
 
+
+        /**
+         * TODO? Maybe move this inside the Polyhedron class
+         * Transforms the edges of the polyhedron to the Hessian Plane form.
+         * This method uses the cross product method.
+         * @param p - the point for which the transformation should be executed
+         * @return vector of Hessian Normal Planes
+         */
+        std::vector<HessianPlane> calculateFaceToHessianPlane(const std::array<double, 3> &p = {0, 0, 0});
+
+        /**
+         * Calculates the Hessian Plane form spanned by three given point p, q, and r.
+         * @param p - first point on the plane
+         * @param q - second point on the plane
+         * @param r - third point on the plane
+         * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
+         * @return HessianPlane
+         * @related https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
+         */
+        HessianPlane computeHessianPlane(const std::array<double, 3> &p, const std::array<double, 3> &q,
+                                                const std::array<double, 3> &r,
+                                                const std::array<double, 3> &origin = {0.0, 0.0, 0.0});
+
+
+        /**
+         * Calculates the plane distances h_p of P from each plane S_p.
+         * @return plane distances
+         */
+        std::vector<double> calculatePlaneDistance(const std::vector<HessianPlane> &plane);
 
     };
 

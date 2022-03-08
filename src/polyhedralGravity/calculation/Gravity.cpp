@@ -22,7 +22,7 @@ namespace polyhedralGravity {
 
     std::vector<std::array<double, 3>>
     Gravity::calculatePlaneUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g) {
-        std::vector<std::array<double, 3>> planeUnitNormal{_polyhedron.countFaces()};
+        std::vector<std::array<double, 3>> planeUnitNormal{g.size()};
         std::transform(g.cbegin(), g.cend(), planeUnitNormal.begin(), [](const auto &gi) -> std::array<double, 3> {
             using namespace util;
             const std::array<double, 3> crossProduct = cross(gi[0], gi[1]);
@@ -35,7 +35,7 @@ namespace polyhedralGravity {
     std::vector<std::array<std::array<double, 3>, 3>>
     Gravity::calculateSegmentUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g,
                                          const std::vector<std::array<double, 3>> &planeUnitNormals) {
-        std::vector<std::array<std::array<double, 3>, 3>> segmentUnitNormal{_polyhedron.countFaces()};
+        std::vector<std::array<std::array<double, 3>, 3>> segmentUnitNormal{g.size()};
         //Outer "loop" over G_i (running i) and N_i calculating n_i
         std::transform(g.cbegin(), g.cend(), planeUnitNormals.cbegin(), segmentUnitNormal.begin(),
                        [](const std::array<std::array<double, 3>, 3> &gi, const std::array<double, 3> &Ni)
@@ -53,5 +53,41 @@ namespace polyhedralGravity {
                        });
         return segmentUnitNormal;
     }
+
+    std::vector<HessianPlane> Gravity::calculateFaceToHessianPlane(const std::array<double, 3> &p) {
+        std::vector<HessianPlane> hessianPlane{_polyhedron.countFaces()};
+        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), hessianPlane.begin(),
+                       [&](const auto &face) -> HessianPlane {
+                           using namespace util;
+                           const auto &node0 = _polyhedron.getNode(face[0]);
+                           const auto &node1 = _polyhedron.getNode(face[1]);
+                           const auto &node2 = _polyhedron.getNode(face[2]);
+
+                           return computeHessianPlane(node0, node1, node2, p);
+                       });
+        return hessianPlane;
+    }
+
+
+    HessianPlane Gravity::computeHessianPlane(const std::array<double, 3> &p, const std::array<double, 3> &q,
+                                              const std::array<double, 3> &r, const std::array<double, 3> &origin) {
+        using namespace util;
+        const auto crossProduct = cross(p - q, p - r);
+        const auto res = (origin - p) * crossProduct;
+        const double d = res[0] + res[1] + res[2];
+
+        return {crossProduct[0] , crossProduct[1], crossProduct[2], d};
+    }
+
+    std::vector<double> Gravity::calculatePlaneDistance(const std::vector<HessianPlane> &plane) {
+        std::vector<double> planeDistances(plane.size(), 0.0);
+        std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
+                       [](const HessianPlane& plane) -> double {
+                           return std::abs(
+                                   plane.d / std::sqrt(plane.a * plane.a + plane.b * plane.b + plane.c * plane.c));
+        });
+        return planeDistances;
+    }
+
 
 }

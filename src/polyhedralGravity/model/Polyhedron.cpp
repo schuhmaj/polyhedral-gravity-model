@@ -9,5 +9,4 @@ namespace polyhedralGravity {
         const std::array<double, 3> &node2 = _nodes.at(plane.at((q + 1) % 3));
         return {node1, node2};
     }
-
 }
