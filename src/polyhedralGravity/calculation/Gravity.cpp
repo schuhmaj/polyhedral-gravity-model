@@ -54,6 +54,19 @@ namespace polyhedralGravity {
         return segmentUnitNormal;
     }
 
+    std::vector<double> Gravity::calculateSigmaP(const std::vector<std::array<std::array<double, 3>, 3>> &g,
+                                                 const std::vector<std::array<double, 3>> &planeUnitNormals) {
+        std::vector<double> sigmaP(planeUnitNormals.size(), 0.0);
+        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(), sigmaP.begin(),
+                       [&](const std::array<double, 3> &ni, const std::array<size_t, 3> &gi) {
+                           using namespace util;
+                           const auto &node = _polyhedron.getNode(gi[0]);
+                           return sgn(dot(ni, node * -1.0)) * -1.0;
+                       });
+        return sigmaP;
+    }
+
+
     std::vector<HessianPlane> Gravity::calculateFaceToHessianPlane(const std::array<double, 3> &p) {
         std::vector<HessianPlane> hessianPlane{_polyhedron.countFaces()};
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), hessianPlane.begin(),
@@ -68,7 +81,6 @@ namespace polyhedralGravity {
         return hessianPlane;
     }
 
-
     HessianPlane Gravity::computeHessianPlane(const std::array<double, 3> &p, const std::array<double, 3> &q,
                                               const std::array<double, 3> &r, const std::array<double, 3> &origin) {
         using namespace util;
@@ -76,16 +88,16 @@ namespace polyhedralGravity {
         const auto res = (origin - p) * crossProduct;
         const double d = res[0] + res[1] + res[2];
 
-        return {crossProduct[0] , crossProduct[1], crossProduct[2], d};
+        return {crossProduct[0], crossProduct[1], crossProduct[2], d};
     }
 
     std::vector<double> Gravity::calculatePlaneDistance(const std::vector<HessianPlane> &plane) {
         std::vector<double> planeDistances(plane.size(), 0.0);
         std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
-                       [](const HessianPlane& plane) -> double {
+                       [](const HessianPlane &plane) -> double {
                            return std::abs(
                                    plane.d / std::sqrt(plane.a * plane.a + plane.b * plane.b + plane.c * plane.c));
-        });
+                       });
         return planeDistances;
     }
 

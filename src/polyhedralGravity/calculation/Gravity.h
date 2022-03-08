@@ -86,6 +86,17 @@ namespace polyhedralGravity {
         calculateSegmentUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g,
                                     const std::vector<std::array<double, 3>> &planeUnitNormals);
 
+        /**
+         * TODO? Maybe do this just in time instead of calculating an saving in a vector
+         * TODO!!! Deviation paper and FORTRAN implementation!!! Paper uses -G_i1 vs. FORTRAN uses -face_i1
+         * Computes the sigma P values according to equation (21).
+         * @param g - the G_ij vectors
+         * @param planeUnitNormals - the plane unit normals
+         * @return sigma_p
+         */
+        std::vector<double> calculateSigmaP(const std::vector<std::array<std::array<double, 3>, 3>> &g,
+                             const std::vector<std::array<double, 3>> &planeUnitNormals);
+
 
         /**
          * TODO? Maybe move this inside the Polyhedron class
