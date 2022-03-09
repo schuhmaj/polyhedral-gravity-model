@@ -87,7 +87,7 @@ namespace polyhedralGravity {
                                     const std::vector<std::array<double, 3>> &planeUnitNormals);
 
         /**
-         * TODO? Maybe do this just in time instead of calculating an saving in a vector
+         * TODO? Maybe do this just in time instead of calculating everything at once and storing in a vector
          * Computes the sigma P values according to equation (21).
          * In equation (21), the used -G_i1 corresponds to opposite position vector of the first vertices building
          * the plane i.
@@ -100,7 +100,7 @@ namespace polyhedralGravity {
         /**
          * Transforms the edges of the polyhedron to the Hessian Plane form.
          * This method uses the cross product method.
-         * @param p - the point for which the transformation should be executed
+         * @param p - the reference point for which the transformation should be executed (default origin {0, 0, 0})
          * @return vector of Hessian Normal Planes
          */
         std::vector<HessianPlane> calculateFaceToHessianPlane(const std::array<double, 3> &p = {0, 0, 0});

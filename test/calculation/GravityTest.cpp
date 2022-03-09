@@ -213,10 +213,10 @@ TEST_F(GravityTest, SimpleHessianPlane) {
 
     auto actualHessianPlane = systemUnderTest.computeHessianPlane({1, -2, 0}, {3, 1, 4}, {0, -1, 2});
 
-    ASSERT_EQ(actualHessianPlane.a, expectedHessian.a);
-    ASSERT_EQ(actualHessianPlane.b, expectedHessian.b);
-    ASSERT_EQ(actualHessianPlane.c, expectedHessian.c);
-    ASSERT_EQ(actualHessianPlane.d, expectedHessian.d);
+    ASSERT_DOUBLE_EQ(actualHessianPlane.a, expectedHessian.a);
+    ASSERT_DOUBLE_EQ(actualHessianPlane.b, expectedHessian.b);
+    ASSERT_DOUBLE_EQ(actualHessianPlane.c, expectedHessian.c);
+    ASSERT_DOUBLE_EQ(actualHessianPlane.d, expectedHessian.d);
 }
 
 TEST_F(GravityTest, HessianPlane) {
