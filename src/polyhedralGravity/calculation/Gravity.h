@@ -59,7 +59,7 @@ namespace polyhedralGravity {
          *
          * The dimension of i will be equal to the number of faces, whereas the dimension j will be equal to 3 as the
          * given polyhedral's faces always consist of three segments/ nodes (triangles).
-         * @return G vectors
+         * @return G_ij vectors
          */
         std::vector<std::array<std::array<double, 3>, 3>> calculateGij();
 
