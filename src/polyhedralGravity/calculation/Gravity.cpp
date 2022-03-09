@@ -54,8 +54,7 @@ namespace polyhedralGravity {
         return segmentUnitNormal;
     }
 
-    std::vector<double> Gravity::calculateSigmaP(const std::vector<std::array<std::array<double, 3>, 3>> &g,
-                                                 const std::vector<std::array<double, 3>> &planeUnitNormals) {
+    std::vector<double> Gravity::calculateSigmaP(const std::vector<std::array<double, 3>> &planeUnitNormals) {
         std::vector<double> sigmaP(planeUnitNormals.size(), 0.0);
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(), sigmaP.begin(),
                        [&](const std::array<double, 3> &ni, const std::array<size_t, 3> &gi) {

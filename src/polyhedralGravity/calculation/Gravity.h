@@ -88,14 +88,13 @@ namespace polyhedralGravity {
 
         /**
          * TODO? Maybe do this just in time instead of calculating an saving in a vector
-         * TODO!!! Deviation paper and FORTRAN implementation!!! Paper uses -G_i1 vs. FORTRAN uses -face_i1
          * Computes the sigma P values according to equation (21).
-         * @param g - the G_ij vectors
+         * In equation (21), the used -G_i1 corresponds to opposite position vector of the first vertices building
+         * the plane i.
          * @param planeUnitNormals - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculateSigmaP(const std::vector<std::array<std::array<double, 3>, 3>> &g,
-                             const std::vector<std::array<double, 3>> &planeUnitNormals);
+        std::vector<double> calculateSigmaP(const std::vector<std::array<double, 3>> &planeUnitNormals);
 
 
         /**

@@ -200,7 +200,7 @@ TEST_F(GravityTest, SegmentUnitNormals) {
 TEST_F(GravityTest, SigmaP) {
     using namespace testing;
 
-    auto actualSigmaP = systemUnderTest.calculateSigmaP(expectedGij, expectedPlaneUnitNormals);
+    auto actualSigmaP = systemUnderTest.calculateSigmaP(expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualSigmaP, ContainerEq(expectedSigmaP));
 }
