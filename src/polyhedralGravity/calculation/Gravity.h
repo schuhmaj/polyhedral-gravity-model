@@ -98,7 +98,6 @@ namespace polyhedralGravity {
 
 
         /**
-         * TODO? Maybe move this inside the Polyhedron class
          * Transforms the edges of the polyhedron to the Hessian Plane form.
          * This method uses the cross product method.
          * @param p - the point for which the transformation should be executed
@@ -121,8 +120,9 @@ namespace polyhedralGravity {
 
 
         /**
-         * Calculates the plane distances h_p of P from each plane S_p.
-         * @return plane distances
+         * Calculates the plane distances h_p of P from each plane S_p according to the following equation:
+         * h_p = D / sqrt(A^2+B^2+C^2)
+         * @return plane distances h_p
          */
         std::vector<double> calculatePlaneDistance(const std::vector<HessianPlane> &plane);
 

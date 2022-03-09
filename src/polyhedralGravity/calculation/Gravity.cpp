@@ -59,8 +59,11 @@ namespace polyhedralGravity {
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(), sigmaP.begin(),
                        [&](const std::array<double, 3> &ni, const std::array<size_t, 3> &gi) {
                            using namespace util;
-                           const auto &node = _polyhedron.getNode(gi[0]);
-                           return sgn(dot(ni, node * -1.0)) * -1.0;
+                           //The first vertices' coordinates of the given face consisting of G_i's
+                           const auto &Gi1 = _polyhedron.getNode(gi[0]);
+                           //We abstain on the double multiplication with -1 in the line above and beyond since two
+                           //times multiplying with -1 equals no change
+                           return sgn(dot(ni, Gi1));
                        });
         return sigmaP;
     }
