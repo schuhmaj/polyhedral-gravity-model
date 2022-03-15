@@ -96,7 +96,7 @@ namespace polyhedralGravity {
 
         /**
          * TODO? Maybe do this just in time instead of calculating everything at once and storing in a vector
-         * Computes the sigma_p values according to equation (21).
+         * Calculates the plane normal orientations, sigma_p, according to equation (21).
          * The sigma_p values represents the relative position of computation point P with respect to the
          * pointing direction of N_p. E. g. if N_p points to the half-space containing P, the inner product of
          * N_p and -G_i1 will be positive, leading to a negative sigma_p.
@@ -106,7 +106,7 @@ namespace polyhedralGravity {
          * @param planeUnitNormals - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculateSigmaPs(const std::vector<std::array<double, 3>> &planeUnitNormals);
+        std::vector<double> calculatePlaneNormalOrientations(const std::vector<std::array<double, 3>> &planeUnitNormals);
 
 
         /**
@@ -117,6 +117,7 @@ namespace polyhedralGravity {
         std::vector<HessianPlane> calculateFacesToHessianPlanes(const std::array<double, 3> &p = {0, 0, 0});
 
         /**
+         * TODO Inline?
          * Calculates the Hessian Plane form spanned by three given points p, q, and r.
          * @param p - first point on the plane
          * @param q - second point on the plane
@@ -124,7 +125,6 @@ namespace polyhedralGravity {
          * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
          * @return HessianPlane
          * @related Cross-Product method https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
-         * TODO Inline?
          */
         HessianPlane computeHessianPlane(const std::array<double, 3> &p, const std::array<double, 3> &q,
                                          const std::array<double, 3> &r,
@@ -157,7 +157,7 @@ namespace polyhedralGravity {
 
 
         /**
-         * Calculates the sigma_pq values according to equation (23).
+         * Calculates the segment normal orientations, sigma_pq, according to equation (23).
          * These values represent the orientations of the segment normals n_ij.
          * E.g. if sigma_pq is -1 then n_ij points to the half-plane containing the orthogonal projection Point P'_i.
          * If sigma_pq is 1 then P'_i resides in the other half-space and in case of 0, P'_i lies on the line of the
@@ -169,7 +169,7 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPoints - the orthogonal projection points P'_i of P on each plane i
          * @return sigma_pq
          */
-        std::vector<std::array<double, 3>> calculateSigmaPQs(
+        std::vector<std::array<double, 3>> calculateSegmentNormalOrientations(
                 const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
                 const std::vector<std::array<double, 3>> &orthogonalProjectionPoints);
 

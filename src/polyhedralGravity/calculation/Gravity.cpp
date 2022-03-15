@@ -56,11 +56,11 @@ namespace polyhedralGravity {
         return segmentUnitNormals;
     }
 
-    std::vector<double> Gravity::calculateSigmaPs(const std::vector<std::array<double, 3>> &planeUnitNormals) {
-        std::vector<double> sigmaPs(planeUnitNormals.size(), 0.0);
+    std::vector<double> Gravity::calculatePlaneNormalOrientations(const std::vector<std::array<double, 3>> &planeUnitNormals) {
+        std::vector<double> planeNormalOrientations(planeUnitNormals.size(), 0.0);
         //Calculate N_i * -G_i1 where * is the dot product and then use the inverted sgn
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(),
-                       sigmaPs.begin(),
+                       planeNormalOrientations.begin(),
                        [&](const std::array<double, 3> &ni, const std::array<size_t, 3> &gi) {
                            using namespace util;
                            //The first vertices' coordinates of the given face consisting of G_i's
@@ -69,7 +69,7 @@ namespace polyhedralGravity {
                            //times multiplying with -1 equals no change
                            return sgn(dot(ni, Gi1));
                        });
-        return sigmaPs;
+        return planeNormalOrientations;
     }
 
 
@@ -144,9 +144,9 @@ namespace polyhedralGravity {
     }
 
     std::vector<std::array<double, 3>>
-    Gravity::calculateSigmaPQs(const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
-                               const std::vector<std::array<double, 3>> &orthogonalProjectionPoints) {
-        std::vector<std::array<double, 3>> sigmaPQs{segmentUnitNormals.size()};
+    Gravity::calculateSegmentNormalOrientations(const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
+                                                const std::vector<std::array<double, 3>> &orthogonalProjectionPoints) {
+        std::vector<std::array<double, 3>> segmentNormalOrientations{segmentUnitNormals.size()};
 
         std::vector<std::array<std::array<double, 3>, 3>> x{segmentUnitNormals.size()};
 
@@ -167,7 +167,7 @@ namespace polyhedralGravity {
         //The second part of equation (23)
         //Calculate n_ij * x_ij with * being the dot product and use the inverted sgn to determine the value of sigma_pq
         //running over n_i and x_i (running i)
-        std::transform(segmentUnitNormals.cbegin(), segmentUnitNormals.cend(), x.cbegin(), sigmaPQs.begin(),
+        std::transform(segmentUnitNormals.cbegin(), segmentUnitNormals.cend(), x.cbegin(), segmentNormalOrientations.begin(),
                        [](const std::array<std::array<double, 3>, 3> &ni,
                           const std::array<std::array<double, 3>, 3> &xi) {
                            //running over n_ij and x_ij (fixed i, running j)
@@ -179,7 +179,7 @@ namespace polyhedralGravity {
                                           });
                            return sigmaPQ;
                        });
-        return sigmaPQs;
+        return segmentNormalOrientations;
     }
 
 

@@ -139,7 +139,8 @@ protected:
 
     };
 
-    std::vector<double> expectedSigmaPs{-1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 1.0, 1.0};
+    std::vector<double> expectedPlaneNormalOrientations
+            {-1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 1.0, 1.0};
 
     std::vector<polyhedralGravity::HessianPlane> expectedHessianPlanes{
             {0.0000000000000000,  0.0000000000000000,  -200.00000000000000, 5000.0000000000000},
@@ -186,7 +187,7 @@ protected:
             {0.0000000000000000,  0.0000000000000000, 15.000000000000000}
     };
 
-    std::vector<std::array<double, 3>> expectedSigmaPQs{
+    std::vector<std::array<double, 3>> expectedSegmentNormalOrientations{
             {0.0000000000000000,  0.0000000000000000,  1.0000000000000000},
             {1.0000000000000000,  0.0000000000000000,  0.0000000000000000},
             {-1.0000000000000000, 1.0000000000000000,  1.0000000000000000},
@@ -227,12 +228,12 @@ TEST_F(GravityTest, SegmentUnitNormals) {
     ASSERT_THAT(actualSegmentUnitNormals, ContainerEq(expectedSegmentUnitNormals));
 }
 
-TEST_F(GravityTest, SigmaP) {
+TEST_F(GravityTest, PlaneNormalOrientations) {
     using namespace testing;
 
-    auto actualSigmaP = systemUnderTest.calculateSigmaPs(expectedPlaneUnitNormals);
+    auto actualPlaneNormalOrientations = systemUnderTest.calculatePlaneNormalOrientations(expectedPlaneUnitNormals);
 
-    ASSERT_THAT(actualSigmaP, ContainerEq(expectedSigmaPs));
+    ASSERT_THAT(actualPlaneNormalOrientations, ContainerEq(expectedPlaneNormalOrientations));
 }
 
 TEST_F(GravityTest, SimpleHessianPlane) {
@@ -275,11 +276,12 @@ TEST_F(GravityTest, OrthogonalProjectionOfP) {
     ASSERT_THAT(actualOrthogonalProjectionsOfP, ContainerEq(expectedOrthogonalProjectionsOfP));
 }
 
-TEST_F(GravityTest, SigmaPQ) {
+TEST_F(GravityTest, SegmentNormalOrientations) {
     using namespace testing;
 
-    auto actualSigmaPQs =
-            systemUnderTest.calculateSigmaPQs(expectedSegmentUnitNormals, expectedOrthogonalProjectionsOfP);
+    auto actualSegmentNormalOrientations =
+            systemUnderTest.calculateSegmentNormalOrientations(expectedSegmentUnitNormals,
+                                                               expectedOrthogonalProjectionsOfP);
 
-    ASSERT_THAT(actualSigmaPQs, ContainerEq(expectedSigmaPQs));
+    ASSERT_THAT(actualSegmentNormalOrientations, ContainerEq(expectedSegmentNormalOrientations));
 }
