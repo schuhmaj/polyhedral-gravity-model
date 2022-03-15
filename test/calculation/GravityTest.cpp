@@ -139,9 +139,9 @@ protected:
 
     };
 
-    std::vector<double> expectedSigmaP{-1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 1.0, 1.0};
+    std::vector<double> expectedSigmaPs{-1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -1.0, -1.0, 1.0, 1.0};
 
-    std::vector<polyhedralGravity::HessianPlane> expectedHessianPlane{
+    std::vector<polyhedralGravity::HessianPlane> expectedHessianPlanes{
             {0.0000000000000000,  0.0000000000000000,  -200.00000000000000, 5000.0000000000000},
             {0.0000000000000000,  0.0000000000000000,  -200.00000000000000, 5000.0000000000000},
             {0.0000000000000000,  200.00000000000000,  0.0000000000000000,  -0.0000000000000000},
@@ -156,7 +156,7 @@ protected:
             {0.0000000000000000,  0.0000000000000000,  200.00000000000000,  -3000.0000000000000}
     };
 
-    std::vector<double> expectedPlaneDistance{
+    std::vector<double> expectedPlaneDistances{
             25.000000000000000,
             25.000000000000000,
             0.0000000000000000,
@@ -171,7 +171,7 @@ protected:
             15.000000000000000
     };
 
-    std::vector<std::array<double, 3>> expectedOrthogonalProjectionOfPOnPlaneSp{
+    std::vector<std::array<double, 3>> expectedOrthogonalProjectionsOfP{
             {0.0000000000000000,  0.0000000000000000, 25.000000000000000},
             {0.0000000000000000,  0.0000000000000000, 25.000000000000000},
             {0.0000000000000000,  0.0000000000000000, 0.0000000000000000},
@@ -215,9 +215,9 @@ TEST_F(GravityTest, SegmentUnitNormals) {
 TEST_F(GravityTest, SigmaP) {
     using namespace testing;
 
-    auto actualSigmaP = systemUnderTest.calculateSigmaP(expectedPlaneUnitNormals);
+    auto actualSigmaP = systemUnderTest.calculateSigmaPs(expectedPlaneUnitNormals);
 
-    ASSERT_THAT(actualSigmaP, ContainerEq(expectedSigmaP));
+    ASSERT_THAT(actualSigmaP, ContainerEq(expectedSigmaPs));
 }
 
 TEST_F(GravityTest, SimpleHessianPlane) {
@@ -238,16 +238,25 @@ TEST_F(GravityTest, HessianPlane) {
     using namespace testing;
     using namespace polyhedralGravity;
 
-    auto actualHessianPlane = systemUnderTest.calculateFaceToHessianPlane();
+    auto actualHessianPlane = systemUnderTest.calculateFacesToHessianPlanes();
 
-    ASSERT_EQ(actualHessianPlane, expectedHessianPlane);
+    ASSERT_EQ(actualHessianPlane, expectedHessianPlanes);
 }
 
 TEST_F(GravityTest, PlaneDistances) {
     using namespace testing;
 
-    auto actualPlaneDistances = systemUnderTest.calculatePlaneDistance(expectedHessianPlane);
+    auto actualPlaneDistances = systemUnderTest.calculatePlaneDistances(expectedHessianPlanes);
 
-    ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistance));
+    ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistances));
+}
+
+TEST_F(GravityTest, OrthogonalProjectionOfP) {
+    using namespace testing;
+
+    auto actualOrthogonalProjectionsOfP =systemUnderTest.calculateOrthogonalProjectionPoints(
+            expectedHessianPlanes, expectedPlaneUnitNormals, expectedPlaneDistances);
+
+    ASSERT_THAT(actualOrthogonalProjectionsOfP, ContainerEq(expectedOrthogonalProjectionsOfP));
 }
 

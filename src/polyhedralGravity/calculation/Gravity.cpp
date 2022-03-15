@@ -54,7 +54,7 @@ namespace polyhedralGravity {
         return segmentUnitNormal;
     }
 
-    std::vector<double> Gravity::calculateSigmaP(const std::vector<std::array<double, 3>> &planeUnitNormals) {
+    std::vector<double> Gravity::calculateSigmaPs(const std::vector<std::array<double, 3>> &planeUnitNormals) {
         std::vector<double> sigmaP(planeUnitNormals.size(), 0.0);
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(), sigmaP.begin(),
                        [&](const std::array<double, 3> &ni, const std::array<size_t, 3> &gi) {
@@ -69,7 +69,7 @@ namespace polyhedralGravity {
     }
 
 
-    std::vector<HessianPlane> Gravity::calculateFaceToHessianPlane(const std::array<double, 3> &p) {
+    std::vector<HessianPlane> Gravity::calculateFacesToHessianPlanes(const std::array<double, 3> &p) {
         std::vector<HessianPlane> hessianPlane{_polyhedron.countFaces()};
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), hessianPlane.begin(),
                        [&](const auto &face) -> HessianPlane {
@@ -93,7 +93,7 @@ namespace polyhedralGravity {
         return {crossProduct[0], crossProduct[1], crossProduct[2], d};
     }
 
-    std::vector<double> Gravity::calculatePlaneDistance(const std::vector<HessianPlane> &plane) {
+    std::vector<double> Gravity::calculatePlaneDistances(const std::vector<HessianPlane> &plane) {
         std::vector<double> planeDistances(plane.size(), 0.0);
         std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
                        [](const HessianPlane &plane) -> double {
@@ -101,6 +101,13 @@ namespace polyhedralGravity {
                                    plane.d / std::sqrt(plane.a * plane.a + plane.b * plane.b + plane.c * plane.c));
                        });
         return planeDistances;
+    }
+
+    std::vector<std::array<double, 3>>
+    Gravity::calculateOrthogonalProjectionPoints(const std::vector<HessianPlane> &hessianPlanes,
+                                                 const std::vector<std::array<double, 3>> &planeUnitNormals,
+                                                 const std::vector<double> &planeDistances) {
+        return std::vector<std::array<double, 3>>();
     }
 
 

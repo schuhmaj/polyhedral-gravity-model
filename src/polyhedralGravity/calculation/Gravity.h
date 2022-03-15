@@ -106,7 +106,7 @@ namespace polyhedralGravity {
          * @param planeUnitNormals - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculateSigmaP(const std::vector<std::array<double, 3>> &planeUnitNormals);
+        std::vector<double> calculateSigmaPs(const std::vector<std::array<double, 3>> &planeUnitNormals);
 
 
         /**
@@ -114,7 +114,7 @@ namespace polyhedralGravity {
          * @param p - the reference point for which the transformation should be executed (default origin {0, 0, 0})
          * @return vector of Hessian Normal Planes
          */
-        std::vector<HessianPlane> calculateFaceToHessianPlane(const std::array<double, 3> &p = {0, 0, 0});
+        std::vector<HessianPlane> calculateFacesToHessianPlanes(const std::array<double, 3> &p = {0, 0, 0});
 
         /**
          * Calculates the Hessian Plane form spanned by three given point p, q, and r.
@@ -139,7 +139,7 @@ namespace polyhedralGravity {
          * onto the plane S_p) to computation point P.
          * @return plane distances h_p
          */
-        std::vector<double> calculatePlaneDistance(const std::vector<HessianPlane> &plane);
+        std::vector<double> calculatePlaneDistances(const std::vector<HessianPlane> &plane);
 
         /**
          * Calculates the origins P' for each plane S_p according to equation (22) of Tsoulis paper.
@@ -147,7 +147,9 @@ namespace polyhedralGravity {
          * plane, i.e the p-th face of the polyhedron.
          * @return P' for each plane S_p in a vector
          */
-        std::vector<std::array<double, 3>> calculateOrthogonalProjectionPoints();
+        std::vector<std::array<double, 3>> calculateOrthogonalProjectionPoints(
+                const std::vector<HessianPlane> &hessianPlanes,
+                const std::vector<std::array<double, 3>> &planeUnitNormals, const std::vector<double> &planeDistances);
 
     };
 
