@@ -28,7 +28,7 @@ namespace polyhedralGravity {
                 _hasNodes = true;
             } catch (...) {
                 throw std::runtime_error(
-                        "The nodes were read unsuccessfully cause of an fault in Tetgen!"
+                        "The nodes were not read because of an error in Tetgen!"
                         );
             }
         } else {
