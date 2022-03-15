@@ -70,11 +70,12 @@ namespace polyhedralGravity {
          * @param faces - vector containing the triangle faces.
          *
          * ASSERTS PRE-CONDITION
-         * @throws runtime_error if the no face contains the node zero indicating mathematical index
+         * @throws runtime_error if no face contains the node zero indicating mathematical index
          */
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
                 : _nodes{std::move(nodes)},
                   _faces{std::move(faces)} {
+            //Checks that the node with index zero is actually used
             if (_faces.end() == std::find_if(_faces.begin(), _faces.end(), [&](auto &face) {
                 return face[0] == 0 || face[1] == 0 || face[2] == 0;
             })) {
