@@ -56,7 +56,8 @@ namespace polyhedralGravity {
 
     std::vector<double> Gravity::calculateSigmaPs(const std::vector<std::array<double, 3>> &planeUnitNormals) {
         std::vector<double> sigmaPs(planeUnitNormals.size(), 0.0);
-        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(), sigmaPs.begin(),
+        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(),
+                       sigmaPs.begin(),
                        [&](const std::array<double, 3> &ni, const std::array<size_t, 3> &gi) {
                            using namespace util;
                            //The first vertices' coordinates of the given face consisting of G_i's
@@ -108,7 +109,31 @@ namespace polyhedralGravity {
                                                  const std::vector<std::array<double, 3>> &planeUnitNormals,
                                                  const std::vector<double> &planeDistances) {
         std::vector<std::array<double, 3>> orthogonalProjectionPointsOfP{planeUnitNormals.size()};
-
+        //According to equation (22)
+        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), planeDistances.cbegin(),
+                       orthogonalProjectionPointsOfP.begin(), [](const std::array<double, 3> &Ni, double hp) {
+                    using namespace util;
+                    const std::array<double, 3> directionCosine = Ni / euclideanNorm(Ni);
+                    return abs(directionCosine * hp);
+                });
+        //Calculate the sign according to flow text after (22)
+        std::vector<std::array<double, 3>> signs{planeUnitNormals.size()};
+        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), hessianPlanes.cbegin(), signs.begin(),
+                       [](const std::array<double, 3> &Ni, const HessianPlane &plane) {
+                           std::array<double, 3> sign{};
+                           //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
+                           //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
+                           sign[0] = plane.d / plane.a < 0 ? 1.0 : Ni[0] > 0 ? -1.0 : 1.0;
+                           sign[1] = plane.d / plane.b < 0 ? 1.0 : Ni[1] > 0 ? -1.0 : 1.0;
+                           sign[2] = plane.d / plane.c < 0 ? 1.0 : Ni[2] > 0 ? -1.0 : 1.0;
+                           return sign;
+                       });
+        //Apply signs
+        std::transform(orthogonalProjectionPointsOfP.cbegin(), orthogonalProjectionPointsOfP.cend(), signs.cbegin(),
+                       orthogonalProjectionPointsOfP.begin(), [](const auto &projection, const auto &sign) {
+                    using util::operator*;
+                    return projection * sign;
+        });
         return orthogonalProjectionPointsOfP;
     }
 

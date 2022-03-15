@@ -166,6 +166,14 @@ namespace polyhedralGravity::util {
         return std::sqrt(std::inner_product(std::begin(container), std::end(container), std::begin(container), 0.0));
     }
 
+    template<typename Container>
+    Container abs(const Container &container) {
+        Container ret = container;
+        std::transform(std::begin(container), std::end(container), std::begin(ret),
+                       [](const auto &element) {return std::abs(element);});
+        return ret;
+    }
+
     /**
     * Returns the cross product of two cartesian vectors.
     * @tparam T - a number
