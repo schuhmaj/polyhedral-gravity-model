@@ -172,7 +172,7 @@ protected:
             15.000000000000000
     };
 
-    std::vector<std::array<double, 3>> expectedOrthogonalProjectionsOfP{
+    std::vector<std::array<double, 3>> expectedOrthogonalProjectionPointsOnPlane{
             {0.0000000000000000,  0.0000000000000000, 25.000000000000000},
             {0.0000000000000000,  0.0000000000000000, 25.000000000000000},
             {0.0000000000000000,  0.0000000000000000, 0.0000000000000000},
@@ -200,6 +200,45 @@ protected:
             {-1.0000000000000000, 0.0000000000000000,  1.0000000000000000},
             {0.0000000000000000,  1.0000000000000000,  0.0000000000000000},
             {1.0000000000000000,  1.0000000000000000,  -1.0000000000000000}
+    };
+
+    std::vector<std::array<std::array<double, 3>, 3>> expectedOrthogonalProjectionPointsOnSegment{
+            std::array<std::array<double, 3>, 3>{{{0.0000000000000000, 0.0000000000000000, 25.000000000000000},
+                                                  {0.0000000000000000, 0.0000000000000000, 25.000000000000000},
+                                                  {-20.000000000000000, -0.0000000000000000, 25.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-0.0000000000000000, 10.000000000000000, 25.000000000000000},
+                                                  {0.0000000000000000, 0.0000000000000000, 25.000000000000000},
+                                                  {0.0000000000000000, 0.0000000000000000, 25.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-0.0000000000000000, -0.0000000000000000, 15.000000000000000},
+                                                  {-20.000000000000000, -0.0000000000000000, -0.0000000000000000},
+                                                  {6.0000000000000000, -0.0000000000000000, 12.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{0.0000000000000000, 0.0000000000000000, 0.0000000000000000},
+                                                  {6.0000000000000000, -0.0000000000000000, 12.000000000000000},
+                                                  {-0.0000000000000000, -0.0000000000000000, 25.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-20.000000000000000, -0.0000000000000000, 15.000000000000000},
+                                                  {-20.000000000000000, 12.500000000000000, 12.500000000000000},
+                                                  {-20.000000000000000, 0.0000000000000000, 0.0000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-20.000000000000000, 10.000000000000000, -0.0000000000000000},
+                                                  {-20.000000000000000, -0.0000000000000000, 25.000000000000000},
+                                                  {-20.000000000000000, 12.500000000000000, 12.500000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-0.0000000000000000, -0.0000000000000000, 15.000000000000000},
+                                                  {0.0000000000000000, 0.0000000000000000, 0.0000000000000000},
+                                                  {-0.0000000000000000, 12.500000000000000, 12.500000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-0.0000000000000000, 10.000000000000000, -0.0000000000000000},
+                                                  {-0.0000000000000000, 12.500000000000000, 12.500000000000000},
+                                                  {-0.0000000000000000, -0.0000000000000000, 25.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-0.0000000000000000, 10.000000000000000, 15.000000000000000},
+                                                  {6.0000000000000000, 10.000000000000000, 12.000000000000000},
+                                                  {-20.000000000000000, 10.000000000000000, -0.0000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{6.0000000000000000, 10.000000000000000, 12.000000000000000},
+                                                  {0.0000000000000000, 10.000000000000000, 0.0000000000000000},
+                                                  {-0.0000000000000000, 10.000000000000000, 25.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{0.0000000000000000, 0.0000000000000000, 15.000000000000000},
+                                                  {-4.0000000000000000, 8.0000000000000000, 15.000000000000000},
+                                                  {0.0000000000000000, 0.0000000000000000, 15.000000000000000}}},
+            std::array<std::array<double, 3>, 3>{{{-0.0000000000000000, 10.000000000000000, 15.000000000000000},
+                                                  {-20.000000000000000, -0.0000000000000000, 15.000000000000000},
+                                                  {-4.0000000000000000, 8.0000000000000000, 15.000000000000000}}}
     };
 
 };
@@ -267,13 +306,13 @@ TEST_F(GravityTest, PlaneDistances) {
     ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistances));
 }
 
-TEST_F(GravityTest, OrthogonalProjectionOfP) {
+TEST_F(GravityTest, OrthogonalProjectionPointsOnPlane) {
     using namespace testing;
 
-    auto actualOrthogonalProjectionsOfP = systemUnderTest.calculateOrthogonalProjectionPoints(
+    auto actualOrthogonalProjectionPointsOnPlane = systemUnderTest.calculateOrthogonalProjectionPointsOnPlane(
             expectedHessianPlanes, expectedPlaneUnitNormals, expectedPlaneDistances);
 
-    ASSERT_THAT(actualOrthogonalProjectionsOfP, ContainerEq(expectedOrthogonalProjectionsOfP));
+    ASSERT_THAT(actualOrthogonalProjectionPointsOnPlane, ContainerEq(expectedOrthogonalProjectionPointsOnPlane));
 }
 
 TEST_F(GravityTest, SegmentNormalOrientations) {
@@ -281,7 +320,16 @@ TEST_F(GravityTest, SegmentNormalOrientations) {
 
     auto actualSegmentNormalOrientations =
             systemUnderTest.calculateSegmentNormalOrientations(expectedSegmentUnitNormals,
-                                                               expectedOrthogonalProjectionsOfP);
+                                                               expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualSegmentNormalOrientations, ContainerEq(expectedSegmentNormalOrientations));
+}
+
+TEST_F(GravityTest, OrthogonalProjectionPointsOnSegment) {
+    using namespace testing;
+
+    auto actualOrthogonalProjectionPointsOnSegment =
+            systemUnderTest.calculateOrthogonalProjectionPointsOnSegments(expectedOrthogonalProjectionPointsOnPlane);
+
+    ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }

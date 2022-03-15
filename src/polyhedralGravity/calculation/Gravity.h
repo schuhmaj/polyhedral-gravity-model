@@ -151,7 +151,7 @@ namespace polyhedralGravity {
          * @param planeDistances - the plane distance h_p for every plane
          * @return P' for each plane S_p in a vector
          */
-        std::vector<std::array<double, 3>> calculateOrthogonalProjectionPoints(
+        std::vector<std::array<double, 3>> calculateOrthogonalProjectionPointsOnPlane(
                 const std::vector<HessianPlane> &hessianPlanes,
                 const std::vector<std::array<double, 3>> &planeUnitNormals, const std::vector<double> &planeDistances);
 
@@ -166,12 +166,22 @@ namespace polyhedralGravity {
          * (G_ij is the notation for a segment)
          * (One can exchange i and p, as well as j and q)
          * @param segmentUnitNormals - the segment unit normal n_ij
-         * @param orthogonalProjectionPoints - the orthogonal projection points P'_i of P on each plane i
+         * @param orthogonalProjectionPointsOnPlane - the orthogonal projection points P'_i of P on each plane i
          * @return sigma_pq
          */
         std::vector<std::array<double, 3>> calculateSegmentNormalOrientations(
                 const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
-                const std::vector<std::array<double, 3>> &orthogonalProjectionPoints);
+                const std::vector<std::array<double, 3>> &orthogonalProjectionPointsOnPlane);
+
+        /**
+         * Calculates the origins P'' for each line segment G_pq according to equation (24), (25) and (26) of Tsoulis
+         * paper. P'' is the orthogonal projection of the point P' onto the straight line defined by the line
+         * segment G_pq.
+         * @param orthogonalProjectionPointsOnPlane - the P' for every plane
+         * @return the P'' for every line segment of the polyhedron
+         */
+        std::vector<std::array<std::array<double, 3>, 3>> calculateOrthogonalProjectionPointsOnSegments(
+                const std::vector<std::array<double, 3>> &orthogonalProjectionPointsOnPlane);
 
     };
 

@@ -56,7 +56,8 @@ namespace polyhedralGravity {
         return segmentUnitNormals;
     }
 
-    std::vector<double> Gravity::calculatePlaneNormalOrientations(const std::vector<std::array<double, 3>> &planeUnitNormals) {
+    std::vector<double>
+    Gravity::calculatePlaneNormalOrientations(const std::vector<std::array<double, 3>> &planeUnitNormals) {
         std::vector<double> planeNormalOrientations(planeUnitNormals.size(), 0.0);
         //Calculate N_i * -G_i1 where * is the dot product and then use the inverted sgn
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(),
@@ -110,9 +111,9 @@ namespace polyhedralGravity {
     }
 
     std::vector<std::array<double, 3>>
-    Gravity::calculateOrthogonalProjectionPoints(const std::vector<HessianPlane> &hessianPlanes,
-                                                 const std::vector<std::array<double, 3>> &planeUnitNormals,
-                                                 const std::vector<double> &planeDistances) {
+    Gravity::calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
+                                                        const std::vector<std::array<double, 3>> &planeUnitNormals,
+                                                        const std::vector<double> &planeDistances) {
         std::vector<std::array<double, 3>> orthogonalProjectionPointsOfP{planeUnitNormals.size()};
         //According to equation (22)
         //Calculate x_P'_i for each plane i
@@ -144,8 +145,9 @@ namespace polyhedralGravity {
     }
 
     std::vector<std::array<double, 3>>
-    Gravity::calculateSegmentNormalOrientations(const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
-                                                const std::vector<std::array<double, 3>> &orthogonalProjectionPoints) {
+    Gravity::calculateSegmentNormalOrientations(
+            const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
+            const std::vector<std::array<double, 3>> &orthogonalProjectionPointsOnPlane) {
         std::vector<std::array<double, 3>> segmentNormalOrientations{segmentUnitNormals.size()};
 
         std::vector<std::array<std::array<double, 3>, 3>> x{segmentUnitNormals.size()};
@@ -154,7 +156,7 @@ namespace polyhedralGravity {
         //Calculate x_P' - x_ij^1 (x_P' is the projectionPoint and x_ij^1 is the first vertices of one segment,
         //i.e. the coordinates of the training-planes' nodes
         //The result is saved in x
-        std::transform(orthogonalProjectionPoints.cbegin(), orthogonalProjectionPoints.cend(),
+        std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
                        _polyhedron.getFaces().cbegin(), x.begin(),
                        [&](const std::array<double, 3> &projectionPoint, const std::array<size_t, 3> face)
                                -> std::array<std::array<double, 3>, 3> {
@@ -167,7 +169,8 @@ namespace polyhedralGravity {
         //The second part of equation (23)
         //Calculate n_ij * x_ij with * being the dot product and use the inverted sgn to determine the value of sigma_pq
         //running over n_i and x_i (running i)
-        std::transform(segmentUnitNormals.cbegin(), segmentUnitNormals.cend(), x.cbegin(), segmentNormalOrientations.begin(),
+        std::transform(segmentUnitNormals.cbegin(), segmentUnitNormals.cend(), x.cbegin(),
+                       segmentNormalOrientations.begin(),
                        [](const std::array<std::array<double, 3>, 3> &ni,
                           const std::array<std::array<double, 3>, 3> &xi) {
                            //running over n_ij and x_ij (fixed i, running j)
@@ -180,6 +183,14 @@ namespace polyhedralGravity {
                            return sigmaPQ;
                        });
         return segmentNormalOrientations;
+    }
+
+    std::vector<std::array<std::array<double, 3>, 3>> Gravity::calculateOrthogonalProjectionPointsOnSegments(
+            const std::vector<std::array<double, 3>> &orthogonalProjectionPointsOnPlane) {
+        std::vector<std::array<std::array<double, 3>, 3>> orthogonalProjectionPointsOfPPrime
+                {orthogonalProjectionPointsOnPlane.size()};
+
+        return orthogonalProjectionPointsOfPPrime;
     }
 
 
