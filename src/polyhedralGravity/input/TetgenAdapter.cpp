@@ -45,7 +45,7 @@ namespace polyhedralGravity {
             _hasFaces = true;
             } catch (...) {
                 throw std::runtime_error(
-                        "The faces were read unsuccessfully cause of an fault in Tetgen! This could indicate several "
+                        "The faces were not read because of an error in Tetgen! This could indicate several "
                         "issues, e. g. issues with the node assignment like they appear if either no nodes were "
                         "read in at all or if no assignment was possible."
                 );
