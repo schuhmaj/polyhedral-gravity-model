@@ -145,11 +145,19 @@ namespace polyhedralGravity {
          * Calculates the origins P' for each plane S_p according to equation (22) of Tsoulis paper.
          * P' is the orthogonal projection of the computation point P onto the plane S_p. S_p is the p-th
          * plane, i.e the p-th face of the polyhedron.
+         * @param hessianPlanes - the Hessian Plane Form for every plane
+         * @param planeUnitNormals - the plane unit normals N_i for every plane
+         * @param planeDistances - the plane distance h_p for every plane
          * @return P' for each plane S_p in a vector
          */
         std::vector<std::array<double, 3>> calculateOrthogonalProjectionPoints(
                 const std::vector<HessianPlane> &hessianPlanes,
                 const std::vector<std::array<double, 3>> &planeUnitNormals, const std::vector<double> &planeDistances);
+
+
+        std::vector<std::array<double, 3>> calculateSigmaPQs(
+                const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
+                const std::vector<std::array<double, 3>> &orthogonalProjectionPoints);
 
     };
 

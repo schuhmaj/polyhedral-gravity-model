@@ -186,6 +186,21 @@ protected:
             {0.0000000000000000,  0.0000000000000000, 15.000000000000000}
     };
 
+    std::vector<std::array<double, 3>> expectedSigmaPQs{
+            {0.0000000000000000,  0.0000000000000000,  1.0000000000000000},
+            {1.0000000000000000,  0.0000000000000000,  0.0000000000000000},
+            {-1.0000000000000000, 1.0000000000000000,  1.0000000000000000},
+            {0.0000000000000000,  -1.0000000000000000, 1.0000000000000000},
+            {-1.0000000000000000, 1.0000000000000000,  0.0000000000000000},
+            {1.0000000000000000,  1.0000000000000000,  -1.0000000000000000},
+            {-1.0000000000000000, 0.0000000000000000,  1.0000000000000000},
+            {1.0000000000000000,  -1.0000000000000000, 1.0000000000000000},
+            {-1.0000000000000000, 1.0000000000000000,  1.0000000000000000},
+            {-1.0000000000000000, 0.0000000000000000,  1.0000000000000000},
+            {0.0000000000000000,  1.0000000000000000,  0.0000000000000000},
+            {1.0000000000000000,  1.0000000000000000,  -1.0000000000000000}
+    };
+
 };
 
 TEST_F(GravityTest, GijVectors) {
@@ -254,9 +269,17 @@ TEST_F(GravityTest, PlaneDistances) {
 TEST_F(GravityTest, OrthogonalProjectionOfP) {
     using namespace testing;
 
-    auto actualOrthogonalProjectionsOfP =systemUnderTest.calculateOrthogonalProjectionPoints(
+    auto actualOrthogonalProjectionsOfP = systemUnderTest.calculateOrthogonalProjectionPoints(
             expectedHessianPlanes, expectedPlaneUnitNormals, expectedPlaneDistances);
 
     ASSERT_THAT(actualOrthogonalProjectionsOfP, ContainerEq(expectedOrthogonalProjectionsOfP));
 }
 
+TEST_F(GravityTest, SigmaPQ) {
+    using namespace testing;
+
+    auto actualSigmaPQs =
+            systemUnderTest.calculateSigmaPQs(expectedSegmentUnitNormals, expectedOrthogonalProjectionsOfP);
+
+    ASSERT_THAT(actualSigmaPQs, ContainerEq(expectedSigmaPQs));
+}
