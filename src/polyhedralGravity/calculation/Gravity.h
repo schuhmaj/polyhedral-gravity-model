@@ -117,7 +117,7 @@ namespace polyhedralGravity {
         std::vector<HessianPlane> calculateFacesToHessianPlanes(const std::array<double, 3> &p = {0, 0, 0});
 
         /**
-         * Calculates the Hessian Plane form spanned by three given point p, q, and r.
+         * Calculates the Hessian Plane form spanned by three given points p, q, and r.
          * @param p - first point on the plane
          * @param q - second point on the plane
          * @param r - third point on the plane
