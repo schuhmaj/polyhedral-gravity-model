@@ -124,6 +124,7 @@ namespace polyhedralGravity {
          * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
          * @return HessianPlane
          * @related Cross-Product method https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
+         * TODO Inline?
          */
         HessianPlane computeHessianPlane(const std::array<double, 3> &p, const std::array<double, 3> &q,
                                          const std::array<double, 3> &r,
