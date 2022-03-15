@@ -54,8 +54,8 @@ namespace polyhedralGravity {
         void calculate();
 
         /**
-         * Calculates the G_ij vectors according to Tsoulis equation (18). These vectors are required to further
-         * compute the plane unit and segment unit normals.
+         * Calculates the G_ij vectors according to Tsoulis equation (18). Each of these vectors G_ij represents one
+         * line segment of the polyhedron.
          *
          * Subscript i stands for the corresponding plane/ face of the polyhedron. The subscript j stands for
          * the specific vector whose endpoints are two of the three vertices making up the plane. The vertices are used
@@ -155,6 +155,19 @@ namespace polyhedralGravity {
                 const std::vector<std::array<double, 3>> &planeUnitNormals, const std::vector<double> &planeDistances);
 
 
+        /**
+         * Calculates the sigma_pq values according to equation (23).
+         * These values represent the orientations of the segment normals n_ij.
+         * E.g. if sigma_pq is -1 then n_ij points to the half-plane containing the orthogonal projection Point P'_i.
+         * If sigma_pq is 1 then P'_i resides in the other half-space and in case of 0, P'_i lies on the line of the
+         * segment G_ij.
+         *
+         * (G_ij is the notation for a segment)
+         * (One can exchange i and p, as well as j and q)
+         * @param segmentUnitNormals - the segment unit normal n_ij
+         * @param orthogonalProjectionPoints - the orthogonal projection points P'_i of P on each plane i
+         * @return sigma_pq
+         */
         std::vector<std::array<double, 3>> calculateSigmaPQs(
                 const std::vector<std::array<std::array<double, 3>, 3>> &segmentUnitNormals,
                 const std::vector<std::array<double, 3>> &orthogonalProjectionPoints);
