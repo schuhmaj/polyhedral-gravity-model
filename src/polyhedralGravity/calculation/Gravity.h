@@ -166,7 +166,8 @@ namespace polyhedralGravity {
          * @return P' for each plane S_p in a vector
          */
         PlanesVector calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
-                const PlanesVector &planeUnitNormals, const std::vector<double> &planeDistances);
+                                                                const PlanesVector &planeUnitNormals,
+                                                                const std::vector<double> &planeDistances);
 
 
         /**
@@ -194,6 +195,9 @@ namespace polyhedralGravity {
          */
         SegmentsVector calculateOrthogonalProjectionPointsOnSegments(
                 const PlanesVector &orthogonalProjectionPointsOnPlane);
+
+        CartesianArray calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
+                                                              const CartesianArray &pPrime);
 
     };
 

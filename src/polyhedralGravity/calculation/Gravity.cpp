@@ -108,8 +108,8 @@ namespace polyhedralGravity {
     }
 
     PlanesVector Gravity::calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
-                                                        const PlanesVector &planeUnitNormals,
-                                                        const std::vector<double> &planeDistances) {
+                                                                     const PlanesVector &planeUnitNormals,
+                                                                     const std::vector<double> &planeDistances) {
         PlanesVector orthogonalProjectionPointsOfP{planeUnitNormals.size()};
         //According to equation (22)
         //Calculate x_P'_i for each plane i
@@ -181,16 +181,42 @@ namespace polyhedralGravity {
 
     SegmentsVector Gravity::calculateOrthogonalProjectionPointsOnSegments(
             const PlanesVector &orthogonalProjectionPointsOnPlane) {
-        SegmentsVector orthogonalProjectionPointsOfPPrime {orthogonalProjectionPointsOnPlane.size()};
+        SegmentsVector orthogonalProjectionPointsOfPPrime{orthogonalProjectionPointsOnPlane.size()};
 
         std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
                        _polyhedron.getFaces().cbegin(), orthogonalProjectionPointsOfPPrime.begin(),
-                       [&](const CartesianArray &pPrime, const std::array<size_t, 3> &face) {
-                           SegmentsOfPlaneArray pDoublePrime{};
-                           return pDoublePrime;
+                       [&](const CartesianArray &pPrime, const std::array<size_t, 3> &face) -> SegmentsOfPlaneArray {
+                           const auto &node0 = _polyhedron.getNode(face[0]);
+                           const auto &node1 = _polyhedron.getNode(face[1]);
+                           const auto &node2 = _polyhedron.getNode(face[2]);
+                           //TODO sigma_pq == 0 special case --> P'' = P'
+                           return {calculateOrthogonalProjectionOnSegment(node0, node1, pPrime),
+                                   calculateOrthogonalProjectionOnSegment(node1, node2, pPrime),
+                                   calculateOrthogonalProjectionOnSegment(node2, node0, pPrime)};
                        });
 
         return orthogonalProjectionPointsOfPPrime;
+    }
+
+    CartesianArray
+    Gravity::calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
+                                                    const CartesianArray &pPrime) {
+        using namespace util;
+        CartesianArray pDoublePrime{};
+        const CartesianArray matrixColumn1 = v2 - v1;
+        const CartesianArray matrixColumn2 = cross(v1 - pPrime, matrixColumn1);
+        const CartesianArray matrixColumn3 = cross(matrixColumn2, matrixColumn1);
+        const CartesianArray d = {
+                dot(matrixColumn1, pPrime),
+                dot(matrixColumn2, pPrime),
+                dot(matrixColumn3, v1)
+        };
+        //Column major format! det(A^T) = det(A) if it's a square matrix
+        const double determinant = det(Matrix<double, 3, 3>{matrixColumn1, matrixColumn2, matrixColumn3});
+        pDoublePrime[0] = det(Matrix<double, 3, 3>{d, matrixColumn2, matrixColumn3});
+        pDoublePrime[1] = det(Matrix<double, 3, 3>{matrixColumn1, d, matrixColumn3});
+        pDoublePrime[2] = det(Matrix<double, 3, 3>{matrixColumn1, matrixColumn2, d});
+        return pDoublePrime / determinant;
     }
 
 

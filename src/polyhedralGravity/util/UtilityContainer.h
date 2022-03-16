@@ -10,6 +10,12 @@
 namespace polyhedralGravity::util {
 
     /**
+     * Alias for two-dimensional array with size M and N.
+     */
+    template<typename T, size_t M, size_t N>
+    using Matrix = std::array<std::array<T, N>, M>;
+
+    /**
      * Applies a binary function to elements of two containers piece by piece. The objects must
      * be iterable and should have the same size!
      * @tparam Container - an iterable object like an array or vector
@@ -182,12 +188,13 @@ namespace polyhedralGravity::util {
 
     /**
      * Computes the determinant with the Sarrus rule for a 3x3 matrix.
+     * Notice that for square matrices det(A) = det(A^T).
      * @tparam T - a numerical value
      * @param matrix - the 3x3 matrix
      * @return the determinant
      */
     template<typename T>
-    T det(const std::array<std::array<T, 3>, 3> &matrix) {
+    T det(const Matrix<T, 3, 3> &matrix) {
         return matrix[0][0] * matrix[1][1] * matrix[2][2] + matrix[0][1] * matrix[1][2] * matrix[2][0]
                + matrix[0][2] * matrix[1][0] * matrix[2][1] - matrix[0][2] * matrix[1][1] * matrix[2][0]
                - matrix[0][0] * matrix[1][2] * matrix[2][1] - matrix[0][1] * matrix[1][0] * matrix[2][2];
