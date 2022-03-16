@@ -190,6 +190,13 @@ namespace polyhedralGravity {
         std::vector<std::array<std::array<double, 3>, 3>> orthogonalProjectionPointsOfPPrime
                 {orthogonalProjectionPointsOnPlane.size()};
 
+        std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
+                       _polyhedron.getFaces().cbegin(), orthogonalProjectionPointsOfPPrime.begin(),
+                       [&](const std::array<double, 3> &pPrime, const std::array<size_t, 3> &face) {
+                           std::array<std::array<double, 3>, 3> pDoublePrime{};
+                           return pDoublePrime;
+                       });
+
         return orthogonalProjectionPointsOfPPrime;
     }
 
