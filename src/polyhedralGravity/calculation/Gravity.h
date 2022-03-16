@@ -9,6 +9,20 @@
 namespace polyhedralGravity {
 
     /**
+     * Alias for x, y, z coordinates.
+     */
+    using CartesianArray = std::array<double, 3>;
+    /**
+     * Alias for vectors of cartesian coordinates.
+     */
+    using PlaneVector = std::vector<CartesianArray>;
+    /**
+     * Alias for two-dimensional structure of cartesian vectors.
+     * The second dimension fixed to size three.
+     */
+    using SegmentVector = std::vector<std::array<CartesianArray, 3>>;
+
+    /**
      * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
      */
     class Gravity {
