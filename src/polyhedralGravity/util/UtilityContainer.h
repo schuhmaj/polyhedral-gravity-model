@@ -166,12 +166,31 @@ namespace polyhedralGravity::util {
         return std::sqrt(std::inner_product(std::begin(container), std::end(container), std::begin(container), 0.0));
     }
 
+    /**
+     * Computes the absolute value for each value in the given container
+     * @tparam Container - a iterable container, containing numerical values
+     * @param container - the container
+     * @return a container with the modified values
+     */
     template<typename Container>
     Container abs(const Container &container) {
         Container ret = container;
         std::transform(std::begin(container), std::end(container), std::begin(ret),
-                       [](const auto &element) {return std::abs(element);});
+                       [](const auto &element) { return std::abs(element); });
         return ret;
+    }
+
+    /**
+     * Computes the determinant with the Sarrus rule for a 3x3 matrix.
+     * @tparam T - a numerical value
+     * @param matrix - the 3x3 matrix
+     * @return the determinant
+     */
+    template<typename T>
+    T det(const std::array<std::array<T, 3>, 3> &matrix) {
+        return matrix[0][0] * matrix[1][1] * matrix[2][2] + matrix[0][1] * matrix[1][2] * matrix[2][0]
+               + matrix[0][2] * matrix[1][0] * matrix[2][1] - matrix[0][2] * matrix[1][1] * matrix[2][0]
+               - matrix[0][0] * matrix[1][2] * matrix[2][1] - matrix[0][1] * matrix[1][0] * matrix[2][2];
     }
 
     /**
@@ -209,7 +228,7 @@ namespace polyhedralGravity::util {
      * @return -1, 0, 1 depending on the sign
      * @related https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
      */
-    template <typename T>
+    template<typename T>
     int sgn(T val) {
         return (T(0) < val) - (val < T(0));
     }
