@@ -80,7 +80,7 @@ namespace polyhedralGravity {
                            const auto &node0 = _polyhedron.getNode(face[0]);
                            const auto &node1 = _polyhedron.getNode(face[1]);
                            const auto &node2 = _polyhedron.getNode(face[2]);
-
+                           //The three vertices put up the plane, p is the origin of the reference system default 0,0,0
                            return computeHessianPlane(node0, node1, node2, p);
                        });
         return hessianPlanes;
@@ -107,10 +107,10 @@ namespace polyhedralGravity {
         return planeDistances;
     }
 
-    CartesianPlanePropertyVector
-    Gravity::calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
-                                                        const CartesianPlanePropertyVector &planeUnitNormals,
-                                                        const PlanePropertyVector &planeDistances) {
+    CartesianPlanePropertyVector Gravity::calculateOrthogonalProjectionPointsOnPlane(
+            const std::vector<HessianPlane> &hessianPlanes,
+            const CartesianPlanePropertyVector &planeUnitNormals,
+            const PlanePropertyVector &planeDistances) {
         CartesianPlanePropertyVector orthogonalProjectionPointsOfP{planeUnitNormals.size()};
         //According to equation (22)
         //Calculate x_P'_i for each plane i
@@ -185,6 +185,7 @@ namespace polyhedralGravity {
             const SegmentPropertyVector &segmentNormalOrientation) {
         CartesianSegmentPropertyVector orthogonalProjectionPointsOfPPrime{orthogonalProjectionPointsOnPlane.size()};
 
+        //Zip the three required arguments together: P' for every plane, sigma_pq for every segment, the faces
         auto first = thrust::make_zip_iterator(thrust::make_tuple(orthogonalProjectionPointsOnPlane.begin(),
                                                                   segmentNormalOrientation.begin(),
                                                                   _polyhedron.getFaces().begin()));
@@ -192,20 +193,26 @@ namespace polyhedralGravity {
                                                                  segmentNormalOrientation.end(),
                                                                  _polyhedron.getFaces().end()));
 
+        //The outer loop with the running i --> the planes
         thrust::transform(first, last, orthogonalProjectionPointsOfPPrime.begin(), [&](const auto &tuple) {
             //P' for plane i, sigma_pq[i] with fixed i, the nodes making up plane i
             const auto &pPrime = thrust::get<0>(tuple);
             const auto &sigmaP = thrust::get<1>(tuple);
             const auto &face = thrust::get<2>(tuple);
-            auto counterJ = thrust::counting_iterator<unsigned int>(0);
 
+            auto counterJ = thrust::counting_iterator<unsigned int>(0);
             CartesianSegmentProperty pDoublePrime{};
+
+            //The inner loop with fixed i, running over the j --> the segments of a plane
             thrust::transform(sigmaP.begin(), sigmaP.end(), counterJ, pDoublePrime.begin(),
                               [&](const auto &sigmaPQ, unsigned int j) {
                                   //We actually only accept +0.0 or -0.0, so the equal comparison is ok
                                   if (sigmaPQ == 0.0) {
+                                      //Geometrically trivial case, in neither of the half space --> already on segment
                                       return pPrime;
                                   } else {
+                                      //In one of the half space, calculate the projection point P'' for the segment
+                                      //with the endpoints v1 and v2
                                       const auto &v1 = _polyhedron.getNode(face[j]);
                                       const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
                                       return calculateOrthogonalProjectionOnSegment(v1, v2, pPrime);
@@ -219,14 +226,16 @@ namespace polyhedralGravity {
 
     Cartesian Gravity::calculateOrthogonalProjectionOnSegment(const Cartesian &v1, const Cartesian &v2,
                                                               const Cartesian &pPrime) {
+        //TODO Could this be more pretty? More efficient?
         using namespace util;
         Cartesian pDoublePrime{};
+        //Preparing our the planes/ equations in matrix form
         const Cartesian matrixRow1 = v2 - v1;
         const Cartesian matrixRow2 = cross(v1 - pPrime, matrixRow1);
         const Cartesian matrixRow3 = cross(matrixRow2, matrixRow1);
         const Cartesian d = {dot(matrixRow1, pPrime), dot(matrixRow2, pPrime), dot(matrixRow3, v1)};
-        //TODO Could this be more pretty? More efficient?
         Matrix<double, 3, 3> columnMatrix = transpose(Matrix<double, 3, 3>{matrixRow1, matrixRow2, matrixRow3});
+        //Calculation and solving the equations of above
         const double determinant = det(columnMatrix);
         pDoublePrime[0] = det(Matrix<double, 3, 3>{d, columnMatrix[1], columnMatrix[2]});
         pDoublePrime[1] = det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]});
@@ -234,14 +243,17 @@ namespace polyhedralGravity {
         return pDoublePrime / determinant;
     }
 
-    SegmentPropertyVector
-    Gravity::calculateSegmentDistances(const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
-                                       const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
+    SegmentPropertyVector Gravity::calculateSegmentDistances(
+            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+            const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
         SegmentPropertyVector segmentDistances{orthogonalProjectionPointsOnPlane.size()};
+        //The outer loop with the running i --> iterating over planes (P'_i and P''_i are the parameters of the lambda)
         std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
                        orthogonalProjectionPointsOnSegment.cbegin(), segmentDistances.begin(),
                        [](const Cartesian pPrime, const CartesianSegmentProperty &pDoublePrimes) {
                            std::array<double, 3> hp{};
+                           //The inner loop with the running j --> iterating over the segments
+                           //Using the values P'_i and P''_ij for the calculation of the distance
                            std::transform(pDoublePrimes.cbegin(), pDoublePrimes.cend(), hp.begin(),
                                           [&pPrime](const Cartesian &pDoublePrime) {
                                               using namespace util;
