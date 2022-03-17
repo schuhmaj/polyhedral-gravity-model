@@ -141,9 +141,9 @@ namespace polyhedralGravity {
         return orthogonalProjectionPointsOfP;
     }
 
-    SegmentPropertyVector
-    Gravity::calculateSegmentNormalOrientations(const CartesianSegmentPropertyVector &segmentUnitNormals,
-                                                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
+    SegmentPropertyVector Gravity::calculateSegmentNormalOrientations(
+            const CartesianSegmentPropertyVector &segmentUnitNormals,
+            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
         SegmentPropertyVector segmentNormalOrientations{segmentUnitNormals.size()};
 
         CartesianSegmentPropertyVector x{segmentUnitNormals.size()};
