@@ -14,23 +14,35 @@ namespace polyhedralGravity {
     /**
      * Alias for x, y, z coordinates.
      */
-    using CartesianArray = std::array<double, 3>;
+    using Cartesian = std::array<double, 3>;
     /**
      * Alias for vectors of cartesian coordinates.
-     * @example PlanesVector[i] returns the i-th plane
+     * @example CartesianPlanePropertyVector[i] returns the Cartesian property of the i-th plane
      */
-    using PlanesVector = std::vector<CartesianArray>;
+    using CartesianPlanePropertyVector = std::vector<Cartesian>;
+    /**
+     * Alias for vectors of (double) values which represent a property of the plane.
+     * @example PlanePropertyVector[i] returns the property of the i-th plane
+     */
+    using PlanePropertyVector = std::vector<double>;
     /**
      * Alias for the segments (always three) of one plane
-     * @example SegmentsOfPlaneArray[j] returns the j-th segment
+     * @example CartesianSegmentProperty[j] returns the Cartesian property j-th segment
      */
-    using SegmentsOfPlaneArray = std::array<CartesianArray, 3>;
+    using CartesianSegmentProperty = std::array<Cartesian, 3>;
     /**
      * Alias for two-dimensional structure of cartesian vectors.
      * The second dimension is fixed to size three.
-     * @example SegmentsVector[i][j] returns the j-th segment of the i-th plane
+     * @example CartesianSegmentPropertyVector[i][j]
+     * returns the Cartesian property of the j-th segment of the i-th plane
      */
-    using SegmentsVector = std::vector<SegmentsOfPlaneArray>;
+    using CartesianSegmentPropertyVector = std::vector<CartesianSegmentProperty>;
+    /**
+     * Alias for a two-dimensional structure of (double) values.
+     * The second dimension is fixed to size three.
+     * @example SegmentPropertyVector[i][j] returns the property of the j-th segment of the i-th plane
+     */
+    using SegmentPropertyVector = std::vector<std::array<double, 3>>;
 
     /**
      * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
@@ -90,7 +102,7 @@ namespace polyhedralGravity {
          * given polyhedral's faces always consist of three segments/ nodes (triangles).
          * @return G_ij vectors
          */
-        SegmentsVector calculateGij();
+        CartesianSegmentPropertyVector calculateGij();
 
         /**
          * Calculate the plane unit normals N_i vectors according to Tsoulis equation (19).
@@ -100,7 +112,7 @@ namespace polyhedralGravity {
          * @param g - the G_ij vectors
          * @return plane unit normals
          */
-        PlanesVector calculatePlaneUnitNormals(const SegmentsVector &g);
+        CartesianPlanePropertyVector calculatePlaneUnitNormals(const CartesianSegmentPropertyVector &g);
 
         /**
          * Calculates the segment unit normals n_ij according to Tsoulis equation (20).
@@ -113,7 +125,7 @@ namespace polyhedralGravity {
          * @param planeUnitNormals - the plane unit normals
          * @return segment unit normals
          */
-        SegmentsVector calculateSegmentUnitNormals(const SegmentsVector &g, const PlanesVector &planeUnitNormals);
+        CartesianSegmentPropertyVector calculateSegmentUnitNormals(const CartesianSegmentPropertyVector &g, const CartesianPlanePropertyVector &planeUnitNormals);
 
         /**
          * TODO? Maybe do this just in time instead of calculating everything at once and storing in a vector
@@ -127,7 +139,7 @@ namespace polyhedralGravity {
          * @param planeUnitNormals - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculatePlaneNormalOrientations(const PlanesVector &planeUnitNormals);
+        PlanePropertyVector calculatePlaneNormalOrientations(const CartesianPlanePropertyVector &planeUnitNormals);
 
 
         /**
@@ -135,7 +147,7 @@ namespace polyhedralGravity {
          * @param p - the reference point for which the transformation should be executed (default origin {0, 0, 0})
          * @return vector of Hessian Normal Planes
          */
-        std::vector<HessianPlane> calculateFacesToHessianPlanes(const CartesianArray &p = {0, 0, 0});
+        std::vector<HessianPlane> calculateFacesToHessianPlanes(const Cartesian &p = {0, 0, 0});
 
         /**
          * TODO Inline?
@@ -147,8 +159,8 @@ namespace polyhedralGravity {
          * @return HessianPlane
          * @related Cross-Product method https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
          */
-        HessianPlane computeHessianPlane(const CartesianArray &p, const CartesianArray &q,
-                                         const CartesianArray &r, const CartesianArray &origin = {0.0, 0.0, 0.0});
+        HessianPlane computeHessianPlane(const Cartesian &p, const Cartesian &q,
+                                         const Cartesian &r, const Cartesian &origin = {0.0, 0.0, 0.0});
 
 
         /**
@@ -160,7 +172,7 @@ namespace polyhedralGravity {
          * onto the plane S_p) to computation point P.
          * @return plane distances h_p
          */
-        std::vector<double> calculatePlaneDistances(const std::vector<HessianPlane> &plane);
+        PlanePropertyVector calculatePlaneDistances(const std::vector<HessianPlane> &plane);
 
         /**
          * Calculates the origins P' for each plane S_p according to equation (22) of Tsoulis paper.
@@ -171,9 +183,9 @@ namespace polyhedralGravity {
          * @param planeDistances - the plane distance h_p for every plane
          * @return P' for each plane S_p in a vector
          */
-        PlanesVector calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
-                                                                const PlanesVector &planeUnitNormals,
-                                                                const std::vector<double> &planeDistances);
+        CartesianPlanePropertyVector calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
+                                                                                const CartesianPlanePropertyVector &planeUnitNormals,
+                                                                                const PlanePropertyVector &planeDistances);
 
 
         /**
@@ -189,8 +201,8 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the orthogonal projection points P'_i of P on each plane i
          * @return sigma_pq
          */
-        std::vector<std::array<double, 3>> calculateSegmentNormalOrientations(
-                const SegmentsVector &segmentUnitNormals, const PlanesVector &orthogonalProjectionPointsOnPlane);
+        SegmentPropertyVector calculateSegmentNormalOrientations(
+                const CartesianSegmentPropertyVector &segmentUnitNormals, const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
 
         /**
          * Calculates the origins P'' for each line segment G_pq according to equation (24), (25) and (26) of Tsoulis
@@ -199,9 +211,9 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the P' for every plane
          * @return the P'' for every line segment of the polyhedron
          */
-        SegmentsVector calculateOrthogonalProjectionPointsOnSegments(
-                const PlanesVector &orthogonalProjectionPointsOnPlane,
-                const std::vector<std::array<double, 3>> &segmentNormalOrientation);
+        CartesianSegmentPropertyVector calculateOrthogonalProjectionPointsOnSegments(
+                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+                const SegmentPropertyVector &segmentNormalOrientation);
 
         /**
          * Calculates the point P'' for a given Segment consisting of vertices v1 and v2 and the orthogonal projection
@@ -212,8 +224,9 @@ namespace polyhedralGravity {
          * @return P'' for this segment
          * @note If sigma_pq is zero then P'' == P', this is not checked by this method, but has to be assured first
          */
-        CartesianArray calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
-                                                              const CartesianArray &pPrime);
+        Cartesian calculateOrthogonalProjectionOnSegment(const Cartesian &v1, const Cartesian &v2,
+                                                         const Cartesian &pPrime);
+
         /**
          * Calculates the distance h_pg between the orthogonal projection P' of the computation point P
          * for a given plane and the orthogonal projection P'' of P' for a line segment.
@@ -221,9 +234,9 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnSegment - the P'' for every segment
          * @return a two-dimensional vector of the distances h_pq
          */
-        std::vector<std::array<double, 3>> calculateSegmentDistances(
-                const PlanesVector &orthogonalProjectionPointsOnPlane,
-                const SegmentsVector &orthogonalProjectionPointsOnSegment);
+        SegmentPropertyVector calculateSegmentDistances(
+                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+                const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
 
     };
 
