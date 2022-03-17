@@ -10,6 +10,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(spdlog)
 include(tetgen)
 include(yaml)
+include(thrust)
 
 # Main file, containing the gravity model's driver
 set(mainFile ${PROJECT_SOURCE_DIR}/src/main.cpp)
@@ -33,15 +34,12 @@ target_link_libraries(${PROJECT_NAME}_lib
         yaml-cpp
         )
 
-# For future parallelization of the std algorithms?!
-#if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#    message(STATUS "Linking tbb libary")
-#    find_library(TBB
-#            NAME tbb
-#            HINTS "/opt/homebrew/lib/")
-#    target_link_libraries(${PROJECT_NAME}_lib
-#            ${TBB})
-#endif()
+# TODO, Make this an option for the user
+# CPP = Serial execution, We also set the DEVICE to CPP since the default CUDA should not be a dependency
+thrust_create_target(Thrust HOST CPP DEVICE CPP)
+target_link_libraries(${PROJECT_NAME}_lib
+        Thrust
+        )
 
 # Building the standalone Executable
 add_executable(${PROJECT_NAME} ${mainFile})
@@ -52,11 +50,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib)
 # Option to build tests or not
 option(BUILD_POLYHEDRAL_GRAVITY_TESTS "Set to on if the tests should be built (Default: ON)" ON)
 # Only build the tests if they are enabled
-if(BUILD_POLYHEDRAL_GRAVITY_TESTS)
+if (BUILD_POLYHEDRAL_GRAVITY_TESTS)
     message(STATUS "Building the Polyhedral Gravity Tests")
     # Enables CTest, must be in the top-level CMakeList.txt, otherwise it won't work
     enable_testing()
 
     # Subdirectory where the tests are located
     add_subdirectory(${PROJECT_SOURCE_DIR}/test)
-endif()
+endif ()
