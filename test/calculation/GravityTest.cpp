@@ -8,7 +8,7 @@
 
 /**
  * Contains Tests based on the example from Tsoulis FORTRAN implementation.
- * Harcoded values taken from his implementation's results.
+ * Hardcoded values taken from his implementation's results.
  */
 class GravityTest : public ::testing::Test {
 
