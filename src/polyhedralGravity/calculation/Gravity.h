@@ -203,8 +203,27 @@ namespace polyhedralGravity {
                 const PlanesVector &orthogonalProjectionPointsOnPlane,
                 const std::vector<std::array<double, 3>> &segmentNormalOrientation);
 
+        /**
+         * Calculates the point P'' for a given Segment consisting of vertices v1 and v2 and the orthogonal projection
+         * point P' for the plane consisting of those vertices. Solves the three equations given in (24), (25) and (26).
+         * @param v1 - first endpoint of segment
+         * @param v2 - second endpoint of segment
+         * @param pPrime - the orthogonal projection P' of P on this plane
+         * @return P'' for this segment
+         * @note If sigma_pq is zero then P'' == P', this is not checked by this method, but has to be assured first
+         */
         CartesianArray calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
                                                               const CartesianArray &pPrime);
+        /**
+         * Calculates the distance h_pg between the orthogonal projection P' of the computation point P
+         * for a given plane and the orthogonal projection P'' of P' for a line segment.
+         * @param orthogonalProjectionPointsOnPlane - the P' for every plane
+         * @param orthogonalProjectionPointsOnSegment - the P'' for every segment
+         * @return a two-dimensional vector of the distances h_pq
+         */
+        std::vector<std::array<double, 3>> calculateSegmentDistances(
+                const PlanesVector &orthogonalProjectionPointsOnPlane,
+                const SegmentsVector &orthogonalProjectionPointsOnSegment);
 
     };
 

@@ -231,5 +231,11 @@ namespace polyhedralGravity {
         return pDoublePrime / determinant;
     }
 
+    std::vector<std::array<double, 3>>
+    Gravity::calculateSegmentDistances(const PlanesVector &orthogonalProjectionPointsOnPlane,
+                                       const SegmentsVector &orthogonalProjectionPointsOnSegment) {
+        return std::vector<std::array<double, 3>>();
+    }
+
 
 }

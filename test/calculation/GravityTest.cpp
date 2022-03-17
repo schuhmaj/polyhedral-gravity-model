@@ -241,6 +241,21 @@ protected:
                                                   {-4.0000000000000000, 8.0000000000000000, 15.000000000000000}}}
     };
 
+    std::vector<std::array<double, 3>> expectedSegmentDistances{
+            {0.0000000000000000, 0.0000000000000000, 20.000000000000000},
+            {10.000000000000000, 0.0000000000000000, 0.0000000000000000},
+            {15.000000000000000, 20.000000000000000, 13.416407864998739},
+            {0.0000000000000000, 13.416407864998739, 25.000000000000000},
+            {15.000000000000000, 17.677669529663689, 0.0000000000000000},
+            {10.000000000000000, 25.000000000000000, 17.677669529663689},
+            {15.000000000000000, 0.0000000000000000, 17.677669529663689},
+            {10.000000000000000, 17.677669529663689, 25.000000000000000},
+            {15.000000000000000, 13.416407864998739, 20.000000000000000},
+            {13.416407864998739, 0.0000000000000000, 25.000000000000000},
+            {0.0000000000000000, 8.9442719099991592, 0.0000000000000000},
+            {10.000000000000000, 20.000000000000000, 8.9442719099991592}
+    };
+
 };
 
 TEST_F(GravityTest, GijVectors) {
@@ -333,4 +348,14 @@ TEST_F(GravityTest, OrthogonalProjectionPointsOnSegment) {
                                                                           expectedSegmentNormalOrientations);
 
     ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
+}
+
+TEST_F(GravityTest, SegmentDistances) {
+    using namespace testing;
+
+    auto actualSegmentDistances =
+            systemUnderTest.calculateSegmentDistances(expectedOrthogonalProjectionPointsOnPlane,
+                                                      expectedOrthogonalProjectionPointsOnSegment);
+
+    ASSERT_THAT(actualSegmentDistances, ContainerEq(expectedSegmentDistances));
 }
