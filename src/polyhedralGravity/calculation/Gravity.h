@@ -8,6 +8,9 @@
 
 namespace polyhedralGravity {
 
+    /**
+     * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
+     */
     class Gravity {
 
         /**
@@ -44,19 +47,84 @@ namespace polyhedralGravity {
                 : _polyhedron{polyhedron},
                   _density{density} {}
 
-
+        /**
+         * Executes the whole calculation.
+         * TODO: return values or via getResult()?
+         */
         void calculate();
 
+        /**
+         * Calculates the G_ij vectors according to Tsoulis equation (18). These vectors are required to further
+         * compute the plane unit and segment unit normals.
+         *
+         * The dimension of i will be equal to the number of faces, whereas the dimension j will be equal to 3 as the
+         * given polyhedral's faces always consist of three segments/ nodes (triangles).
+         * @return G_ij vectors
+         */
         std::vector<std::array<std::array<double, 3>, 3>> calculateGij();
 
         /**
-         * Calculates the LN_pq values based on Equation (14).
-         * The subscript q is the polyhedral segment of one face p of the complete polyhedron.
-         * @param p - the index of the polyhedral face
-         * @param q - the polyhedral segment
+         * Calculate the N_i vectors according to Tsoulis equation (19).
+         *
+         * The dimension of i will be equal to the number of faces.
+         * @param g - the G_ij vectors
+         * @return plane unit normals
          */
-        double calculateLNpq(size_t p, size_t q);
+        std::vector<std::array<double, 3>>
+        calculatePlaneUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g);
 
+        /**
+         * Calculates the segment unit normals according to Tsoulis equation (20).
+         *
+         * The dimension of i will be equal to the number of faces, whereas the dimension j mirrors the number of
+         * segments forming one face. Since we always use triangles, j will be 3.
+         * @param g - the G_ij vectors
+         * @param planeUnitNormals - the plane unit normals
+         * @return segment unit normals
+         */
+        std::vector<std::array<std::array<double, 3>, 3>>
+        calculateSegmentUnitNormals(const std::vector<std::array<std::array<double, 3>, 3>> &g,
+                                    const std::vector<std::array<double, 3>> &planeUnitNormals);
+
+        /**
+         * TODO? Maybe do this just in time instead of calculating everything at once and storing in a vector
+         * Computes the sigma P values according to equation (21).
+         * In equation (21), the used -G_i1 corresponds to opposite position vector of the first vertices building
+         * the plane i.
+         * @param planeUnitNormals - the plane unit normals
+         * @return sigma_p
+         */
+        std::vector<double> calculateSigmaP(const std::vector<std::array<double, 3>> &planeUnitNormals);
+
+
+        /**
+         * Transforms the edges of the polyhedron to the Hessian Plane form.
+         * This method uses the cross product method.
+         * @param p - the reference point for which the transformation should be executed (default origin {0, 0, 0})
+         * @return vector of Hessian Normal Planes
+         */
+        std::vector<HessianPlane> calculateFaceToHessianPlane(const std::array<double, 3> &p = {0, 0, 0});
+
+        /**
+         * Calculates the Hessian Plane form spanned by three given points p, q, and r.
+         * @param p - first point on the plane
+         * @param q - second point on the plane
+         * @param r - third point on the plane
+         * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
+         * @return HessianPlane
+         * @related https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
+         */
+        HessianPlane computeHessianPlane(const std::array<double, 3> &p, const std::array<double, 3> &q,
+                                                const std::array<double, 3> &r,
+                                                const std::array<double, 3> &origin = {0.0, 0.0, 0.0});
+
+
+        /**
+         * Calculates the plane distances h_p of P from each plane S_p according to the following equation:
+         * h_p = D / sqrt(A^2+B^2+C^2)
+         * @return plane distances h_p
+         */
+        std::vector<double> calculatePlaneDistance(const std::vector<HessianPlane> &plane);
 
     };
 

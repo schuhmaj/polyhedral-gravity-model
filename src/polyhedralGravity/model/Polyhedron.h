@@ -3,12 +3,40 @@
 #include <utility>
 #include <vector>
 #include <array>
+#include <algorithm>
+#include <exception>
+#include <stdexcept>
 
 namespace polyhedralGravity {
 
-/**
- * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
- */
+    /**
+     * A struct describing a plane in Hessian Normal Form:
+     * ax + by + cz + d = 0
+     * where a,b,c are the plane's normal
+     * and d as the signed distance to the plane from the origin along the normal.
+     */
+    struct HessianPlane {
+        double a;
+        double b;
+        double c;
+        double d;
+
+        bool operator==(const HessianPlane &rhs) const {
+            return a == rhs.a &&
+                   b == rhs.b &&
+                   c == rhs.c &&
+                   d == rhs.d;
+        }
+
+        bool operator!=(const HessianPlane &rhs) const {
+            return !(rhs == *this);
+        }
+    };
+
+    /**
+     * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
+     * The index always starts with zero!
+    */
     class Polyhedron {
 
         /**
@@ -40,10 +68,20 @@ namespace polyhedralGravity {
          * Generates a polyhedron from nodes and faces.
          * @param nodes - vector containing the nodes
          * @param faces - vector containing the triangle faces.
+         *
+         * ASSERTS PRE-CONDITION
+         * @throws runtime_error if the no face contains the node zero indicating mathematical index
          */
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
                 : _nodes{std::move(nodes)},
-                  _faces{std::move(faces)} {}
+                  _faces{std::move(faces)} {
+            if (_faces.end() == std::find_if(_faces.begin(), _faces.end(), [&](auto &face) {
+                return face[0] == 0 || face[1] == 0 || face[2] == 0;
+            })) {
+                throw std::runtime_error("The node with index zero (0) was never used in any face! This is "
+                                         "no valid polyhedron. Probable issue: Started counting at one (1).");
+            }
+        }
 
         ~Polyhedron() = default;
 
@@ -59,8 +97,16 @@ namespace polyhedralGravity {
          * The number of points (nodes) that make up the polyhedron.
          * @return a size_t
          */
-        [[nodiscard]] size_t size() const {
+        [[nodiscard]] size_t countNodes() const {
             return _nodes.size();
+        }
+
+        /**
+         * Returns the number of faces (triangles) that make up the polyhedral.
+         * @return a size_t
+         */
+        [[nodiscard]] size_t countFaces() const {
+            return _faces.size();
         }
 
         [[nodiscard]] const std::vector<std::array<size_t, 3>> &getFaces() const {

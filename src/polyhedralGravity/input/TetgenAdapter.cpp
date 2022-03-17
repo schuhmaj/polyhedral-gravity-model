@@ -1,4 +1,5 @@
 #include "TetgenAdapter.h"
+#include "spdlog/spdlog.h"
 
 namespace polyhedralGravity {
 
@@ -22,8 +23,14 @@ namespace polyhedralGravity {
 
     void TetgenAdapter::readNode(const std::string &filename) {
         if (!_hasNodes) {
-            _tetgenio.load_node(const_cast<char *>(filename.c_str()));
-            _hasNodes = true;
+            try {
+                _tetgenio.load_node(const_cast<char *>(filename.c_str()));
+                _hasNodes = true;
+            } catch (...) {
+                throw std::runtime_error(
+                        "The nodes were not read because of an error in Tetgen!"
+                        );
+            }
         } else {
             throw std::runtime_error(
                     "The Polyhedron already has well defined nodes! The information of " + filename
@@ -33,8 +40,16 @@ namespace polyhedralGravity {
 
     void TetgenAdapter::readFace(const std::string &filename) {
         if (!_hasFaces) {
+            try {
             _tetgenio.load_face(const_cast<char *>(filename.c_str()));
             _hasFaces = true;
+            } catch (...) {
+                throw std::runtime_error(
+                        "The faces were not read because of an error in Tetgen! This could indicate several "
+                        "issues, e. g. issues with the node assignment like they appear if either no nodes were "
+                        "read in at all or if no assignment was possible."
+                );
+            }
         } else {
             throw std::runtime_error(
                     "The Polyhedron already has well defined faces! The information of " + filename
@@ -44,8 +59,14 @@ namespace polyhedralGravity {
 
     void TetgenAdapter::readElements(const std::string &filename) {
         if (!_hasElements) {
+            try {
             _tetgenio.load_elem(const_cast<char *>(filename.c_str()));
             _hasElements = true;
+            } catch (...) {
+                throw std::runtime_error(
+                        "The elements were not read because of an error in Tetgen!"
+                );
+            }
         } else {
             throw std::runtime_error(
                     "The Polyhedron already has well defined elements! The information of " + filename

@@ -27,9 +27,11 @@ CMake and then follow these steps:
 ## Execution
 After the build, the gravity model can be run by executing:
 
-    ./polyhedralGravity
+    ./polyhedralGravity [YAML-Configuration-File]
 
-with TODO arguments.
+where the YAML-Configuration-File contains the required parameters.
+Examples for Configuration Files can be found in this repository
+in the folder `/example-config/`.
 
 ## Testing
 The project uses GoogleTest for testing. In oder to execute those
