@@ -20,8 +20,7 @@ namespace polyhedralGravity {
         return g;
     }
 
-    PlanesVector
-    Gravity::calculatePlaneUnitNormals(const SegmentsVector &g) {
+    PlanesVector Gravity::calculatePlaneUnitNormals(const SegmentsVector &g) {
         PlanesVector planeUnitNormals{g.size()};
         //Calculate N_i as (G_i1 * G_i2) / |G_i1 * G_i2| with * being the cross product
         std::transform(g.cbegin(), g.cend(), planeUnitNormals.begin(), [](const auto &gi) -> CartesianArray {
@@ -33,8 +32,7 @@ namespace polyhedralGravity {
         return planeUnitNormals;
     }
 
-    SegmentsVector
-    Gravity::calculateSegmentUnitNormals(const SegmentsVector &g, const PlanesVector &planeUnitNormals) {
+    SegmentsVector Gravity::calculateSegmentUnitNormals(const SegmentsVector &g, const PlanesVector &planeUnitNormals) {
         SegmentsVector segmentUnitNormals{g.size()};
         //Calculate n_ij as (G_ij * N_i) / |G_ig * N_i| with * being the cross product
         //Outer "loop" over G_i (running i) and N_i calculating n_i
@@ -180,42 +178,56 @@ namespace polyhedralGravity {
     }
 
     SegmentsVector Gravity::calculateOrthogonalProjectionPointsOnSegments(
-            const PlanesVector &orthogonalProjectionPointsOnPlane) {
+            const PlanesVector &orthogonalProjectionPointsOnPlane,
+            const std::vector<std::array<double, 3>> &segmentNormalOrientation) {
         SegmentsVector orthogonalProjectionPointsOfPPrime{orthogonalProjectionPointsOnPlane.size()};
 
-        std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
-                       _polyhedron.getFaces().cbegin(), orthogonalProjectionPointsOfPPrime.begin(),
-                       [&](const CartesianArray &pPrime, const std::array<size_t, 3> &face) -> SegmentsOfPlaneArray {
-                           const auto &node0 = _polyhedron.getNode(face[0]);
-                           const auto &node1 = _polyhedron.getNode(face[1]);
-                           const auto &node2 = _polyhedron.getNode(face[2]);
-                           //TODO sigma_pq == 0 special case --> P'' = P'
-                           return {calculateOrthogonalProjectionOnSegment(node0, node1, pPrime),
-                                   calculateOrthogonalProjectionOnSegment(node1, node2, pPrime),
-                                   calculateOrthogonalProjectionOnSegment(node2, node0, pPrime)};
-                       });
+        auto first = thrust::make_zip_iterator(thrust::make_tuple(orthogonalProjectionPointsOnPlane.begin(),
+                                                                  segmentNormalOrientation.begin(),
+                                                                  _polyhedron.getFaces().begin()));
+        auto last = thrust::make_zip_iterator(thrust::make_tuple(orthogonalProjectionPointsOnPlane.end(),
+                                                                 segmentNormalOrientation.end(),
+                                                                 _polyhedron.getFaces().end()));
+
+        thrust::transform(first, last, orthogonalProjectionPointsOfPPrime.begin(), [&](const auto &tuple) {
+            //P' for plane i, sigma_pq[i] with fixed i, the nodes making up plane i
+            const auto &pPrime = thrust::get<0>(tuple);
+            const auto &sigmaP = thrust::get<1>(tuple);
+            const auto &face = thrust::get<2>(tuple);
+            auto counterJ = thrust::counting_iterator<unsigned int>(0);
+
+            SegmentsOfPlaneArray pDoublePrime{};
+            thrust::transform(sigmaP.begin(), sigmaP.end(), counterJ, pDoublePrime.begin(),
+                              [&](const auto &sigmaPQ, unsigned int j) {
+                                  //We actually only accept +0.0 or -0.0, so the equal comparison is ok
+                                  if (sigmaPQ == 0.0) {
+                                      return pPrime;
+                                  } else {
+                                      const auto &v1 = _polyhedron.getNode(face[j]);
+                                      const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                                      return calculateOrthogonalProjectionOnSegment(v1, v2, pPrime);
+                                  }
+                              });
+            return pDoublePrime;
+        });
 
         return orthogonalProjectionPointsOfPPrime;
     }
 
-    CartesianArray
-    Gravity::calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
-                                                    const CartesianArray &pPrime) {
+    CartesianArray Gravity::calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
+                                                                   const CartesianArray &pPrime) {
         using namespace util;
         CartesianArray pDoublePrime{};
-        const CartesianArray matrixColumn1 = v2 - v1;
-        const CartesianArray matrixColumn2 = cross(v1 - pPrime, matrixColumn1);
-        const CartesianArray matrixColumn3 = cross(matrixColumn2, matrixColumn1);
-        const CartesianArray d = {
-                dot(matrixColumn1, pPrime),
-                dot(matrixColumn2, pPrime),
-                dot(matrixColumn3, v1)
-        };
-        //Column major format! det(A^T) = det(A) if it's a square matrix
-        const double determinant = det(Matrix<double, 3, 3>{matrixColumn1, matrixColumn2, matrixColumn3});
-        pDoublePrime[0] = det(Matrix<double, 3, 3>{d, matrixColumn2, matrixColumn3});
-        pDoublePrime[1] = det(Matrix<double, 3, 3>{matrixColumn1, d, matrixColumn3});
-        pDoublePrime[2] = det(Matrix<double, 3, 3>{matrixColumn1, matrixColumn2, d});
+        const CartesianArray matrixRow1 = v2 - v1;
+        const CartesianArray matrixRow2 = cross(v1 - pPrime, matrixRow1);
+        const CartesianArray matrixRow3 = cross(matrixRow2, matrixRow1);
+        const CartesianArray d = {dot(matrixRow1, pPrime), dot(matrixRow2, pPrime), dot(matrixRow3, v1)};
+        //TODO Could this be more pretty? More efficient?
+        Matrix<double, 3, 3> columnMatrix = transpose(Matrix<double, 3, 3>{matrixRow1, matrixRow2, matrixRow3});
+        const double determinant = det(columnMatrix);
+        pDoublePrime[0] = det(Matrix<double, 3, 3>{d, columnMatrix[1], columnMatrix[2]});
+        pDoublePrime[1] = det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]});
+        pDoublePrime[2] = det(Matrix<double, 3, 3>{columnMatrix[0], columnMatrix[1], d});
         return pDoublePrime / determinant;
     }
 

@@ -329,7 +329,8 @@ TEST_F(GravityTest, OrthogonalProjectionPointsOnSegment) {
     using namespace testing;
 
     auto actualOrthogonalProjectionPointsOnSegment =
-            systemUnderTest.calculateOrthogonalProjectionPointsOnSegments(expectedOrthogonalProjectionPointsOnPlane);
+            systemUnderTest.calculateOrthogonalProjectionPointsOnSegments(expectedOrthogonalProjectionPointsOnPlane,
+                                                                          expectedSegmentNormalOrientations);
 
     ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }

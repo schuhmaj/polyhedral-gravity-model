@@ -201,6 +201,25 @@ namespace polyhedralGravity::util {
     }
 
     /**
+     * Computes the transposed of a mxn matrix.
+     * @tparam T - the type of the matrix elements
+     * @tparam M - the row number
+     * @tparam N - the column number
+     * @param matrix - the matrix to transpose
+     * @return the transposed
+     */
+    template<typename T, size_t M, size_t N>
+    Matrix<T, M, N> transpose(const Matrix<T, M, N> &matrix) {
+        Matrix<T, N, M> transposed;
+        for (size_t i = 0; i < M; ++i) {
+            for (size_t j = 0; j < N; ++j) {
+                transposed[i][j] = matrix[j][i];
+            }
+        }
+        return transposed;
+    }
+
+    /**
     * Returns the cross product of two cartesian vectors.
     * @tparam T - a number
     * @param lhs - left vector

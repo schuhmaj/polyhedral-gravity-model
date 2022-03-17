@@ -5,6 +5,9 @@
 #include "polyhedralGravity/util/UtilityConstants.h"
 #include "polyhedralGravity/util/UtilityContainer.h"
 #include "spdlog/spdlog.h"
+#include "thrust/iterator/zip_iterator.h"
+#include "thrust/iterator/counting_iterator.h"
+#include "thrust/transform.h"
 
 namespace polyhedralGravity {
 
@@ -14,15 +17,18 @@ namespace polyhedralGravity {
     using CartesianArray = std::array<double, 3>;
     /**
      * Alias for vectors of cartesian coordinates.
+     * @example PlanesVector[i] returns the i-th plane
      */
     using PlanesVector = std::vector<CartesianArray>;
     /**
      * Alias for the segments (always three) of one plane
+     * @example SegmentsOfPlaneArray[j] returns the j-th segment
      */
     using SegmentsOfPlaneArray = std::array<CartesianArray, 3>;
     /**
      * Alias for two-dimensional structure of cartesian vectors.
      * The second dimension is fixed to size three.
+     * @example SegmentsVector[i][j] returns the j-th segment of the i-th plane
      */
     using SegmentsVector = std::vector<SegmentsOfPlaneArray>;
 
@@ -194,7 +200,8 @@ namespace polyhedralGravity {
          * @return the P'' for every line segment of the polyhedron
          */
         SegmentsVector calculateOrthogonalProjectionPointsOnSegments(
-                const PlanesVector &orthogonalProjectionPointsOnPlane);
+                const PlanesVector &orthogonalProjectionPointsOnPlane,
+                const std::vector<std::array<double, 3>> &segmentNormalOrientation);
 
         CartesianArray calculateOrthogonalProjectionOnSegment(const CartesianArray &v1, const CartesianArray &v2,
                                                               const CartesianArray &pPrime);
