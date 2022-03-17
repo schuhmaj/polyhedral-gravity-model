@@ -11,6 +11,7 @@ namespace polyhedralGravity::util {
 
     /**
      * Alias for two-dimensional array with size M and N.
+     * M is the major size.
      */
     template<typename T, size_t M, size_t N>
     using Matrix = std::array<std::array<T, N>, M>;
