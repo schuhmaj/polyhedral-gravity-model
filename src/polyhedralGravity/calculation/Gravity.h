@@ -248,9 +248,19 @@ namespace polyhedralGravity {
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
 
-
+        /**
+         * Calculates the 3D distances l1_pq and l2_pq between the computation point P and the line
+         * segment endpoints of each polyhedral segment.
+         * @return two 3D (double value) distances per segment
+         */
         SegmentPairPropertyVector calculate3DDistances();
 
+        /**
+         * Calculates the 1D distances s1_pq and s2_pq between orthogonal projection of P on the line
+         * segment P''_pq and the line segment endpoints for each polyhedral segment.
+         * @param orthogonalProjectionPointsOnSegment - the P'' for every segment
+         * @return two 1D (double value) distances per segment
+         */
         SegmentPairPropertyVector calculate1DDistances(
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
 

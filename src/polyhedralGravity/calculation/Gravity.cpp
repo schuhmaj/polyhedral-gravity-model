@@ -289,9 +289,29 @@ namespace polyhedralGravity {
         return l;
     }
 
-    SegmentPairPropertyVector
-    Gravity::calculate1DDistances(const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
-        return polyhedralGravity::SegmentPairPropertyVector();
+    SegmentPairPropertyVector Gravity::calculate1DDistances(
+            const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
+        SegmentPairPropertyVector s{_polyhedron.countFaces()};
+        //Iterate over the planes of the polyhedron, running index i
+        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(),
+                       orthogonalProjectionPointsOnSegment.cbegin(), s.begin(),
+                       [&](const auto &face, const CartesianSegmentProperty &pDoublePrimePerPlane) {
+                           std::array<std::array<double, 2>, 3> si{};
+                           auto counterJ = thrust::counting_iterator<unsigned int>(0);
+                           //Iterate over the segments of the i-th plane, running index j
+                           std::transform(pDoublePrimePerPlane.cbegin(), pDoublePrimePerPlane.cend(),
+                                          counterJ, si.begin(),
+                                          [&](const Cartesian &pDoublePrime, unsigned int j) -> std::array<double, 2> {
+                                              using namespace util;
+                                              const auto &v1 = _polyhedron.getNode(face[j]);
+                                              const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                                              return {euclideanNorm(pDoublePrime - v1),
+                                                      euclideanNorm(pDoublePrime - v2)};
+                                          });
+                           return si;
+                       });
+
+        return s;
     }
 
 
