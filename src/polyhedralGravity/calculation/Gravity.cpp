@@ -176,7 +176,7 @@ namespace polyhedralGravity {
                            std::transform(ni.cbegin(), ni.cend(), xi.cbegin(), sigmaPQ.begin(),
                                           [](const Cartesian &nij, const Cartesian &xij) {
                                               using namespace util;
-                                              return sgn( (dot(nij, xij)), util::epsilon) * -1.0;
+                                              return sgn((dot(nij, xij)), util::epsilon) * -1.0;
                                           });
                            return sigmaPQ;
                        });
@@ -265,6 +265,33 @@ namespace polyhedralGravity {
                            return hp;
                        });
         return segmentDistances;
+    }
+
+    SegmentPairPropertyVector Gravity::calculate3DDistances() {
+        SegmentPairPropertyVector l{_polyhedron.countFaces()};
+        //Iterate over the planes of the polyhedron, running index i
+        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), l.begin(),
+                       [&](const auto &face) {
+                           std::array<std::array<double, 2>, 3> li{};
+                           auto first = thrust::counting_iterator<unsigned int>(0);
+                           auto last = first + 3;
+                           //Iterate over the segments of the i-th plane, running index j
+                           std::transform(first, last, li.begin(), [&](unsigned int j) -> std::array<double, 2> {
+                               using namespace util;
+                               const auto &v1 = _polyhedron.getNode(face[j]);
+                               const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                               //If p = {0, 0, 0}
+                               return {euclideanNorm(v1), euclideanNorm(v2)};
+                           });
+                           return li;
+                       });
+
+        return l;
+    }
+
+    SegmentPairPropertyVector
+    Gravity::calculate1DDistances(const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
+        return polyhedralGravity::SegmentPairPropertyVector();
     }
 
 

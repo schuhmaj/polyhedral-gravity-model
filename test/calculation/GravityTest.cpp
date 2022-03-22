@@ -180,6 +180,49 @@ protected:
             {20.0,               10.0,               8.94427190999916}
     };
 
+    std::vector<std::array<std::array<double, 2>, 3>> expected3DDistancesPerSegmentEndpoint{
+            std::array<std::array<double, 2>, 3>{
+                    {{32.01562118716424, 25.0}, {25.0, 33.54101966249684}, {33.54101966249684, 32.01562118716424}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{25.0, 26.92582403567252}, {26.92582403567252, 33.54101966249684}, {33.54101966249684, 25.0}}},
+            std::array<std::array<double, 2>, 3>{{{32.01562118716424, 25.0}, {25.0, 15.0}, {15.0, 32.01562118716424}}},
+            std::array<std::array<double, 2>, 3>{{{32.01562118716424, 15.0}, {15.0, 25.0}, {25.0, 32.01562118716424}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{32.01562118716424, 26.92582403567252}, {26.92582403567252, 25.0}, {25.0, 32.01562118716424}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{32.01562118716424, 33.54101966249684}, {33.54101966249684, 26.92582403567252},
+                     {26.92582403567252, 32.01562118716424}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{25.0, 15.0}, {15.0, 18.027756377319946}, {18.027756377319946, 25.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{25.0, 18.027756377319946}, {18.027756377319946, 26.92582403567252}, {26.92582403567252, 25.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{33.54101966249684, 18.027756377319946}, {18.027756377319946, 26.92582403567252},
+                     {26.92582403567252, 33.54101966249684}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{26.92582403567252, 18.027756377319946}, {18.027756377319946, 33.54101966249684},
+                     {33.54101966249684, 26.92582403567252}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{25.0, 18.027756377319946}, {18.027756377319946, 15.0}, {15.0, 25.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{25.0, 26.92582403567252}, {26.92582403567252, 18.027756377319946}, {18.027756377319946, 25.0}}}
+    };
+
+    std::vector<std::array<std::array<double, 2>, 3>> expected1DDistancesPerSegmentEndpoint{
+            std::array<std::array<double, 2>, 3>{{{20.0, 0.0}, {0.0, 22.360679774997898}, {10.0, 0.0}}},
+            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {0.0, 20.0}, {22.360679774997898, 0.0}}},
+            std::array<std::array<double, 2>, 3>{{{25.0, 15.0}, {20.0, 0.0}, {6.708203932499369, 29.068883707497267}}},
+            std::array<std::array<double, 2>, 3>{{{29.068883707497267, 6.708203932499369}, {15.0, 25.0}, {0.0, 20.0}}},
+            std::array<std::array<double, 2>, 3>{{{17.67766952966369, 3.5355339059327378}, {10.0, 0.0}, {15.0, 25.0}}},
+            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {25.0, 15.0}, {3.5355339059327378, 17.67766952966369}}},
+            std::array<std::array<double, 2>, 3>{{{25.0, 15.0}, {0.0, 10.0}, {3.5355339059327378, 17.67766952966369}}},
+            std::array<std::array<double, 2>, 3>{{{17.67766952966369, 3.5355339059327378}, {15.0, 25.0}, {10.0, 0.0}}},
+            std::array<std::array<double, 2>, 3>{{{29.068883707497267, 6.708203932499369}, {0.0, 20.0}, {15.0, 25.0}}},
+            std::array<std::array<double, 2>, 3>{{{25.0, 15.0}, {6.708203932499369, 29.068883707497267}, {20.0, 0.0}}},
+            std::array<std::array<double, 2>, 3>{{{17.88854381999832, 4.47213595499958}, {10.0, 0.0}, {0.0, 20.0}}},
+            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {20.0, 0.0}, {4.47213595499958, 17.88854381999832}}}
+    };
+
 };
 
 TEST_F(GravityTest, GijVectors) {
@@ -282,4 +325,21 @@ TEST_F(GravityTest, SegmentDistances) {
                                                       expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualSegmentDistances, ContainerEq(expectedSegmentDistances));
+}
+
+TEST_F(GravityTest, ThreeDDistancesPerSegmentEndpoint) {
+    using namespace testing;
+
+    auto actual3DDistancesPerSegmentEndpoint = systemUnderTest.calculate3DDistances();
+
+    ASSERT_THAT(actual3DDistancesPerSegmentEndpoint, ContainerEq(expected3DDistancesPerSegmentEndpoint));
+}
+
+TEST_F(GravityTest, OneDDistancesPerSegmentEndpoint) {
+    using namespace testing;
+
+    auto actual1DDistancesPerSegmentEndpoint =
+            systemUnderTest.calculate1DDistances(expectedOrthogonalProjectionPointsOnSegment);
+
+    ASSERT_THAT(actual1DDistancesPerSegmentEndpoint, ContainerEq(expected1DDistancesPerSegmentEndpoint));
 }

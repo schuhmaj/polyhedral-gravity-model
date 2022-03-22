@@ -1,5 +1,9 @@
 #pragma once
 
+#include <utility>
+#include <array>
+#include <vector>
+#include <algorithm>
 #include "polyhedralGravity/model/Polyhedron.h"
 #include "polyhedralGravity/model/GravityResult.h"
 #include "polyhedralGravity/util/UtilityConstants.h"
@@ -43,6 +47,12 @@ namespace polyhedralGravity {
      * @example SegmentPropertyVector[i][j] returns the property of the j-th segment of the i-th plane
      */
     using SegmentPropertyVector = std::vector<std::array<double, 3>>;
+    /**
+     * Alias for a two-dimensional structure of double value pairs.
+     * The second dimension is fixed to size three.
+     * @example SegmentPropertyVector[i][j] returns the pair property of the j-th segment of the i-th plane
+     */
+    using SegmentPairPropertyVector = std::vector<std::array<std::array<double, 2>, 3>>;
 
     /**
      * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
@@ -236,6 +246,12 @@ namespace polyhedralGravity {
          */
         SegmentPropertyVector calculateSegmentDistances(
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+                const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
+
+
+        SegmentPairPropertyVector calculate3DDistances();
+
+        SegmentPairPropertyVector calculate1DDistances(
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
 
     };
