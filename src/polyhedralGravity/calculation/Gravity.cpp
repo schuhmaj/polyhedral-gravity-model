@@ -112,32 +112,35 @@ namespace polyhedralGravity {
             const CartesianPlanePropertyVector &planeUnitNormals,
             const PlanePropertyVector &planeDistances) {
         CartesianPlanePropertyVector orthogonalProjectionPointsOfP{planeUnitNormals.size()};
-        //According to equation (22)
-        //Calculate x_P'_i for each plane i
-        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), planeDistances.cbegin(),
-                       orthogonalProjectionPointsOfP.begin(), [](const Cartesian &Ni, double hp) {
-                    using namespace util;
-                    const Cartesian directionCosine = Ni / euclideanNorm(Ni);
-                    return abs(directionCosine * hp);
-                });
-        //Calculate the sign according to flow text after (22)
-        CartesianPlanePropertyVector signs{planeUnitNormals.size()};
-        std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), hessianPlanes.cbegin(), signs.begin(),
-                       [](const Cartesian &Ni, const HessianPlane &plane) {
-                           Cartesian sign{};
-                           //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
-                           //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
-                           sign[0] = plane.d / plane.a < 0 ? 1.0 : Ni[0] > 0 ? -1.0 : 1.0;
-                           sign[1] = plane.d / plane.b < 0 ? 1.0 : Ni[1] > 0 ? -1.0 : 1.0;
-                           sign[2] = plane.d / plane.c < 0 ? 1.0 : Ni[2] > 0 ? -1.0 : 1.0;
-                           return sign;
-                       });
-        //Apply the calculated signs on top of the previously calculated x_P'_i
-        std::transform(orthogonalProjectionPointsOfP.cbegin(), orthogonalProjectionPointsOfP.cend(), signs.cbegin(),
-                       orthogonalProjectionPointsOfP.begin(), [](const auto &projection, const auto &sign) {
-                    using util::operator*;
-                    return projection * sign;
-                });
+
+        //Zip the three required arguments together: Plane normal N_i, Plane Distance h_i and the Hessian Form
+        auto first = thrust::make_zip_iterator(thrust::make_tuple(planeUnitNormals.begin(),
+                                                                  planeDistances.begin(),
+                                                                  hessianPlanes.begin()));
+
+        auto last = thrust::make_zip_iterator(thrust::make_tuple(planeUnitNormals.end(),
+                                                                 planeDistances.end(),
+                                                                 hessianPlanes.end()));
+
+        thrust::transform(first, last, orthogonalProjectionPointsOfP.begin(), [](const auto &tuple) {
+            using namespace util;
+            const Cartesian &Ni = thrust::get<0>(tuple);
+            const double hi = thrust::get<1>(tuple);
+            const HessianPlane &plane = thrust::get<2>(tuple);
+
+            //Calculate the projection point by (22) P'_ = N_i / norm(N_i) * h_i
+            const Cartesian directionCosine = Ni / euclideanNorm(Ni);
+            Cartesian orthogonalProjectionPoint = abs(directionCosine * hi);
+
+            //Calculate the sign of the projections points x, y, z coordinates and apply it
+            //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
+            //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
+            orthogonalProjectionPoint[0] *= plane.a == 0.0 ? 1.0 : plane.d / plane.a > 0.0 && Ni[0] < 0.0 ? -1.0 : 1.0;
+            orthogonalProjectionPoint[1] *= plane.b == 0.0 ? 1.0 : plane.d / plane.b > 0.0 && Ni[1] < 0.0 ? -1.0 : 1.0;
+            orthogonalProjectionPoint[2] *= plane.c == 0.0 ? 1.0 : plane.d / plane.c > 0.0 && Ni[2] < 0.0 ? -1.0 : 1.0;
+
+            return orthogonalProjectionPoint;
+        });
         return orthogonalProjectionPointsOfP;
     }
 
