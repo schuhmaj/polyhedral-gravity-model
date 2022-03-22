@@ -65,7 +65,7 @@ namespace polyhedralGravity {
                            const auto &Gi1 = _polyhedron.getNode(gi[0]);
                            //We abstain on the double multiplication with -1 in the line above and beyond since two
                            //times multiplying with -1 equals no change
-                           return sgn(dot(ni, Gi1));
+                           return sgn(dot(ni, Gi1), util::epsilon);
                        });
         return planeNormalOrientations;
     }
@@ -176,7 +176,7 @@ namespace polyhedralGravity {
                            std::transform(ni.cbegin(), ni.cend(), xi.cbegin(), sigmaPQ.begin(),
                                           [](const Cartesian &nij, const Cartesian &xij) {
                                               using namespace util;
-                                              return sgn(dot(nij, xij)) * -1.0;
+                                              return sgn( (dot(nij, xij)), util::epsilon) * -1.0;
                                           });
                            return sigmaPQ;
                        });

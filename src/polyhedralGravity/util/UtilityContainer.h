@@ -250,15 +250,15 @@ namespace polyhedralGravity::util {
     }
 
     /**
-     * Implements the signum function
-     * @tparam T - a numerical type
+     * Implements the signum function with a certain epsilon to absorb rounding errors.
+     * @tparam T - a numerical (floating point) value
      * @param val - the value itself
-     * @return -1, 0, 1 depending on the sign
-     * @related https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
+     * @param cutoffEpsilon - the cut-off radius around zero to return 0
+     * @return -1, 0, 1 depending on the sign an the given epsilon
      */
     template<typename T>
-    int sgn(T val) {
-        return (T(0) < val) - (val < T(0));
+    int sgn(T val, double cutoffEpsilon) {
+        return val < -cutoffEpsilon ? -1 : val > cutoffEpsilon ? 1 : 0;
     }
 
     /**

@@ -3,6 +3,13 @@
 namespace polyhedralGravity::util {
 
     /**
+     * The epsilon used in the polyhedral gravity model.
+     * @related Used for the sgn() function to determine the sign of a double value. Different compilers
+     * produce different results if no epsilon is applied for the comparison!
+     */
+    constexpr double epsilon = 1e-15;
+
+    /**
      * The gravitational constant G in [m^3/(kg*s^2)].
      * @related in his paper above Equation (4)
      */
