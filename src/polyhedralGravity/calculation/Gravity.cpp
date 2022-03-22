@@ -314,5 +314,24 @@ namespace polyhedralGravity {
         return s;
     }
 
+    SegmentPropertyVector Gravity::calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
+                                                             const SegmentPairPropertyVector &oneDDistances) {
+        //TODO Not 100% correct
+        SegmentPropertyVector transcendentalLN{threeDDistances.size()};
+        std::transform(threeDDistances.cbegin(), threeDDistances.cend(), oneDDistances.cbegin(),
+                       transcendentalLN.begin(),
+                       [](const std::array<std::array<double, 2>, 3> &lp,
+                          const std::array<std::array<double, 2>, 3> &sp) {
+                           std::array<double, 3> segmentLN{};
+                           std::transform(lp.cbegin(), lp.cend(), sp.cbegin(), segmentLN.begin(),
+                                          [](const auto &lpq, const auto &spq) {
+                                              return std::log((spq[1] + lpq[1]) / (spq[0] + lpq[0]));
+                                          });
+                           return segmentLN;
+                       });
+
+        return transcendentalLN;
+    }
+
 
 }

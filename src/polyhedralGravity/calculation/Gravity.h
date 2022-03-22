@@ -135,7 +135,8 @@ namespace polyhedralGravity {
          * @param planeUnitNormals - the plane unit normals
          * @return segment unit normals
          */
-        CartesianSegmentPropertyVector calculateSegmentUnitNormals(const CartesianSegmentPropertyVector &g, const CartesianPlanePropertyVector &planeUnitNormals);
+        CartesianSegmentPropertyVector calculateSegmentUnitNormals(const CartesianSegmentPropertyVector &g,
+                                                                   const CartesianPlanePropertyVector &planeUnitNormals);
 
         /**
          * TODO? Maybe do this just in time instead of calculating everything at once and storing in a vector
@@ -193,9 +194,10 @@ namespace polyhedralGravity {
          * @param planeDistances - the plane distance h_p for every plane
          * @return P' for each plane S_p in a vector
          */
-        CartesianPlanePropertyVector calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
-                                                                                const CartesianPlanePropertyVector &planeUnitNormals,
-                                                                                const PlanePropertyVector &planeDistances);
+        CartesianPlanePropertyVector
+        calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
+                                                   const CartesianPlanePropertyVector &planeUnitNormals,
+                                                   const PlanePropertyVector &planeDistances);
 
 
         /**
@@ -212,7 +214,8 @@ namespace polyhedralGravity {
          * @return sigma_pq
          */
         SegmentPropertyVector calculateSegmentNormalOrientations(
-                const CartesianSegmentPropertyVector &segmentUnitNormals, const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
+                const CartesianSegmentPropertyVector &segmentUnitNormals,
+                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
 
         /**
          * Calculates the origins P'' for each line segment G_pq according to equation (24), (25) and (26) of Tsoulis
@@ -263,6 +266,9 @@ namespace polyhedralGravity {
          */
         SegmentPairPropertyVector calculate1DDistances(
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
+
+        SegmentPropertyVector calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
+                                                        const SegmentPairPropertyVector &oneDDistances);
 
     };
 

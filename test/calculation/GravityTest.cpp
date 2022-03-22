@@ -223,6 +223,21 @@ protected:
             std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {20.0, 0.0}, {4.47213595499958, 17.88854381999832}}}
     };
 
+    std::vector<std::array<double, 3>> expectedTranscendentalLN{
+            {0.0,                0.0,                 0.30747952872839945},
+            {0.0,                0.687362255356451,   0.0},
+            {0.3544458320893136, 1.0986122886681098,  1.0345679811316213},
+            {1.034567981131622,  0.5108256237659907,  0.7326682560454109},
+            {0.4894110007366263, 0.3900353197707153,  0.3544458320893134},
+            {0.3074795287283993, 0.33382573681901684, 0.4894110007366262},
+            {0.0,                0.6251451172504167,  0.6826834766703017},
+            {0.6826834766703017, 0.4524679290839864,  0.3900353197707153},
+            {0.9286653985398196, 0.9566555518497877,  0.33382573681901667},
+            {0.4524679290839866, 0.928665398539819,   0.6873622553564511},
+            {1.1518034938098078, 0.0,                 0.0},
+            {0.3900353197707153, 0.9566555518497877,  1.1518034938098078}
+    };
+
 };
 
 TEST_F(GravityTest, GijVectors) {
@@ -342,4 +357,14 @@ TEST_F(GravityTest, OneDDistancesPerSegmentEndpoint) {
             systemUnderTest.calculate1DDistances(expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actual1DDistancesPerSegmentEndpoint, ContainerEq(expected1DDistancesPerSegmentEndpoint));
+}
+
+TEST_F(GravityTest, TranscendentalLN) {
+    using namespace testing;
+
+    auto actualTranscendentalLN =
+            systemUnderTest.calculateTranscendentalLN(expected3DDistancesPerSegmentEndpoint,
+                                                      expected1DDistancesPerSegmentEndpoint);
+
+    ASSERT_THAT(actualTranscendentalLN, ContainerEq(expectedTranscendentalLN));
 }
