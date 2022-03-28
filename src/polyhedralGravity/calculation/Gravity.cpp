@@ -314,9 +314,88 @@ namespace polyhedralGravity {
         return s;
     }
 
+    std::vector<std::array<Distances, 3>> Gravity::calculateDistances(
+            const CartesianSegmentPropertyVector &gij,
+            const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
+        std::vector<std::array<Distances, 3>> distances{gij.size()};
+
+        //Zip the three required arguments together: G_ij for every segment, P'' for every segment
+        auto first = thrust::make_zip_iterator(thrust::make_tuple(gij.begin(),
+                                                                  orthogonalProjectionPointsOnSegment.begin(),
+                                                                  _polyhedron.getFaces().begin()));
+        auto last = thrust::make_zip_iterator(thrust::make_tuple(gij.end(),
+                                                                 orthogonalProjectionPointsOnSegment.end(),
+                                                                 _polyhedron.getFaces().end()));
+
+        thrust::transform(first, last, distances.begin(), [&](const auto &tuple) {
+            const auto &gi = thrust::get<0>(tuple);
+            const auto &pDoublePrimePerPlane = thrust::get<1>(tuple);
+            const auto &face = thrust::get<2>(tuple);
+
+            std::array<Distances, 3> distancesArray{};
+            auto counterJ = thrust::counting_iterator<unsigned int>(0);
+
+            auto first = thrust::make_zip_iterator(thrust::make_tuple(gi.begin(),
+                                                                      pDoublePrimePerPlane.begin(),
+                                                                      counterJ));
+            auto last = thrust::make_zip_iterator(thrust::make_tuple(gi.end(),
+                                                                     pDoublePrimePerPlane.end(),
+                                                                     counterJ + 3));
+
+            thrust::transform(first, last, distancesArray.begin(), [&](const auto &tuple) {
+                using namespace util;
+                Distances distance{};
+                const Cartesian &gijVector = thrust::get<0>(tuple);
+                const Cartesian &pDoublePrime = thrust::get<1>(tuple);
+                const unsigned int j = thrust::get<2>(tuple);
+
+                //Get the vertices (endpoints) of this segment
+                const auto &v1 = _polyhedron.getNode(face[j]);
+                const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+
+                //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints v1 and v2
+                distance.l1 = euclideanNorm(v1);
+                distance.l2 = euclideanNorm(v2);
+                //Calculate the 1D distances between P'' (every segment has its own) and the segment endpoints v1 and v2
+                distance.s1 = euclideanNorm(pDoublePrime - v1);
+                distance.s2 = euclideanNorm(pDoublePrime - v2);
+
+                //Change the sign depending on certain conditions
+                //1D and 3D distance are small
+                if (std::abs(distance.s1 - distance.l1) < 1e-10 && std::abs(distance.s2 - distance.l2) < 1e-10) {
+                    if (distance.s2 < distance.s1) {
+                        distance.s1 *= -1.0;
+                        distance.s2 *= -1.0;
+                        distance.l1 *= -1.0;
+                        distance.l2 *= -1.0;
+                        return distance;
+                    } else if (distance.s2 == distance.s1) {
+                        distance.s1 *= -1.0;
+                        distance.l1 *= -1.0;
+                        return distance;
+                    }
+                } else {
+                    //condition: P'' lies on the segment described by G_ij
+                    const double norm = euclideanNorm(gijVector);
+                    if (distance.s1 < norm && distance.s2 < norm) {
+                        distance.s1 *= -1.0;
+                        return distance;
+                    } else if (distance.s2 < distance.s1) {
+                        distance.s1 *= -1.0;
+                        distance.s2 *= -1.0;
+                        return distance;
+                    }
+                }
+                return distance;
+            });
+            return distancesArray;
+        });
+        return distances;
+    }
+
     SegmentPropertyVector Gravity::calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
                                                              const SegmentPairPropertyVector &oneDDistances) {
-        //TODO Not 100% correct
+        //TODO Not 100% correct - Missing checks if vertices == P' then LN = 0 + Missing epsilon check
         SegmentPropertyVector transcendentalLN{threeDDistances.size()};
         std::transform(threeDDistances.cbegin(), threeDDistances.cend(), oneDDistances.cbegin(),
                        transcendentalLN.begin(),

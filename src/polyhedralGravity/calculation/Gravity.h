@@ -267,6 +267,11 @@ namespace polyhedralGravity {
         SegmentPairPropertyVector calculate1DDistances(
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
 
+        std::vector<std::array<Distances, 3>> calculateDistances(
+                const CartesianSegmentPropertyVector &gij,
+                const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment
+                );
+
         SegmentPropertyVector calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
                                                         const SegmentPairPropertyVector &oneDDistances);
 

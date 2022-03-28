@@ -193,7 +193,7 @@ protected:
                     {{32.01562118716424, 33.54101966249684}, {33.54101966249684, 26.92582403567252},
                      {26.92582403567252, 32.01562118716424}}},
             std::array<std::array<double, 2>, 3>{
-                    {{25.0, 15.0}, {15.0, 18.027756377319946}, {18.027756377319946, 25.0}}},
+                    {{-25.0, -15.0}, {15.0, 18.027756377319946}, {18.027756377319946, 25.0}}},
             std::array<std::array<double, 2>, 3>{
                     {{25.0, 18.027756377319946}, {18.027756377319946, 26.92582403567252}, {26.92582403567252, 25.0}}},
             std::array<std::array<double, 2>, 3>{
@@ -209,19 +209,29 @@ protected:
     };
 
     std::vector<std::array<std::array<double, 2>, 3>> expected1DDistancesPerSegmentEndpoint{
-            std::array<std::array<double, 2>, 3>{{{20.0, 0.0}, {0.0, 22.360679774997898}, {10.0, 0.0}}},
-            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {0.0, 20.0}, {22.360679774997898, 0.0}}},
-            std::array<std::array<double, 2>, 3>{{{25.0, 15.0}, {20.0, 0.0}, {6.708203932499369, 29.068883707497267}}},
-            std::array<std::array<double, 2>, 3>{{{29.068883707497267, 6.708203932499369}, {15.0, 25.0}, {0.0, 20.0}}},
-            std::array<std::array<double, 2>, 3>{{{17.67766952966369, 3.5355339059327378}, {10.0, 0.0}, {15.0, 25.0}}},
-            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {25.0, 15.0}, {3.5355339059327378, 17.67766952966369}}},
-            std::array<std::array<double, 2>, 3>{{{25.0, 15.0}, {0.0, 10.0}, {3.5355339059327378, 17.67766952966369}}},
-            std::array<std::array<double, 2>, 3>{{{17.67766952966369, 3.5355339059327378}, {15.0, 25.0}, {10.0, 0.0}}},
-            std::array<std::array<double, 2>, 3>{{{29.068883707497267, 6.708203932499369}, {0.0, 20.0}, {15.0, 25.0}}},
-            std::array<std::array<double, 2>, 3>{{{25.0, 15.0}, {6.708203932499369, 29.068883707497267}, {20.0, 0.0}}},
-            std::array<std::array<double, 2>, 3>{{{17.88854381999832, 4.47213595499958}, {10.0, 0.0}, {0.0, 20.0}}},
-            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {20.0, 0.0}, {4.47213595499958, 17.88854381999832}}}
+            std::array<std::array<double, 2>, 3>{{{-20.0, -0.0}, {0.0, 22.360679774997898}, {-10.0, -0.0}}},
+            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {0.0, 20.0}, {-22.360679774997898, -0.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-25.0, -15.0}, {-20.0, -0.0}, {6.708203932499369, 29.068883707497267}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-29.068883707497267, -6.708203932499369}, {15.0, 25.0}, {0.0, 20.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-17.67766952966369, -3.5355339059327378}, {-10.0, -0.0}, {15.0, 25.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{0.0, 10.0}, {-25.0, -15.0}, {3.5355339059327378, 17.67766952966369}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-25.0, -15.0}, {0.0, 10.0}, {3.5355339059327378, 17.67766952966369}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-17.67766952966369, -3.5355339059327378}, {15.0, 25.0}, {-10.0, -0.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-29.068883707497267, -6.708203932499369}, {0.0, 20.0}, {15.0, 25.0}}},
+            std::array<std::array<double, 2>, 3>{
+                    {{-25.0, -15.0}, {6.708203932499369, 29.068883707497267}, {-20.0, -0.0}}},
+            std::array<std::array<double, 2>, 3>{{{-17.88854381999832, 4.47213595499958}, {-10.0, -0.0}, {0.0, 20.0}}},
+            std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {-20.0, -0.0}, {-4.47213595499958, 17.88854381999832}}}
     };
+
+    std::vector<std::array<polyhedralGravity::Distances, 3>> expectedDistancesPerSegmentEndpoint;
 
     std::vector<std::array<double, 3>> expectedTranscendentalLN{
             {0.0,                0.0,                 0.30747952872839945},
@@ -237,6 +247,22 @@ protected:
             {1.1518034938098078, 0.0,                 0.0},
             {0.3900353197707153, 0.9566555518497877,  1.1518034938098078}
     };
+
+public:
+
+    GravityTest() : ::testing::Test() {
+        expectedDistancesPerSegmentEndpoint.resize(expected3DDistancesPerSegmentEndpoint.size());
+        for (int i = 0; i < expected3DDistancesPerSegmentEndpoint.size(); ++i) {
+            for (int j = 0; j < expected3DDistancesPerSegmentEndpoint[i].size(); ++j) {
+                expectedDistancesPerSegmentEndpoint[i][j] = polyhedralGravity::Distances {
+                        expected3DDistancesPerSegmentEndpoint[i][j][0],
+                        expected3DDistancesPerSegmentEndpoint[i][j][1],
+                        expected1DDistancesPerSegmentEndpoint[i][j][0],
+                        expected1DDistancesPerSegmentEndpoint[i][j][1]
+                };
+            }
+        }
+    }
 
 };
 
@@ -357,6 +383,15 @@ TEST_F(GravityTest, OneDDistancesPerSegmentEndpoint) {
             systemUnderTest.calculate1DDistances(expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actual1DDistancesPerSegmentEndpoint, ContainerEq(expected1DDistancesPerSegmentEndpoint));
+}
+
+TEST_F(GravityTest, DistancesPerSegmentEndpoint) {
+    using namespace testing;
+
+    auto actualDistancesPerSegmentEndpoint =
+            systemUnderTest.calculateDistances(expectedGij, expectedOrthogonalProjectionPointsOnSegment);
+
+    ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
 }
 
 TEST_F(GravityTest, TranscendentalLN) {
