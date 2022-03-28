@@ -231,7 +231,7 @@ protected:
             std::array<std::array<double, 2>, 3>{{{0.0, 10.0}, {-20.0, -0.0}, {-4.47213595499958, 17.88854381999832}}}
     };
 
-    std::vector<std::array<polyhedralGravity::Distances, 3>> expectedDistancesPerSegmentEndpoint;
+    std::vector<std::array<polyhedralGravity::Distance, 3>> expectedDistancesPerSegmentEndpoint;
 
     std::vector<std::array<double, 3>> expectedTranscendentalLN{
             {0.0,                0.0,                 0.30747952872839945},
@@ -254,7 +254,7 @@ public:
         expectedDistancesPerSegmentEndpoint.resize(expected3DDistancesPerSegmentEndpoint.size());
         for (int i = 0; i < expected3DDistancesPerSegmentEndpoint.size(); ++i) {
             for (int j = 0; j < expected3DDistancesPerSegmentEndpoint[i].size(); ++j) {
-                expectedDistancesPerSegmentEndpoint[i][j] = polyhedralGravity::Distances {
+                expectedDistancesPerSegmentEndpoint[i][j] = polyhedralGravity::Distance {
                         expected3DDistancesPerSegmentEndpoint[i][j][0],
                         expected3DDistancesPerSegmentEndpoint[i][j][1],
                         expected1DDistancesPerSegmentEndpoint[i][j][0],

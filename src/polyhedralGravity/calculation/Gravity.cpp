@@ -314,10 +314,10 @@ namespace polyhedralGravity {
         return s;
     }
 
-    std::vector<std::array<Distances, 3>> Gravity::calculateDistances(
+    std::vector<std::array<Distance, 3>> Gravity::calculateDistances(
             const CartesianSegmentPropertyVector &gij,
             const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
-        std::vector<std::array<Distances, 3>> distances{gij.size()};
+        std::vector<std::array<Distance, 3>> distances{gij.size()};
 
         //Zip the three required arguments together: G_ij for every segment, P'' for every segment
         auto first = thrust::make_zip_iterator(thrust::make_tuple(gij.begin(),
@@ -332,7 +332,7 @@ namespace polyhedralGravity {
             const auto &pDoublePrimePerPlane = thrust::get<1>(tuple);
             const auto &face = thrust::get<2>(tuple);
 
-            std::array<Distances, 3> distancesArray{};
+            std::array<Distance, 3> distancesArray{};
             auto counterJ = thrust::counting_iterator<unsigned int>(0);
 
             auto first = thrust::make_zip_iterator(thrust::make_tuple(gi.begin(),
@@ -344,7 +344,7 @@ namespace polyhedralGravity {
 
             thrust::transform(first, last, distancesArray.begin(), [&](const auto &tuple) {
                 using namespace util;
-                Distances distance{};
+                Distance distance{};
                 const Cartesian &gijVector = thrust::get<0>(tuple);
                 const Cartesian &pDoublePrime = thrust::get<1>(tuple);
                 const unsigned int j = thrust::get<2>(tuple);
@@ -410,6 +410,19 @@ namespace polyhedralGravity {
                        });
 
         return transcendentalLN;
+    }
+
+    std::vector<std::array<TranscendentalExpression, 3>>
+    Gravity::calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
+                                                const PlanePropertyVector &planeDistances,
+                                                const SegmentPropertyVector &segmentNormalOrientation,
+                                                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
+        std::vector<std::array<TranscendentalExpression, 3>> transcendentalExpressions{distances.size()};
+
+
+
+
+        return transcendentalExpressions;
     }
 
 

@@ -4,22 +4,27 @@
 
 namespace polyhedralGravity {
 
-    struct Distances {
+    struct Distance {
         double l1;
         double l2;
         double s1;
         double s2;
 
-        bool operator==(const Distances &rhs) const {
+        bool operator==(const Distance &rhs) const {
             return l1 == rhs.l1 &&
                    l2 == rhs.l2 &&
                    s1 == rhs.s1 &&
                    s2 == rhs.s2;
         }
 
-        bool operator!=(const Distances &rhs) const {
+        bool operator!=(const Distance &rhs) const {
             return !(rhs == *this);
         }
+    };
+
+    struct TranscendentalExpression {
+        double ln;
+        double an;
     };
 
 /**
