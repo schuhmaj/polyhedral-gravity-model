@@ -25,6 +25,15 @@ namespace polyhedralGravity {
     struct TranscendentalExpression {
         double ln;
         double an;
+
+        bool operator==(const TranscendentalExpression &rhs) const {
+            return ln == rhs.ln &&
+                   an == rhs.an;
+        }
+
+        bool operator!=(const TranscendentalExpression &rhs) const {
+            return !(rhs == *this);
+        }
     };
 
 /**

@@ -248,17 +248,39 @@ protected:
             {0.3900353197707153, 0.9566555518497877,  1.1518034938098078}
     };
 
+    std::vector<std::array<double, 3>> expectedTranscendentalAN{
+            {0.0,                 0.0,                 0.3567333885140938},
+            {0.0,                 0.9799235766494776,  0.0},
+            {0.0,                 0.0,                 0.0},
+            {0.0,                 0.0,                 0.0},
+            {0.4109023045514107,  0.45979025757734426, 0.0},
+            {0.23413936163132537, 0.1405746311094993,  0.4109023045514107},
+            {0.0,                 0.0,                 0.0},
+            {0.0,                 0.0,                 0.0},
+            {0.3029908626228055,  0.45979025757734426, 0.08507626483651975},
+            {0.0,                 0.3029908626228055,  0.23413936163132537},
+            {1.2703024256629791,  0.0,                 0.0},
+            {0.27165712367757405, 0.8393489455399783,  1.2703024256629791}
+    };
+
+    std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
+
 public:
 
     GravityTest() : ::testing::Test() {
         expectedDistancesPerSegmentEndpoint.resize(expected3DDistancesPerSegmentEndpoint.size());
+        expectedTranscendentalExpressions.resize(expectedTranscendentalLN.size());
         for (int i = 0; i < expected3DDistancesPerSegmentEndpoint.size(); ++i) {
             for (int j = 0; j < expected3DDistancesPerSegmentEndpoint[i].size(); ++j) {
-                expectedDistancesPerSegmentEndpoint[i][j] = polyhedralGravity::Distance {
+                expectedDistancesPerSegmentEndpoint[i][j] = polyhedralGravity::Distance{
                         expected3DDistancesPerSegmentEndpoint[i][j][0],
                         expected3DDistancesPerSegmentEndpoint[i][j][1],
                         expected1DDistancesPerSegmentEndpoint[i][j][0],
                         expected1DDistancesPerSegmentEndpoint[i][j][1]
+                };
+                expectedTranscendentalExpressions[i][j] = polyhedralGravity::TranscendentalExpression {
+                        expectedTranscendentalLN[i][j],
+                        expectedTranscendentalAN[i][j],
                 };
             }
         }
@@ -402,4 +424,16 @@ TEST_F(GravityTest, TranscendentalLN) {
                                                       expected1DDistancesPerSegmentEndpoint);
 
     ASSERT_THAT(actualTranscendentalLN, ContainerEq(expectedTranscendentalLN));
+}
+
+TEST_F(GravityTest, TranscendentalExpressions) {
+    using namespace testing;
+
+    auto actualTranscendentalExpressions =
+            systemUnderTest.calculateTranscendentalExpressions(expectedDistancesPerSegmentEndpoint,
+                                                               expectedPlaneDistances,
+                                                               expectedSegmentNormalOrientations,
+                                                               expectedOrthogonalProjectionPointsOnPlane);
+
+    ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
 }

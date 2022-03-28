@@ -412,15 +412,75 @@ namespace polyhedralGravity {
         return transcendentalLN;
     }
 
-    std::vector<std::array<TranscendentalExpression, 3>>
-    Gravity::calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
-                                                const PlanePropertyVector &planeDistances,
-                                                const SegmentPropertyVector &segmentNormalOrientation,
-                                                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
+    std::vector<std::array<TranscendentalExpression, 3>> Gravity::calculateTranscendentalExpressions(
+            const std::vector<std::array<Distance, 3>> &distances,
+            const PlanePropertyVector &planeDistances,
+            const SegmentPropertyVector &segmentNormalOrientation,
+            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
+        //The result of this functions
         std::vector<std::array<TranscendentalExpression, 3>> transcendentalExpressions{distances.size()};
 
+        //Zip iterator consisting of  3D and 1D distances l1/l2 and s1/2 | h_p | sigma_pq | P'_p | faces
+        //TODO Add h_pq
+        auto first = thrust::make_zip_iterator(thrust::make_tuple(distances.begin(),
+                                                                  planeDistances.begin(),
+                                                                  segmentNormalOrientation.begin(),
+                                                                  orthogonalProjectionPointsOnPlane.begin(),
+                                                                  _polyhedron.getFaces().begin()));
+        auto last = thrust::make_zip_iterator(thrust::make_tuple(distances.end(),
+                                                                 planeDistances.end(),
+                                                                 segmentNormalOrientation.end(),
+                                                                 orthogonalProjectionPointsOnPlane.end(),
+                                                                 _polyhedron.getFaces().end()));
+
+        thrust::transform(first, last, transcendentalExpressions.begin(), [&](const auto &tuple) {
+            const auto &distancesPerPlane = thrust::get<0>(tuple);
+            const double hp = thrust::get<1>(tuple);
+            const auto &segmentNormalOrientationPerPlane = thrust::get<2>(tuple);
+            const Cartesian &pPrime = thrust::get<3>(tuple);
+            const auto &face = thrust::get<4>(tuple);
+
+            auto counterJ = thrust::counting_iterator<unsigned int>(0);
 
 
+            //Zip iterator consisting of 3D and 1D distances l1/l2 and s1/2 for this plane | sigma_pq for this plane
+            auto first = thrust::make_zip_iterator(thrust::make_tuple(distancesPerPlane.begin(),
+                                                                      segmentNormalOrientationPerPlane.begin()));
+            auto last = thrust::make_zip_iterator(thrust::make_tuple(distancesPerPlane.end(),
+                                                                     segmentNormalOrientationPerPlane.end()));
+
+            //Result for this plane
+            std::array<TranscendentalExpression, 3> transcendentalExpressionsPerPlane{};
+
+            thrust::transform(first, last, counterJ, transcendentalExpressionsPerPlane.begin(),
+                              [&](const auto &tuple, const unsigned int j) {
+                                  using namespace util;
+                                  const Distance &distance = thrust::get<0>(tuple);
+                                  const double sigmaPQ = thrust::get<1>(tuple);
+
+                                  //Result for this segment
+                                  TranscendentalExpression transcendentalExpressionPerSegment{};
+
+                                  //Vertices (endpoints) of this segment
+                                  const Cartesian &v1 = _polyhedron.getNode(face[j]);
+                                  const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+
+
+                                  if ((sigmaPQ == 0.0) &&
+                                      (euclideanNorm(pPrime - v1) == 0.0 || euclideanNorm(pPrime - v2) == 0.0)) {
+                                      transcendentalExpressionPerSegment.ln = 0.0;
+                                  }
+
+                                  if (hp == 0) {
+                                      transcendentalExpressionPerSegment.an = 0.0;
+                                  }
+
+                                  return transcendentalExpressionPerSegment;
+                              });
+
+            return transcendentalExpressionsPerPlane;
+
+        });
 
         return transcendentalExpressions;
     }
