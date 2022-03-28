@@ -412,23 +412,26 @@ namespace polyhedralGravity {
         return transcendentalLN;
     }
 
-    std::vector<std::array<TranscendentalExpression, 3>> Gravity::calculateTranscendentalExpressions(
-            const std::vector<std::array<Distance, 3>> &distances,
-            const PlanePropertyVector &planeDistances,
-            const SegmentPropertyVector &segmentNormalOrientation,
-            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
+    std::vector<std::array<TranscendentalExpression, 3>>
+    Gravity::calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
+                                                const PlanePropertyVector &planeDistances,
+                                                const SegmentPropertyVector &segmentDistances,
+                                                const SegmentPropertyVector &segmentNormalOrientation,
+                                                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
         //The result of this functions
         std::vector<std::array<TranscendentalExpression, 3>> transcendentalExpressions{distances.size()};
 
-        //Zip iterator consisting of  3D and 1D distances l1/l2 and s1/2 | h_p | sigma_pq | P'_p | faces
+        //Zip iterator consisting of  3D and 1D distances l1/l2 and s1/2 | h_p | h_pq | sigma_pq | P'_p | faces
         //TODO Add h_pq
         auto first = thrust::make_zip_iterator(thrust::make_tuple(distances.begin(),
                                                                   planeDistances.begin(),
+                                                                  segmentDistances.begin(),
                                                                   segmentNormalOrientation.begin(),
                                                                   orthogonalProjectionPointsOnPlane.begin(),
                                                                   _polyhedron.getFaces().begin()));
         auto last = thrust::make_zip_iterator(thrust::make_tuple(distances.end(),
                                                                  planeDistances.end(),
+                                                                 segmentDistances.end(),
                                                                  segmentNormalOrientation.end(),
                                                                  orthogonalProjectionPointsOnPlane.end(),
                                                                  _polyhedron.getFaces().end()));
@@ -436,17 +439,20 @@ namespace polyhedralGravity {
         thrust::transform(first, last, transcendentalExpressions.begin(), [&](const auto &tuple) {
             const auto &distancesPerPlane = thrust::get<0>(tuple);
             const double hp = thrust::get<1>(tuple);
-            const auto &segmentNormalOrientationPerPlane = thrust::get<2>(tuple);
-            const Cartesian &pPrime = thrust::get<3>(tuple);
-            const auto &face = thrust::get<4>(tuple);
+            const auto &segmentDistancesPerPlane = thrust::get<2>(tuple);
+            const auto &segmentNormalOrientationPerPlane = thrust::get<3>(tuple);
+            const Cartesian &pPrime = thrust::get<4>(tuple);
+            const auto &face = thrust::get<5>(tuple);
 
             auto counterJ = thrust::counting_iterator<unsigned int>(0);
 
 
             //Zip iterator consisting of 3D and 1D distances l1/l2 and s1/2 for this plane | sigma_pq for this plane
             auto first = thrust::make_zip_iterator(thrust::make_tuple(distancesPerPlane.begin(),
+                                                                      segmentDistancesPerPlane.begin(),
                                                                       segmentNormalOrientationPerPlane.begin()));
             auto last = thrust::make_zip_iterator(thrust::make_tuple(distancesPerPlane.end(),
+                                                                     segmentDistancesPerPlane.end(),
                                                                      segmentNormalOrientationPerPlane.end()));
 
             //Result for this plane
@@ -456,7 +462,8 @@ namespace polyhedralGravity {
                               [&](const auto &tuple, const unsigned int j) {
                                   using namespace util;
                                   const Distance &distance = thrust::get<0>(tuple);
-                                  const double sigmaPQ = thrust::get<1>(tuple);
+                                  const double hpq = thrust::get<1>(tuple);
+                                  const double sigmaPQ = thrust::get<2>(tuple);
 
                                   //Result for this segment
                                   TranscendentalExpression transcendentalExpressionPerSegment{};
@@ -465,14 +472,27 @@ namespace polyhedralGravity {
                                   const Cartesian &v1 = _polyhedron.getNode(face[j]);
                                   const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
 
-
-                                  if ((sigmaPQ == 0.0) &&
-                                      (euclideanNorm(pPrime - v1) == 0.0 || euclideanNorm(pPrime - v2) == 0.0)) {
+                                  //Compute LN_pq according to (14)
+                                  //If either sigmaPQ has no sign AND either of the distances of P' to the two
+                                  //segment endpoints is zero OR the 1D and 3D distances are below some threshold
+                                  //then LN_pq is zero, too
+                                  if ((sigmaPQ == 0.0 &&
+                                       (euclideanNorm(pPrime - v1) == 0.0 || euclideanNorm(pPrime - v2) == 0.0)) ||
+                                      (distance.s1 + distance.s2 < 1e-10 && distance.l1 + distance.l2 < 1e-10)) {
                                       transcendentalExpressionPerSegment.ln = 0.0;
+                                  } else {
+                                      transcendentalExpressionPerSegment.ln =
+                                              std::log((distance.s2 + distance.l2) / (distance.s1 + distance.l1));
                                   }
 
-                                  if (hp == 0) {
+                                  //Compute AN_pq according to (15)
+                                  //If h_p or h_pq is zero then AN_pq is zero, too
+                                  if (hp == 0 || hpq == 0) {
                                       transcendentalExpressionPerSegment.an = 0.0;
+                                  } else {
+                                      transcendentalExpressionPerSegment.an =
+                                              std::atan((hp * distance.s2) / (hpq * distance.l2)) -
+                                              std::atan((hp * distance.s1) / (hpq * distance.l1));
                                   }
 
                                   return transcendentalExpressionPerSegment;

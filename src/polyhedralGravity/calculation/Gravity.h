@@ -272,12 +272,12 @@ namespace polyhedralGravity {
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment
                 );
 
-        std::vector<std::array<TranscendentalExpression, 3>> calculateTranscendentalExpressions(
-                const std::vector<std::array<Distance, 3>> &distances,
-                const PlanePropertyVector &planeDistances,
-                const SegmentPropertyVector &segmentNormalOrientation,
-                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane
-                );
+        std::vector<std::array<TranscendentalExpression, 3>>
+        calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
+                                           const PlanePropertyVector &planeDistances,
+                                           const SegmentPropertyVector &segmentDistances,
+                                           const SegmentPropertyVector &segmentNormalOrientation,
+                                           const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
 
         SegmentPropertyVector calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
                                                         const SegmentPairPropertyVector &oneDDistances);

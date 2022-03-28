@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <ostream>
 
 namespace polyhedralGravity {
 
@@ -20,6 +21,11 @@ namespace polyhedralGravity {
         bool operator!=(const Distance &rhs) const {
             return !(rhs == *this);
         }
+
+        friend std::ostream &operator<<(std::ostream &os, const Distance &distance) {
+            os << "l1: " << distance.l1 << " l2: " << distance.l2 << " s1: " << distance.s1 << " s2: " << distance.s2;
+            return os;
+        }
     };
 
     struct TranscendentalExpression {
@@ -33,6 +39,11 @@ namespace polyhedralGravity {
 
         bool operator!=(const TranscendentalExpression &rhs) const {
             return !(rhs == *this);
+        }
+
+        friend std::ostream &operator<<(std::ostream &os, const TranscendentalExpression &expression) {
+            os << "ln: " << expression.ln << " an: " << expression.an;
+            return os;
         }
     };
 

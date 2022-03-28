@@ -432,6 +432,7 @@ TEST_F(GravityTest, TranscendentalExpressions) {
     auto actualTranscendentalExpressions =
             systemUnderTest.calculateTranscendentalExpressions(expectedDistancesPerSegmentEndpoint,
                                                                expectedPlaneDistances,
+                                                               expectedSegmentDistances,
                                                                expectedSegmentNormalOrientations,
                                                                expectedOrthogonalProjectionPointsOnPlane);
 
