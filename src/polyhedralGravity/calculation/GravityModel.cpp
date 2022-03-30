@@ -439,7 +439,7 @@ namespace polyhedralGravity {
     }
 
     PlanePropertyVector GravityModel::calculateAlphaSingularityTerms(
-            const CartesianSegmentPropertyVector &gij,
+            const CartesianSegmentPropertyVector &gijVectors,
             const SegmentPropertyVector &segmentNormalOrientation,
             const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
             const PlanePropertyVector &planeDistances) {
@@ -447,27 +447,51 @@ namespace polyhedralGravity {
         PlanePropertyVector alphaSingularity(planeDistances.size(), 0.0);
 
         //Zip iterator consisting of G_ij vectors | sigma_pq | faces | P' | h_p
-        auto first = thrust::make_zip_iterator(thrust::make_tuple(gij.begin(),
+        auto first = thrust::make_zip_iterator(thrust::make_tuple(gijVectors.begin(),
                                                                   segmentNormalOrientation.begin(),
                                                                   _polyhedron.getFaces().begin(),
                                                                   orthogonalProjectionPointsOnPlane.begin(),
                                                                   planeDistances.begin()));
-        auto last = thrust::make_zip_iterator(thrust::make_tuple(gij.end(),
+        auto last = thrust::make_zip_iterator(thrust::make_tuple(gijVectors.end(),
                                                                  segmentNormalOrientation.end(),
                                                                  _polyhedron.getFaces().end(),
                                                                  orthogonalProjectionPointsOnPlane.end(),
                                                                  planeDistances.end()));
 
         thrust::transform(first, last, alphaSingularity.begin(), [&](const auto &tuple) {
-            double alphaSingularityForPlane{0.0};
-            const auto &gijPerPlane = thrust::get<0>(tuple);
+            const auto &gijVectorsPerPlane = thrust::get<0>(tuple);
             const auto segmentNormalOrientationPerPlane = thrust::get<1>(tuple);
             const auto &face = thrust::get<2>(tuple);
             const Cartesian &pPrime = thrust::get<3>(tuple);
             const double hp = thrust::get<4>(tuple);
 
+            //1. case: If all sigma_pq for a given plane p are 1.0 then P' lies inside the plane S_p
+            if (std::all_of(segmentNormalOrientationPerPlane.cbegin(), segmentNormalOrientationPerPlane.cend(),
+                            [](const double sigma) {return sigma == 1.0;})) {
+                return -1.0 * util::PI2 * hp;
+            }
+            //2. case: If ... then P' is located on one line segment G_p of plane p, but not on any of its vertices
+            auto counterJ = thrust::counting_iterator<unsigned int>(0);
+            auto secondCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(gijVectorsPerPlane.begin(),
+                                                                      counterJ));
+            auto secondCaseEnd = thrust::make_zip_iterator(thrust::make_tuple(gijVectorsPerPlane.end(),
+                                                                      counterJ + 3));
+            if (std::any_of(secondCaseBegin, secondCaseEnd, [&](const auto &tuple) {
+                using namespace util;
+                const Cartesian &gij = thrust::get<0>(tuple);
+                const unsigned int j = thrust::get<1>(tuple);
 
-            return alphaSingularityForPlane;
+                const Cartesian &v1 = _polyhedron.getNode(face[j]);
+                const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                const double gijNorm = euclideanNorm(gij);
+                return euclideanNorm(pPrime - v1) < gijNorm || euclideanNorm(pPrime - v2) < gijNorm;
+            } )) {
+                return -1.0 * util::PI * hp;
+            }
+            //3. case If ... then P' is located at one of G_p's vertices
+
+            //4. case Otherwise P' is located outside the plane S_p and then the singularity equals zero
+            return 0.0;
         });
 
         return alphaSingularity;

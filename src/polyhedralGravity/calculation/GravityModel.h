@@ -285,7 +285,7 @@ namespace polyhedralGravity {
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
 
         PlanePropertyVector calculateAlphaSingularityTerms(
-                const CartesianSegmentPropertyVector &gij,
+                const CartesianSegmentPropertyVector &gijVectors,
                 const SegmentPropertyVector &segmentNormalOrientation,
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
                 const PlanePropertyVector &planeDistances);
