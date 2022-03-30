@@ -453,12 +453,16 @@ namespace polyhedralGravity {
                                                                   segmentNormalOrientation.begin(),
                                                                   _polyhedron.getFaces().begin(),
                                                                   orthogonalProjectionPointsOnPlane.begin(),
-                                                                  planeDistances.begin()));
+                                                                  planeDistances.begin(),
+                                                                  planeNormalOrientation.begin(),
+                                                                  planeUnitNormals.begin()));
         auto last = thrust::make_zip_iterator(thrust::make_tuple(gijVectors.end(),
                                                                  segmentNormalOrientation.end(),
                                                                  _polyhedron.getFaces().end(),
                                                                  orthogonalProjectionPointsOnPlane.end(),
-                                                                 planeDistances.end()));
+                                                                 planeDistances.end(),
+                                                                 planeNormalOrientation.end(),
+                                                                 planeUnitNormals.end()));
 
         thrust::transform(first, last, singularities.begin(), [&](const auto &tuple) {
             const auto &gijVectorsPerPlane = thrust::get<0>(tuple);
@@ -466,11 +470,14 @@ namespace polyhedralGravity {
             const auto &face = thrust::get<2>(tuple);
             const Cartesian &pPrime = thrust::get<3>(tuple);
             const double hp = thrust::get<4>(tuple);
+            const double sigmaP = thrust::get<5>(tuple);
+            const Cartesian &Np = thrust::get<6>(tuple);
 
             //1. case: If all sigma_pq for a given plane p are 1.0 then P' lies inside the plane S_p
             if (std::all_of(segmentNormalOrientationPerPlane.cbegin(), segmentNormalOrientationPerPlane.cend(),
                             [](const double sigma) { return sigma == 1.0; })) {
-                return std::make_pair(-1.0 * util::PI2 * hp, Cartesian{0, 0, 0});
+                using namespace util;
+                return std::make_pair(-1.0 * util::PI2 * hp, Np / euclideanNorm(Np) * -1.0 * util::PI2 * sigmaP);
             }
             //2. case: If sigma_pq == 0 AND norm(P' - v1) < norm(G_ij) && norm(P' - v2) < norm(G_ij) with G_ij
             // as the vector of v1 and v2
@@ -499,7 +506,8 @@ namespace polyhedralGravity {
                 const double gijNorm = euclideanNorm(gij);
                 return euclideanNorm(pPrime - v1) < gijNorm && euclideanNorm(pPrime - v2) < gijNorm;
             })) {
-                return std::make_pair(-1.0 * util::PI * hp, Cartesian{0, 0, 0});
+                using namespace util;
+                return std::make_pair(-1.0 * util::PI * hp, Np / euclideanNorm(Np) * -1.0 * util::PI * sigmaP);
             }
             //3. case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
             // then P' is located at one of G_p's vertices
@@ -532,8 +540,8 @@ namespace polyhedralGravity {
                 const Cartesian &g1 = e1 == 0.0 ? gijVectorsPerPlane[j] : gijVectorsPerPlane[(j - 1 + 3) % 3];
                 const Cartesian &g2 = e1 == 0.0 ? gijVectorsPerPlane[(j + 1) % 3] : gijVectorsPerPlane[j];
                 const double gdot = dot(g1 * -1.0, g2);
-                double theta = gdot == 0.0 ? util::PI_2 : std::acos(gdot / (euclideanNorm(g1) * euclideanNorm(g2)));
-                return std::make_pair(-1.0 * theta * hp, Cartesian{0, 0, 0});
+                const double theta = gdot == 0.0 ? util::PI_2 : std::acos(gdot / (euclideanNorm(g1) * euclideanNorm(g2)));
+                return std::make_pair(-1.0 * theta * hp, Np / euclideanNorm(Np) * -1.0 * theta * sigmaP);
             }
 
             //4. case Otherwise P' is located outside the plane S_p and then the singularity equals zero
