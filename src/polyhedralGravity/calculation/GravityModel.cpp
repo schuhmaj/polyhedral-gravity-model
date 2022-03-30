@@ -402,8 +402,8 @@ namespace polyhedralGravity {
                                   TranscendentalExpression transcendentalExpressionPerSegment{};
 
                                   //Vertices (endpoints) of this segment
-                                  const Cartesian &v1 = _polyhedron.getNode(face[j]);
-                                  const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                                  const Cartesian &v1 = _polyhedron.getNode(face[(j + 1) % 3]);
+                                  const Cartesian &v2 = _polyhedron.getNode(face[j]);
 
                                   //Compute LN_pq according to (14)
                                   //If either sigmaPQ has no sign AND either of the distances of P' to the two
@@ -492,8 +492,8 @@ namespace polyhedralGravity {
                     return false;
                 }
 
-                const Cartesian &v1 = _polyhedron.getNode(face[j]);
-                const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                const Cartesian &v1 = _polyhedron.getNode(face[(j + 1) % 3]);
+                const Cartesian &v2 = _polyhedron.getNode(face[j]);
                 const double gijNorm = euclideanNorm(gij);
                 return euclideanNorm(pPrime - v1) < gijNorm && euclideanNorm(pPrime - v2) < gijNorm;
             } )) {
@@ -501,7 +501,7 @@ namespace polyhedralGravity {
             }
             //3. case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
             // then P' is located at one of G_p's vertices
-            auto counterJ3 = thrust::counting_iterator<unsigned int>(0);
+            auto counterJ3 = thrust::counting_iterator<int>(0);
             auto thirdCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(
                     segmentNormalOrientationPerPlane.begin(),
                     counterJ3));
@@ -520,14 +520,14 @@ namespace polyhedralGravity {
                     return false;
                 }
 
-                const Cartesian &v1 = _polyhedron.getNode(face[j]);
-                const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                const Cartesian &v1 = _polyhedron.getNode(face[(j + 1) % 3]);
+                const Cartesian &v2 = _polyhedron.getNode(face[j]);
                 e1 = euclideanNorm(pPrime - v1);
                 e2 = euclideanNorm(pPrime - v2);
                 return e1 == 0.0 || e2 == 0.0;
             } )) {
                 using namespace util;
-                const Cartesian &g1 = e1 == 0.0 ? gijVectorsPerPlane[j] : gijVectorsPerPlane[(j - 1) % 3];
+                const Cartesian &g1 = e1 == 0.0 ? gijVectorsPerPlane[j] : gijVectorsPerPlane[(j - 1 + 3) % 3];
                 const Cartesian &g2 = e1 == 0.0 ? gijVectorsPerPlane[(j + 1) % 3] : gijVectorsPerPlane[j];
                 const double gdot = dot(g1 * -1.0, g2);
                 double theta = gdot == 0.0 ? util::PI_2 : std::acos(gdot/ (euclideanNorm(g1) * euclideanNorm(g2)));

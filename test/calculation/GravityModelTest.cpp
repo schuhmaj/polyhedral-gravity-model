@@ -438,7 +438,7 @@ TEST_F(GravityModelTest, AlphaSingularityTerms) {
                                                            expectedOrthogonalProjectionPointsOnPlane,
                                                            expectedPlaneDistances);
 
-    ASSERT_THAT(actualAlphaSingularityTerms, ContainerEq(expectedAlphaSingularityTerms));
+    ASSERT_THAT(actualAlphaSingularityTerms, Pointwise(DoubleNear(1e-6) ,expectedAlphaSingularityTerms));
 }
 
 TEST_F(GravityModelTest, BetaSingularityTerms) {
