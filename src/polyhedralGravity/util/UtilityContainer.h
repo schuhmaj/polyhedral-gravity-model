@@ -250,11 +250,11 @@ namespace polyhedralGravity::util {
     }
 
     /**
-     * Implements the signum function with a certain epsilon to absorb rounding errors.
+     * Implements the signum function with a certain EPSILON to absorb rounding errors.
      * @tparam T - a numerical (floating point) value
      * @param val - the value itself
      * @param cutoffEpsilon - the cut-off radius around zero to return 0
-     * @return -1, 0, 1 depending on the sign an the given epsilon
+     * @return -1, 0, 1 depending on the sign an the given EPSILON
      */
     template<typename T>
     int sgn(T val, double cutoffEpsilon) {

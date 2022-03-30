@@ -68,7 +68,7 @@ namespace polyhedralGravity {
          * The constant density of the polyhedron in [kg/m^3].
          * The density is initialized with the default constant density 2670.0 from Tsoulis Paper (above (4)).
          */
-        const double _density{util::defaultConstantDensity};
+        const double _density{util::DEFAULT_CONSTANT_DENSITY};
 
         /**
          * The result of the evaluation of the gravity model
