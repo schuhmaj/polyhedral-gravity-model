@@ -252,35 +252,37 @@ namespace polyhedralGravity {
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
 
         /**
-         * Calculates the 3D distances l1_pq and l2_pq between the computation point P and the line
+         * Calculates the 3D distances between l1_pq and l2_pq between the computation point P and the line
          * segment endpoints of each polyhedral segment.
-         * @return two 3D (double value) distances per segment
-         */
-        SegmentPairPropertyVector calculate3DDistances();
-
-        /**
          * Calculates the 1D distances s1_pq and s2_pq between orthogonal projection of P on the line
          * segment P''_pq and the line segment endpoints for each polyhedral segment.
+         * The results are stored in the Distance struct for each segment.
+         * @param gij - the segment vectors
          * @param orthogonalProjectionPointsOnSegment - the P'' for every segment
-         * @return two 1D (double value) distances per segment
+         * @return Distance struct containing l1, l2, s1, s2
          */
-        SegmentPairPropertyVector calculate1DDistances(
-                const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment);
-
         std::vector<std::array<Distance, 3>> calculateDistances(
                 const CartesianSegmentPropertyVector &gij,
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment
                 );
 
-        std::vector<std::array<TranscendentalExpression, 3>>
-        calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
-                                           const PlanePropertyVector &planeDistances,
-                                           const SegmentPropertyVector &segmentDistances,
-                                           const SegmentPropertyVector &segmentNormalOrientation,
-                                           const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
-
-        SegmentPropertyVector calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
-                                                        const SegmentPairPropertyVector &oneDDistances);
+        /**
+         * Calculates the Transcendental Expressions LN_pq and AN_pq for every line segment of the polyhedron.
+         * LN_pq is calculated according to (14) using the natural logarithm and AN_pq is calculated according
+         * to (15) using the arctan.
+         * @param distances - the 3D and 1D distances l1, l2, s1, s2 for every segment
+         * @param planeDistances - the plane distances h_p for every plane
+         * @param segmentDistances - the segment distances h_pq for every segment
+         * @param segmentNormalOrientation - the segment normal orientation sigma_pq for every segment
+         * @param orthogonalProjectionPointsOnPlane - the orthogonal Projection Points P' for every plane
+         * @return the Transcendental Expressions LN and AN for every segment
+         */
+        std::vector<std::array<TranscendentalExpression, 3>> calculateTranscendentalExpressions(
+                const std::vector<std::array<Distance, 3>> &distances,
+                const PlanePropertyVector &planeDistances,
+                const SegmentPropertyVector &segmentDistances,
+                const SegmentPropertyVector &segmentNormalOrientation,
+                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
 
     };
 

@@ -229,7 +229,6 @@ namespace polyhedralGravity {
 
     Cartesian Gravity::calculateOrthogonalProjectionOnSegment(const Cartesian &v1, const Cartesian &v2,
                                                               const Cartesian &pPrime) {
-        //TODO Could this be more pretty? More efficient?
         using namespace util;
         Cartesian pDoublePrime{};
         //Preparing our the planes/ equations in matrix form
@@ -265,53 +264,6 @@ namespace polyhedralGravity {
                            return hp;
                        });
         return segmentDistances;
-    }
-
-    SegmentPairPropertyVector Gravity::calculate3DDistances() {
-        SegmentPairPropertyVector l{_polyhedron.countFaces()};
-        //Iterate over the planes of the polyhedron, running index i
-        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), l.begin(),
-                       [&](const auto &face) {
-                           std::array<std::array<double, 2>, 3> li{};
-                           auto first = thrust::counting_iterator<unsigned int>(0);
-                           auto last = first + 3;
-                           //Iterate over the segments of the i-th plane, running index j
-                           std::transform(first, last, li.begin(), [&](unsigned int j) -> std::array<double, 2> {
-                               using namespace util;
-                               const auto &v1 = _polyhedron.getNode(face[j]);
-                               const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
-                               //If p = {0, 0, 0}
-                               return {euclideanNorm(v1), euclideanNorm(v2)};
-                           });
-                           return li;
-                       });
-
-        return l;
-    }
-
-    SegmentPairPropertyVector Gravity::calculate1DDistances(
-            const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
-        SegmentPairPropertyVector s{_polyhedron.countFaces()};
-        //Iterate over the planes of the polyhedron, running index i
-        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(),
-                       orthogonalProjectionPointsOnSegment.cbegin(), s.begin(),
-                       [&](const auto &face, const CartesianSegmentProperty &pDoublePrimePerPlane) {
-                           std::array<std::array<double, 2>, 3> si{};
-                           auto counterJ = thrust::counting_iterator<unsigned int>(0);
-                           //Iterate over the segments of the i-th plane, running index j
-                           std::transform(pDoublePrimePerPlane.cbegin(), pDoublePrimePerPlane.cend(),
-                                          counterJ, si.begin(),
-                                          [&](const Cartesian &pDoublePrime, unsigned int j) -> std::array<double, 2> {
-                                              using namespace util;
-                                              const auto &v1 = _polyhedron.getNode(face[j]);
-                                              const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
-                                              return {euclideanNorm(pDoublePrime - v1),
-                                                      euclideanNorm(pDoublePrime - v2)};
-                                          });
-                           return si;
-                       });
-
-        return s;
     }
 
     std::vector<std::array<Distance, 3>> Gravity::calculateDistances(
@@ -391,25 +343,6 @@ namespace polyhedralGravity {
             return distancesArray;
         });
         return distances;
-    }
-
-    SegmentPropertyVector Gravity::calculateTranscendentalLN(const SegmentPairPropertyVector &threeDDistances,
-                                                             const SegmentPairPropertyVector &oneDDistances) {
-        //TODO Not 100% correct - Missing checks if vertices == P' then LN = 0 + Missing epsilon check
-        SegmentPropertyVector transcendentalLN{threeDDistances.size()};
-        std::transform(threeDDistances.cbegin(), threeDDistances.cend(), oneDDistances.cbegin(),
-                       transcendentalLN.begin(),
-                       [](const std::array<std::array<double, 2>, 3> &lp,
-                          const std::array<std::array<double, 2>, 3> &sp) {
-                           std::array<double, 3> segmentLN{};
-                           std::transform(lp.cbegin(), lp.cend(), sp.cbegin(), segmentLN.begin(),
-                                          [](const auto &lpq, const auto &spq) {
-                                              return std::log((spq[1] + lpq[1]) / (spq[0] + lpq[0]));
-                                          });
-                           return segmentLN;
-                       });
-
-        return transcendentalLN;
     }
 
     std::vector<std::array<TranscendentalExpression, 3>>

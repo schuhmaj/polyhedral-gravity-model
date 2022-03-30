@@ -5,6 +5,11 @@
 
 namespace polyhedralGravity {
 
+    /**
+     * Contains the 3D distances l1_pq and l2_pq between P and the endpoints of segment pq and
+     * the 1D distances s1_pq and s2_pq between P'' and the segment endpoints.
+     * @note This struct is basically a named tuple
+     */
     struct Distance {
         double l1;
         double l2;
@@ -28,6 +33,10 @@ namespace polyhedralGravity {
         }
     };
 
+    /**
+     * Contains the Transcendental Expressions LN_pq and AN_pq for a given line segment pq of the polyhedron.
+     * @note This struct is basically a named tuple
+     */
     struct TranscendentalExpression {
         double ln;
         double an;

@@ -390,23 +390,6 @@ TEST_F(GravityTest, SegmentDistances) {
     ASSERT_THAT(actualSegmentDistances, ContainerEq(expectedSegmentDistances));
 }
 
-TEST_F(GravityTest, ThreeDDistancesPerSegmentEndpoint) {
-    using namespace testing;
-
-    auto actual3DDistancesPerSegmentEndpoint = systemUnderTest.calculate3DDistances();
-
-    ASSERT_THAT(actual3DDistancesPerSegmentEndpoint, ContainerEq(expected3DDistancesPerSegmentEndpoint));
-}
-
-TEST_F(GravityTest, OneDDistancesPerSegmentEndpoint) {
-    using namespace testing;
-
-    auto actual1DDistancesPerSegmentEndpoint =
-            systemUnderTest.calculate1DDistances(expectedOrthogonalProjectionPointsOnSegment);
-
-    ASSERT_THAT(actual1DDistancesPerSegmentEndpoint, ContainerEq(expected1DDistancesPerSegmentEndpoint));
-}
-
 TEST_F(GravityTest, DistancesPerSegmentEndpoint) {
     using namespace testing;
 
@@ -414,16 +397,6 @@ TEST_F(GravityTest, DistancesPerSegmentEndpoint) {
             systemUnderTest.calculateDistances(expectedGij, expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
-}
-
-TEST_F(GravityTest, TranscendentalLN) {
-    using namespace testing;
-
-    auto actualTranscendentalLN =
-            systemUnderTest.calculateTranscendentalLN(expected3DDistancesPerSegmentEndpoint,
-                                                      expected1DDistancesPerSegmentEndpoint);
-
-    ASSERT_THAT(actualTranscendentalLN, ContainerEq(expectedTranscendentalLN));
 }
 
 TEST_F(GravityTest, TranscendentalExpressions) {
