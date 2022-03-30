@@ -438,13 +438,15 @@ namespace polyhedralGravity {
         return transcendentalExpressions;
     }
 
-    PlanePropertyVector GravityModel::calculateAlphaSingularityTerms(
+    std::vector<std::pair<double, Cartesian>> GravityModel::calculateSingularityTerms(
             const CartesianSegmentPropertyVector &gijVectors,
             const SegmentPropertyVector &segmentNormalOrientation,
             const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
-            const PlanePropertyVector &planeDistances) {
+            const PlanePropertyVector &planeDistances,
+            const PlanePropertyVector &planeNormalOrientation,
+            const CartesianPlanePropertyVector &planeUnitNormals) {
         //The result
-        PlanePropertyVector alphaSingularity(planeDistances.size(), 0.0);
+        std::vector<std::pair<double, Cartesian>> singularities{planeDistances.size()};
 
         //Zip iterator consisting of G_ij vectors | sigma_pq | faces | P' | h_p
         auto first = thrust::make_zip_iterator(thrust::make_tuple(gijVectors.begin(),
@@ -458,7 +460,7 @@ namespace polyhedralGravity {
                                                                  orthogonalProjectionPointsOnPlane.end(),
                                                                  planeDistances.end()));
 
-        thrust::transform(first, last, alphaSingularity.begin(), [&](const auto &tuple) {
+        thrust::transform(first, last, singularities.begin(), [&](const auto &tuple) {
             const auto &gijVectorsPerPlane = thrust::get<0>(tuple);
             const auto segmentNormalOrientationPerPlane = thrust::get<1>(tuple);
             const auto &face = thrust::get<2>(tuple);
@@ -467,8 +469,8 @@ namespace polyhedralGravity {
 
             //1. case: If all sigma_pq for a given plane p are 1.0 then P' lies inside the plane S_p
             if (std::all_of(segmentNormalOrientationPerPlane.cbegin(), segmentNormalOrientationPerPlane.cend(),
-                            [](const double sigma) {return sigma == 1.0;})) {
-                return -1.0 * util::PI2 * hp;
+                            [](const double sigma) { return sigma == 1.0; })) {
+                return std::make_pair(-1.0 * util::PI2 * hp, Cartesian{0, 0, 0});
             }
             //2. case: If sigma_pq == 0 AND norm(P' - v1) < norm(G_ij) && norm(P' - v2) < norm(G_ij) with G_ij
             // as the vector of v1 and v2
@@ -496,8 +498,8 @@ namespace polyhedralGravity {
                 const Cartesian &v2 = _polyhedron.getNode(face[j]);
                 const double gijNorm = euclideanNorm(gij);
                 return euclideanNorm(pPrime - v1) < gijNorm && euclideanNorm(pPrime - v2) < gijNorm;
-            } )) {
-                return -1.0 * util::PI * hp;
+            })) {
+                return std::make_pair(-1.0 * util::PI * hp, Cartesian{0, 0, 0});
             }
             //3. case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
             // then P' is located at one of G_p's vertices
@@ -525,31 +527,20 @@ namespace polyhedralGravity {
                 e1 = euclideanNorm(pPrime - v1);
                 e2 = euclideanNorm(pPrime - v2);
                 return e1 == 0.0 || e2 == 0.0;
-            } )) {
+            })) {
                 using namespace util;
                 const Cartesian &g1 = e1 == 0.0 ? gijVectorsPerPlane[j] : gijVectorsPerPlane[(j - 1 + 3) % 3];
                 const Cartesian &g2 = e1 == 0.0 ? gijVectorsPerPlane[(j + 1) % 3] : gijVectorsPerPlane[j];
                 const double gdot = dot(g1 * -1.0, g2);
-                double theta = gdot == 0.0 ? util::PI_2 : std::acos(gdot/ (euclideanNorm(g1) * euclideanNorm(g2)));
-                return -1.0 * theta * hp;
+                double theta = gdot == 0.0 ? util::PI_2 : std::acos(gdot / (euclideanNorm(g1) * euclideanNorm(g2)));
+                return std::make_pair(-1.0 * theta * hp, Cartesian{0, 0, 0});
             }
 
             //4. case Otherwise P' is located outside the plane S_p and then the singularity equals zero
-            return 0.0;
+            return std::make_pair(0.0, Cartesian{0, 0, 0});
         });
 
-        return alphaSingularity;
-    }
-
-    CartesianPlanePropertyVector GravityModel::calculateBetaSingularityTerms(
-            const CartesianSegmentPropertyVector &gij,
-            const SegmentPropertyVector &segmentNormalOrientation,
-            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
-            const PlanePropertyVector &planeDistances,
-            const PlanePropertyVector &planeNormalOrientation,
-            const CartesianPlanePropertyVector &planeUnitNormals) {
-
-        return polyhedralGravity::CartesianPlanePropertyVector();
+        return singularities;
     }
 
 

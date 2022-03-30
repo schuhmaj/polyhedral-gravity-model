@@ -293,14 +293,8 @@ namespace polyhedralGravity {
          * @param planeDistances
          * @return
          */
-        PlanePropertyVector calculateAlphaSingularityTerms(
+        std::vector<std::pair<double, Cartesian>> calculateSingularityTerms(
                 const CartesianSegmentPropertyVector &gijVectors,
-                const SegmentPropertyVector &segmentNormalOrientation,
-                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
-                const PlanePropertyVector &planeDistances);
-
-        CartesianPlanePropertyVector calculateBetaSingularityTerms(
-                const CartesianSegmentPropertyVector &gij,
                 const SegmentPropertyVector &segmentNormalOrientation,
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
                 const PlanePropertyVector &planeDistances,

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/model/Polyhedron.h"
 
@@ -265,6 +266,25 @@ protected:
 
     std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
 
+
+    std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms{
+            std::make_pair(-11.591190225020153,
+                           std::array<double, 3>{-0.46364760900080615, -0.46364760900080615, -0.46364760900080615}),
+            std::make_pair(-27.67871794485226,
+                           std::array<double, 3>{-1.1071487177940904, -1.1071487177940904, -1.1071487177940904}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+            std::make_pair(-23.5619455575943,
+                           std::array<double, 3>{-1.5707963705062866, -1.5707963705062866, -1.5707963705062866}),
+            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0})
+    };
+
     std::vector<double> expectedAlphaSingularityTerms{-11.591190225020153, -27.67871794485226, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                       0.0, 0.0, 0.0, -23.5619455575943, 0.0};
 
@@ -433,22 +453,11 @@ TEST_F(GravityModelTest, TranscendentalExpressions) {
 TEST_F(GravityModelTest, AlphaSingularityTerms) {
     using namespace testing;
 
-    auto actualAlphaSingularityTerms =
-            systemUnderTest.calculateAlphaSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
-                                                           expectedOrthogonalProjectionPointsOnPlane,
-                                                           expectedPlaneDistances);
+    auto actualSingularityTerms =
+            systemUnderTest.calculateSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
+                                                      expectedOrthogonalProjectionPointsOnPlane,
+                                                      expectedPlaneDistances, expectedPlaneNormalOrientations,
+                                                      expectedPlaneUnitNormals);
 
-    ASSERT_THAT(actualAlphaSingularityTerms, Pointwise(DoubleNear(1e-6) ,expectedAlphaSingularityTerms));
-}
-
-TEST_F(GravityModelTest, BetaSingularityTerms) {
-    using namespace testing;
-
-    auto actualBetaSingularityTerms =
-            systemUnderTest.calculateBetaSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
-                                                           expectedOrthogonalProjectionPointsOnPlane,
-                                                           expectedPlaneDistances, expectedPlaneNormalOrientations,
-                                                           expectedPlaneUnitNormals);
-
-    ASSERT_THAT(actualBetaSingularityTerms, ContainerEq(expectedBetaSingularityTerms));
+    ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
 }
