@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include "polyhedralGravity/model/Polyhedron.h"
-#include "polyhedralGravity/model/GravityResult.h"
+#include "polyhedralGravity/model/GravityModelData.h"
 #include "polyhedralGravity/util/UtilityConstants.h"
 #include "polyhedralGravity/util/UtilityContainer.h"
 #include "spdlog/spdlog.h"
@@ -57,7 +57,7 @@ namespace polyhedralGravity {
     /**
      * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
      */
-    class Gravity {
+    class GravityModel {
 
         /**
          * The Polyhedron for which we evaluated the gravity at point P
@@ -73,23 +73,23 @@ namespace polyhedralGravity {
         /**
          * The result of the evaluation of the gravity model
          */
-        GravityResult _gravityResult{};
+        GravityModelResult _gravityResult{};
 
     public:
 
         /**
-         * Construct as new Gravity Calculation with an polyhedron as input
+         * Construct as new GravityModel Calculation with an polyhedron as input
          * @param polyhedron - Poylhedron
          */
-        explicit Gravity(const Polyhedron &polyhedron)
+        explicit GravityModel(const Polyhedron &polyhedron)
                 : _polyhedron{polyhedron} {}
 
         /**
-         * Construct as new Gravity Calculation with an polyhedron as input
+         * Construct as new GravityModel Calculation with an polyhedron as input
          * @param polyhedron - Poylhedron
          * @param density - the constant density of the Polyhedron
          */
-        Gravity(const Polyhedron &polyhedron, double density)
+        GravityModel(const Polyhedron &polyhedron, double density)
                 : _polyhedron{polyhedron},
                   _density{density} {}
 

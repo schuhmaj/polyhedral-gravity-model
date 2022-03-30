@@ -2,7 +2,7 @@
 #include "spdlog/spdlog.h"
 #include "polyhedralGravity/input/ConfigSource.h"
 #include "polyhedralGravity/input/YAMLConfigReader.h"
-#include "polyhedralGravity/calculation/Gravity.h"
+#include "polyhedralGravity/calculation/GravityModel.h"
 
 int main(int argc, char *argv[]) {
     using namespace polyhedralGravity;
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     auto poly = config->getDataSource()->getPolyhedron();
     auto density = config->getDensity();
 
-    Gravity grav{poly, density};
+    GravityModel grav{poly, density};
 
     auto start = std::chrono::high_resolution_clock::now();
     grav.calculate();

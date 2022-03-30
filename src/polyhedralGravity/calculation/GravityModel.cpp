@@ -1,13 +1,13 @@
-#include "Gravity.h"
+#include "GravityModel.h"
 
 namespace polyhedralGravity {
 
-    void Gravity::calculate() {
+    void GravityModel::calculate() {
         SPDLOG_INFO("Calculate...");
         auto x = calculateGij();
     }
 
-    CartesianSegmentPropertyVector Gravity::calculateGij() {
+    CartesianSegmentPropertyVector GravityModel::calculateGij() {
         CartesianSegmentPropertyVector g{_polyhedron.countFaces()};
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), g.begin(),
                        [&](const auto &face) -> CartesianSegmentProperty {
@@ -20,7 +20,7 @@ namespace polyhedralGravity {
         return g;
     }
 
-    CartesianPlanePropertyVector Gravity::calculatePlaneUnitNormals(const CartesianSegmentPropertyVector &g) {
+    CartesianPlanePropertyVector GravityModel::calculatePlaneUnitNormals(const CartesianSegmentPropertyVector &g) {
         CartesianPlanePropertyVector planeUnitNormals{g.size()};
         //Calculate N_i as (G_i1 * G_i2) / |G_i1 * G_i2| with * being the cross product
         std::transform(g.cbegin(), g.cend(), planeUnitNormals.begin(), [](const auto &gi) -> Cartesian {
@@ -32,8 +32,8 @@ namespace polyhedralGravity {
         return planeUnitNormals;
     }
 
-    CartesianSegmentPropertyVector Gravity::calculateSegmentUnitNormals(const CartesianSegmentPropertyVector &g,
-                                                                        const CartesianPlanePropertyVector &planeUnitNormals) {
+    CartesianSegmentPropertyVector GravityModel::calculateSegmentUnitNormals(const CartesianSegmentPropertyVector &g,
+                                                                             const CartesianPlanePropertyVector &planeUnitNormals) {
         CartesianSegmentPropertyVector segmentUnitNormals{g.size()};
         //Calculate n_ij as (G_ij * N_i) / |G_ig * N_i| with * being the cross product
         //Outer "loop" over G_i (running i) and N_i calculating n_i
@@ -54,7 +54,7 @@ namespace polyhedralGravity {
     }
 
     PlanePropertyVector
-    Gravity::calculatePlaneNormalOrientations(const CartesianPlanePropertyVector &planeUnitNormals) {
+    GravityModel::calculatePlaneNormalOrientations(const CartesianPlanePropertyVector &planeUnitNormals) {
         PlanePropertyVector planeNormalOrientations(planeUnitNormals.size(), 0.0);
         //Calculate N_i * -G_i1 where * is the dot product and then use the inverted sgn
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), _polyhedron.getFaces().begin(),
@@ -71,7 +71,7 @@ namespace polyhedralGravity {
     }
 
 
-    std::vector<HessianPlane> Gravity::calculateFacesToHessianPlanes(const Cartesian &p) {
+    std::vector<HessianPlane> GravityModel::calculateFacesToHessianPlanes(const Cartesian &p) {
         std::vector<HessianPlane> hessianPlanes{_polyhedron.countFaces()};
         //Calculate for each face/ plane/ triangle (here) the Hessian Plane
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), hessianPlanes.begin(),
@@ -86,8 +86,8 @@ namespace polyhedralGravity {
         return hessianPlanes;
     }
 
-    HessianPlane Gravity::computeHessianPlane(const Cartesian &p, const Cartesian &q,
-                                              const Cartesian &r, const Cartesian &origin) {
+    HessianPlane GravityModel::computeHessianPlane(const Cartesian &p, const Cartesian &q,
+                                                   const Cartesian &r, const Cartesian &origin) {
         using namespace util;
         const auto crossProduct = cross(p - q, p - r);
         const auto res = (origin - p) * crossProduct;
@@ -96,7 +96,7 @@ namespace polyhedralGravity {
         return {crossProduct[0], crossProduct[1], crossProduct[2], d};
     }
 
-    PlanePropertyVector Gravity::calculatePlaneDistances(const std::vector<HessianPlane> &plane) {
+    PlanePropertyVector GravityModel::calculatePlaneDistances(const std::vector<HessianPlane> &plane) {
         PlanePropertyVector planeDistances(plane.size(), 0.0);
         //For each plane calculate h_p as D/sqrt(A^2 + B^2 + C^2)
         std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
@@ -107,7 +107,7 @@ namespace polyhedralGravity {
         return planeDistances;
     }
 
-    CartesianPlanePropertyVector Gravity::calculateOrthogonalProjectionPointsOnPlane(
+    CartesianPlanePropertyVector GravityModel::calculateOrthogonalProjectionPointsOnPlane(
             const std::vector<HessianPlane> &hessianPlanes,
             const CartesianPlanePropertyVector &planeUnitNormals,
             const PlanePropertyVector &planeDistances) {
@@ -144,7 +144,7 @@ namespace polyhedralGravity {
         return orthogonalProjectionPointsOfP;
     }
 
-    SegmentPropertyVector Gravity::calculateSegmentNormalOrientations(
+    SegmentPropertyVector GravityModel::calculateSegmentNormalOrientations(
             const CartesianSegmentPropertyVector &segmentUnitNormals,
             const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
         SegmentPropertyVector segmentNormalOrientations{segmentUnitNormals.size()};
@@ -183,7 +183,7 @@ namespace polyhedralGravity {
         return segmentNormalOrientations;
     }
 
-    CartesianSegmentPropertyVector Gravity::calculateOrthogonalProjectionPointsOnSegments(
+    CartesianSegmentPropertyVector GravityModel::calculateOrthogonalProjectionPointsOnSegments(
             const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
             const SegmentPropertyVector &segmentNormalOrientation) {
         CartesianSegmentPropertyVector orthogonalProjectionPointsOfPPrime{orthogonalProjectionPointsOnPlane.size()};
@@ -227,8 +227,8 @@ namespace polyhedralGravity {
         return orthogonalProjectionPointsOfPPrime;
     }
 
-    Cartesian Gravity::calculateOrthogonalProjectionOnSegment(const Cartesian &v1, const Cartesian &v2,
-                                                              const Cartesian &pPrime) {
+    Cartesian GravityModel::calculateOrthogonalProjectionOnSegment(const Cartesian &v1, const Cartesian &v2,
+                                                                   const Cartesian &pPrime) {
         using namespace util;
         Cartesian pDoublePrime{};
         //Preparing our the planes/ equations in matrix form
@@ -245,7 +245,7 @@ namespace polyhedralGravity {
         return pDoublePrime / determinant;
     }
 
-    SegmentPropertyVector Gravity::calculateSegmentDistances(
+    SegmentPropertyVector GravityModel::calculateSegmentDistances(
             const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
             const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
         SegmentPropertyVector segmentDistances{orthogonalProjectionPointsOnPlane.size()};
@@ -266,7 +266,7 @@ namespace polyhedralGravity {
         return segmentDistances;
     }
 
-    std::vector<std::array<Distance, 3>> Gravity::calculateDistances(
+    std::vector<std::array<Distance, 3>> GravityModel::calculateDistances(
             const CartesianSegmentPropertyVector &gij,
             const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment) {
         std::vector<std::array<Distance, 3>> distances{gij.size()};
@@ -346,11 +346,11 @@ namespace polyhedralGravity {
     }
 
     std::vector<std::array<TranscendentalExpression, 3>>
-    Gravity::calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
-                                                const PlanePropertyVector &planeDistances,
-                                                const SegmentPropertyVector &segmentDistances,
-                                                const SegmentPropertyVector &segmentNormalOrientation,
-                                                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
+    GravityModel::calculateTranscendentalExpressions(const std::vector<std::array<Distance, 3>> &distances,
+                                                     const PlanePropertyVector &planeDistances,
+                                                     const SegmentPropertyVector &segmentDistances,
+                                                     const SegmentPropertyVector &segmentNormalOrientation,
+                                                     const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane) {
         //The result of this functions
         std::vector<std::array<TranscendentalExpression, 3>> transcendentalExpressions{distances.size()};
 

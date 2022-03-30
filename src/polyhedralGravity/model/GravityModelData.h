@@ -56,10 +56,35 @@ namespace polyhedralGravity {
         }
     };
 
-/**
- * A data structure containing the result of the polyhedral gravity model's evaluation.
- */
-    class GravityResult {
+
+    /**
+     * A struct describing a plane in Hessian Normal Form:
+     * ax + by + cz + d = 0
+     * where a,b,c are the plane's normal
+     * and d as the signed distance to the plane from the origin along the normal.
+     */
+    struct HessianPlane {
+        double a;
+        double b;
+        double c;
+        double d;
+
+        bool operator==(const HessianPlane &rhs) const {
+            return a == rhs.a &&
+                   b == rhs.b &&
+                   c == rhs.c &&
+                   d == rhs.d;
+        }
+
+        bool operator!=(const HessianPlane &rhs) const {
+            return !(rhs == *this);
+        }
+    };
+
+    /**
+     * A data structure containing the result of the polyhedral gravity model's evaluation.
+    */
+    class GravityModelResult {
 
     public:
 
@@ -91,14 +116,14 @@ namespace polyhedralGravity {
         /**
          * Creates a new empty Result for the origin in P(0, 0, 0)
          */
-        GravityResult()
+        GravityModelResult()
                 : p{0, 0, 0} {}
 
         /**
          * Creates new empty Result for a specific point P
          * @param p1 - point p
          */
-        explicit GravityResult(const std::array<double, 3> &p1)
+        explicit GravityModelResult(const std::array<double, 3> &p1)
                 : p{p1} {}
 
     };

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "polyhedralGravity/calculation/Gravity.h"
+#include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/model/Polyhedron.h"
 
 /**
@@ -42,7 +42,7 @@ protected:
             }
     };
 
-    polyhedralGravity::Gravity systemUnderTest{_polyhedron};
+    polyhedralGravity::GravityModel systemUnderTest{_polyhedron};
 
     std::vector<std::array<std::array<double, 3>, 3>> expectedGij{
             std::array<std::array<double, 3>, 3>{{{20.0, 0.0, 0.0}, {-20.0, 10.0, 0.0}, {0.0, -10.0, 0.0}}},

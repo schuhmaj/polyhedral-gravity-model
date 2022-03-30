@@ -10,30 +10,6 @@
 namespace polyhedralGravity {
 
     /**
-     * A struct describing a plane in Hessian Normal Form:
-     * ax + by + cz + d = 0
-     * where a,b,c are the plane's normal
-     * and d as the signed distance to the plane from the origin along the normal.
-     */
-    struct HessianPlane {
-        double a;
-        double b;
-        double c;
-        double d;
-
-        bool operator==(const HessianPlane &rhs) const {
-            return a == rhs.a &&
-                   b == rhs.b &&
-                   c == rhs.c &&
-                   d == rhs.d;
-        }
-
-        bool operator!=(const HessianPlane &rhs) const {
-            return !(rhs == *this);
-        }
-    };
-
-    /**
      * Data structure containing the model data of one polyhedron. This includes nodes, edges (faces) and elements.
      * The index always starts with zero!
     */
