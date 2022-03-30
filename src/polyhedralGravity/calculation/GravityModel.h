@@ -264,7 +264,7 @@ namespace polyhedralGravity {
         std::vector<std::array<Distance, 3>> calculateDistances(
                 const CartesianSegmentPropertyVector &gij,
                 const CartesianSegmentPropertyVector &orthogonalProjectionPointsOnSegment
-                );
+        );
 
         /**
          * Calculates the Transcendental Expressions LN_pq and AN_pq for every line segment of the polyhedron.
@@ -283,6 +283,12 @@ namespace polyhedralGravity {
                 const SegmentPropertyVector &segmentDistances,
                 const SegmentPropertyVector &segmentNormalOrientation,
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
+
+        PlanePropertyVector calculateAlphaSingularityTerms(
+                const CartesianSegmentPropertyVector &gij,
+                const SegmentPropertyVector &segmentNormalOrientation,
+                const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+                const PlanePropertyVector &planeDistances);
 
     };
 

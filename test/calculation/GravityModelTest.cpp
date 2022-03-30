@@ -10,7 +10,7 @@
  * Contains Tests based on the example from Tsoulis FORTRAN implementation.
  * Hardcoded values taken from his implementation's results.
  */
-class GravityTest : public ::testing::Test {
+class GravityModelTest : public ::testing::Test {
 
 protected:
     //New polyhedron with given vertices and faces
@@ -265,9 +265,12 @@ protected:
 
     std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
 
+    std::vector<double> expectedAlphaSingularityTerms{-11.591190225020153, -27.67871794485226, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                      0.0, 0.0, 0.0, -23.5619455575943, 0.0};
+
 public:
 
-    GravityTest() : ::testing::Test() {
+    GravityModelTest() : ::testing::Test() {
         expectedDistancesPerSegmentEndpoint.resize(expected3DDistancesPerSegmentEndpoint.size());
         expectedTranscendentalExpressions.resize(expectedTranscendentalLN.size());
         for (int i = 0; i < expected3DDistancesPerSegmentEndpoint.size(); ++i) {
@@ -278,7 +281,7 @@ public:
                         expected1DDistancesPerSegmentEndpoint[i][j][0],
                         expected1DDistancesPerSegmentEndpoint[i][j][1]
                 };
-                expectedTranscendentalExpressions[i][j] = polyhedralGravity::TranscendentalExpression {
+                expectedTranscendentalExpressions[i][j] = polyhedralGravity::TranscendentalExpression{
                         expectedTranscendentalLN[i][j],
                         expectedTranscendentalAN[i][j],
                 };
@@ -288,7 +291,7 @@ public:
 
 };
 
-TEST_F(GravityTest, GijVectors) {
+TEST_F(GravityModelTest, GijVectors) {
     using namespace testing;
 
     auto actualGij = systemUnderTest.calculateGij();
@@ -296,7 +299,7 @@ TEST_F(GravityTest, GijVectors) {
     ASSERT_THAT(actualGij, ContainerEq(expectedGij));
 }
 
-TEST_F(GravityTest, PlaneUnitNormals) {
+TEST_F(GravityModelTest, PlaneUnitNormals) {
     using namespace testing;
 
     auto actualPlaneUnitNormals = systemUnderTest.calculatePlaneUnitNormals(expectedGij);
@@ -304,7 +307,7 @@ TEST_F(GravityTest, PlaneUnitNormals) {
     ASSERT_THAT(actualPlaneUnitNormals, ContainerEq(expectedPlaneUnitNormals));
 }
 
-TEST_F(GravityTest, SegmentUnitNormals) {
+TEST_F(GravityModelTest, SegmentUnitNormals) {
     using namespace testing;
 
     auto actualSegmentUnitNormals = systemUnderTest.calculateSegmentUnitNormals(expectedGij, expectedPlaneUnitNormals);
@@ -312,7 +315,7 @@ TEST_F(GravityTest, SegmentUnitNormals) {
     ASSERT_THAT(actualSegmentUnitNormals, ContainerEq(expectedSegmentUnitNormals));
 }
 
-TEST_F(GravityTest, PlaneNormalOrientations) {
+TEST_F(GravityModelTest, PlaneNormalOrientations) {
     using namespace testing;
 
     auto actualPlaneNormalOrientations = systemUnderTest.calculatePlaneNormalOrientations(expectedPlaneUnitNormals);
@@ -320,7 +323,7 @@ TEST_F(GravityTest, PlaneNormalOrientations) {
     ASSERT_THAT(actualPlaneNormalOrientations, ContainerEq(expectedPlaneNormalOrientations));
 }
 
-TEST_F(GravityTest, SimpleHessianPlane) {
+TEST_F(GravityModelTest, SimpleHessianPlane) {
     using namespace testing;
     using namespace polyhedralGravity;
 
@@ -334,7 +337,7 @@ TEST_F(GravityTest, SimpleHessianPlane) {
     ASSERT_DOUBLE_EQ(actualHessianPlane.d, expectedHessian.d);
 }
 
-TEST_F(GravityTest, HessianPlane) {
+TEST_F(GravityModelTest, HessianPlane) {
     using namespace testing;
     using namespace polyhedralGravity;
 
@@ -343,7 +346,7 @@ TEST_F(GravityTest, HessianPlane) {
     ASSERT_EQ(actualHessianPlane, expectedHessianPlanes);
 }
 
-TEST_F(GravityTest, PlaneDistances) {
+TEST_F(GravityModelTest, PlaneDistances) {
     using namespace testing;
 
     auto actualPlaneDistances = systemUnderTest.calculatePlaneDistances(expectedHessianPlanes);
@@ -351,7 +354,7 @@ TEST_F(GravityTest, PlaneDistances) {
     ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistances));
 }
 
-TEST_F(GravityTest, OrthogonalProjectionPointsOnPlane) {
+TEST_F(GravityModelTest, OrthogonalProjectionPointsOnPlane) {
     using namespace testing;
 
     auto actualOrthogonalProjectionPointsOnPlane = systemUnderTest.calculateOrthogonalProjectionPointsOnPlane(
@@ -360,7 +363,7 @@ TEST_F(GravityTest, OrthogonalProjectionPointsOnPlane) {
     ASSERT_THAT(actualOrthogonalProjectionPointsOnPlane, ContainerEq(expectedOrthogonalProjectionPointsOnPlane));
 }
 
-TEST_F(GravityTest, SegmentNormalOrientations) {
+TEST_F(GravityModelTest, SegmentNormalOrientations) {
     using namespace testing;
 
     auto actualSegmentNormalOrientations =
@@ -370,7 +373,7 @@ TEST_F(GravityTest, SegmentNormalOrientations) {
     ASSERT_THAT(actualSegmentNormalOrientations, ContainerEq(expectedSegmentNormalOrientations));
 }
 
-TEST_F(GravityTest, OrthogonalProjectionPointsOnSegment) {
+TEST_F(GravityModelTest, OrthogonalProjectionPointsOnSegment) {
     using namespace testing;
 
     auto actualOrthogonalProjectionPointsOnSegment =
@@ -380,7 +383,7 @@ TEST_F(GravityTest, OrthogonalProjectionPointsOnSegment) {
     ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }
 
-TEST_F(GravityTest, SegmentDistances) {
+TEST_F(GravityModelTest, SegmentDistances) {
     using namespace testing;
 
     auto actualSegmentDistances =
@@ -390,7 +393,7 @@ TEST_F(GravityTest, SegmentDistances) {
     ASSERT_THAT(actualSegmentDistances, ContainerEq(expectedSegmentDistances));
 }
 
-TEST_F(GravityTest, DistancesPerSegmentEndpoint) {
+TEST_F(GravityModelTest, DistancesPerSegmentEndpoint) {
     using namespace testing;
 
     auto actualDistancesPerSegmentEndpoint =
@@ -399,7 +402,7 @@ TEST_F(GravityTest, DistancesPerSegmentEndpoint) {
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
 }
 
-TEST_F(GravityTest, TranscendentalExpressions) {
+TEST_F(GravityModelTest, TranscendentalExpressions) {
     using namespace testing;
 
     auto actualTranscendentalExpressions =
@@ -410,4 +413,15 @@ TEST_F(GravityTest, TranscendentalExpressions) {
                                                                expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
+}
+
+TEST_F(GravityModelTest, AlphaSingularityTerms) {
+    using namespace testing;
+
+    auto actualAlphaSingularityTerms =
+            systemUnderTest.calculateAlphaSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
+                                                           expectedOrthogonalProjectionPointsOnPlane,
+                                                           expectedPlaneDistances);
+
+    ASSERT_THAT(actualAlphaSingularityTerms, ContainerEq(expectedAlphaSingularityTerms));
 }

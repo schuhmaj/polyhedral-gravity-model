@@ -438,5 +438,40 @@ namespace polyhedralGravity {
         return transcendentalExpressions;
     }
 
+    PlanePropertyVector GravityModel::calculateAlphaSingularityTerms(
+            const CartesianSegmentPropertyVector &gij,
+            const SegmentPropertyVector &segmentNormalOrientation,
+            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+            const PlanePropertyVector &planeDistances) {
+        //The result
+        PlanePropertyVector alphaSingularity(planeDistances.size(), 0.0);
+
+        //Zip iterator consisting of G_ij vectors | sigma_pq | faces | P' | h_p
+        auto first = thrust::make_zip_iterator(thrust::make_tuple(gij.begin(),
+                                                                  segmentNormalOrientation.begin(),
+                                                                  _polyhedron.getFaces().begin(),
+                                                                  orthogonalProjectionPointsOnPlane.begin(),
+                                                                  planeDistances.begin()));
+        auto last = thrust::make_zip_iterator(thrust::make_tuple(gij.end(),
+                                                                 segmentNormalOrientation.end(),
+                                                                 _polyhedron.getFaces().end(),
+                                                                 orthogonalProjectionPointsOnPlane.end(),
+                                                                 planeDistances.end()));
+
+        thrust::transform(first, last, alphaSingularity.begin(), [&](const auto &tuple) {
+            double alphaSingularityForPlane{0.0};
+            const auto &gijPerPlane = thrust::get<0>(tuple);
+            const auto segmentNormalOrientationPerPlane = thrust::get<1>(tuple);
+            const auto &face = thrust::get<2>(tuple);
+            const Cartesian &pPrime = thrust::get<3>(tuple);
+            const double hp = thrust::get<4>(tuple);
+
+
+            return alphaSingularityForPlane;
+        });
+
+        return alphaSingularity;
+    }
+
 
 }
