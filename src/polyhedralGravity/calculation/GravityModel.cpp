@@ -470,21 +470,32 @@ namespace polyhedralGravity {
                             [](const double sigma) {return sigma == 1.0;})) {
                 return -1.0 * util::PI2 * hp;
             }
-            //2. case: If ... then P' is located on one line segment G_p of plane p, but not on any of its vertices
+            //2. case: If sigma_pq == 0 AND norm(P' - v1) < norm(G_ij) && norm(P' - v2) < norm(G_ij) with G_ij
+            // as the vector of v1 and v2
+            // then P' is located on one line segment G_p of plane p, but not on any of its vertices
             auto counterJ = thrust::counting_iterator<unsigned int>(0);
-            auto secondCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(gijVectorsPerPlane.begin(),
-                                                                      counterJ));
-            auto secondCaseEnd = thrust::make_zip_iterator(thrust::make_tuple(gijVectorsPerPlane.end(),
-                                                                      counterJ + 3));
+            auto secondCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(
+                    gijVectorsPerPlane.begin(),
+                    segmentNormalOrientationPerPlane.begin(),
+                    counterJ));
+            auto secondCaseEnd = thrust::make_zip_iterator(thrust::make_tuple(
+                    gijVectorsPerPlane.end(),
+                    segmentNormalOrientationPerPlane.end(),
+                    counterJ + 3));
             if (std::any_of(secondCaseBegin, secondCaseEnd, [&](const auto &tuple) {
                 using namespace util;
                 const Cartesian &gij = thrust::get<0>(tuple);
-                const unsigned int j = thrust::get<1>(tuple);
+                const double sigmaPQ = thrust::get<1>(tuple);
+                const unsigned int j = thrust::get<2>(tuple);
+
+                if (sigmaPQ != 0.0) {
+                    return false;
+                }
 
                 const Cartesian &v1 = _polyhedron.getNode(face[j]);
                 const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
                 const double gijNorm = euclideanNorm(gij);
-                return euclideanNorm(pPrime - v1) < gijNorm || euclideanNorm(pPrime - v2) < gijNorm;
+                return euclideanNorm(pPrime - v1) < gijNorm && euclideanNorm(pPrime - v2) < gijNorm;
             } )) {
                 return -1.0 * util::PI * hp;
             }
