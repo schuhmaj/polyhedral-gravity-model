@@ -267,6 +267,7 @@ namespace polyhedralGravity {
         );
 
         /**
+         * TODO Contains enorm duplicate!
          * Calculates the Transcendental Expressions LN_pq and AN_pq for every line segment of the polyhedron.
          * LN_pq is calculated according to (14) using the natural logarithm and AN_pq is calculated according
          * to (15) using the arctan.
@@ -284,6 +285,14 @@ namespace polyhedralGravity {
                 const SegmentPropertyVector &segmentNormalOrientation,
                 const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane);
 
+        /**
+         * TODO Contains enorm duplicate!
+         * @param gijVectors
+         * @param segmentNormalOrientation
+         * @param orthogonalProjectionPointsOnPlane
+         * @param planeDistances
+         * @return
+         */
         PlanePropertyVector calculateAlphaSingularityTerms(
                 const CartesianSegmentPropertyVector &gijVectors,
                 const SegmentPropertyVector &segmentNormalOrientation,

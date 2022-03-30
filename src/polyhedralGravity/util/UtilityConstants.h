@@ -21,6 +21,12 @@ namespace polyhedralGravity::util {
     */
     constexpr double PI2 = 6.2831853071795864769252867665590057683943387987502116419498891846;
 
+
+    /**
+    * PI divided by 2 with enough precision
+    */
+    constexpr double PI_2 = 1.5707963267948966192313216916397514420985846996875529104874722961;
+
     /**
      * The gravitational constant G in [m^3/(kg*s^2)].
      * @related in his paper above Equation (4)

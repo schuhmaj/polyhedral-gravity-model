@@ -499,7 +499,40 @@ namespace polyhedralGravity {
             } )) {
                 return -1.0 * util::PI * hp;
             }
-            //3. case If ... then P' is located at one of G_p's vertices
+            //3. case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
+            // then P' is located at one of G_p's vertices
+            auto counterJ3 = thrust::counting_iterator<unsigned int>(0);
+            auto thirdCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(
+                    segmentNormalOrientationPerPlane.begin(),
+                    counterJ3));
+            auto thirdCaseEnd = thrust::make_zip_iterator(thrust::make_tuple(
+                    segmentNormalOrientationPerPlane.end(),
+                    counterJ3 + 3));
+            double e1;
+            double e2;
+            unsigned int j;
+            if (std::any_of(thirdCaseBegin, thirdCaseEnd, [&](const auto &tuple) {
+                using namespace util;
+                const double sigmaPQ = thrust::get<0>(tuple);
+                j = thrust::get<1>(tuple);
+
+                if (sigmaPQ != 0.0) {
+                    return false;
+                }
+
+                const Cartesian &v1 = _polyhedron.getNode(face[j]);
+                const Cartesian &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                e1 = euclideanNorm(pPrime - v1);
+                e2 = euclideanNorm(pPrime - v2);
+                return e1 == 0.0 || e2 == 0.0;
+            } )) {
+                using namespace util;
+                const Cartesian &g1 = e1 == 0.0 ? gijVectorsPerPlane[j] : gijVectorsPerPlane[(j - 1) % 3];
+                const Cartesian &g2 = e1 == 0.0 ? gijVectorsPerPlane[(j + 1) % 3] : gijVectorsPerPlane[j];
+                const double gdot = dot(g1 * -1.0, g2);
+                double theta = gdot == 0.0 ? util::PI_2 : std::acos(gdot/ (euclideanNorm(g1) * euclideanNorm(g2)));
+                return -1.0 * theta * hp;
+            }
 
             //4. case Otherwise P' is located outside the plane S_p and then the singularity equals zero
             return 0.0;
