@@ -473,5 +473,16 @@ namespace polyhedralGravity {
         return alphaSingularity;
     }
 
+    CartesianPlanePropertyVector GravityModel::calculateBetaSingularityTerms(
+            const CartesianSegmentPropertyVector &gij,
+            const SegmentPropertyVector &segmentNormalOrientation,
+            const CartesianPlanePropertyVector &orthogonalProjectionPointsOnPlane,
+            const PlanePropertyVector &planeDistances,
+            const PlanePropertyVector &planeNormalOrientation,
+            const CartesianPlanePropertyVector &planeUnitNormals) {
+
+        return polyhedralGravity::CartesianPlanePropertyVector();
+    }
+
 
 }

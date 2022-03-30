@@ -268,6 +268,21 @@ protected:
     std::vector<double> expectedAlphaSingularityTerms{-11.591190225020153, -27.67871794485226, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                       0.0, 0.0, 0.0, -23.5619455575943, 0.0};
 
+    std::vector<std::array<double, 3>> expectedBetaSingularityTerms{
+            {-0.46364760900080615, -0.46364760900080615, -0.46364760900080615},
+            {-1.1071487177940904,  -1.1071487177940904,  -1.1071487177940904},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {0.0,                  0.0,                  0.0},
+            {-1.5707963705062866,  -1.5707963705062866,  -1.5707963705062866},
+            {0.0,                  0.0,                  0.0}
+    };
+
 public:
 
     GravityModelTest() : ::testing::Test() {
@@ -424,4 +439,16 @@ TEST_F(GravityModelTest, AlphaSingularityTerms) {
                                                            expectedPlaneDistances);
 
     ASSERT_THAT(actualAlphaSingularityTerms, ContainerEq(expectedAlphaSingularityTerms));
+}
+
+TEST_F(GravityModelTest, BetaSingularityTerms) {
+    using namespace testing;
+
+    auto actualBetaSingularityTerms =
+            systemUnderTest.calculateBetaSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
+                                                           expectedOrthogonalProjectionPointsOnPlane,
+                                                           expectedPlaneDistances, expectedPlaneNormalOrientations,
+                                                           expectedPlaneUnitNormals);
+
+    ASSERT_THAT(actualBetaSingularityTerms, ContainerEq(expectedBetaSingularityTerms));
 }
