@@ -450,7 +450,7 @@ TEST_F(GravityModelTest, TranscendentalExpressions) {
     ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
 }
 
-TEST_F(GravityModelTest, AlphaSingularityTerms) {
+TEST_F(GravityModelTest, SingularityTerms) {
     using namespace testing;
 
     auto actualSingularityTerms =

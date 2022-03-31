@@ -24,6 +24,7 @@ namespace polyhedralGravity::util {
 
     /**
     * PI divided by 2 with enough precision
+     * TODO: FORTRAN uses 1.5707963705062866 as value --> Deviation!
     */
     constexpr double PI_2 = 1.5707963267948966192313216916397514420985846996875529104874722961;
 

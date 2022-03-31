@@ -35,9 +35,6 @@ namespace polyhedralGravity {
                 calculateSingularityTerms(gijVectors, segmentNormalOrientation, orthogonalProjectionOnPlane,
                                           planeDistances, planeNormalOrientation, planeUnitNormals);
 
-        const double prefix = util::GRAVITATIONAL_CONSTANT * _density;
-        const double prefix_2 = prefix / 2.0;
-
         auto first = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.begin(),
                                                                   planeDistances.begin(),
                                                                   segmentNormalOrientation.begin(),
@@ -52,7 +49,7 @@ namespace polyhedralGravity {
                                                                   transcendentalExpressions.end(),
                                                                   singularities.end()));
 
-        double V = prefix_2 * std::accumulate(first, last, 0.0, [](double acc, const auto &tuple) {
+        double V = std::accumulate(first, last, 0.0, [](double acc, const auto &tuple) {
             const double sigma_p = thrust::get<0>(tuple);
             const double h_p = thrust::get<1>(tuple);
             const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
@@ -90,6 +87,10 @@ namespace polyhedralGravity {
 
             return acc + sigma_p * h_p * (sum1 + h_p * sum2 + singularitiesPerPlane.first);
         });
+
+        //TODO Until now V is absolutely equal to the FORTRAN implementation (if PI_2 is FORTRANly set) --> 2. deviation
+        // in this line
+        V = (V * util::GRAVITATIONAL_CONSTANT * _density) / 2.0;
 
         SPDLOG_INFO("The solution is V= {}", V);
 
