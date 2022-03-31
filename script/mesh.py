@@ -54,6 +54,18 @@ def write_to_node_faces_ele_file(filename, nodes, faces, ele):
             index += 1
 
 
+def write__tsoulis_fortran_files(nodes, faces):
+    with open("topoaut", "a") as f:
+        for fac in faces:
+            f.write(" {} {} {}\n".format(fac[0], fac[1], fac[2]))
+    with open("xyzposnew", "a") as f:
+        for n in nodes:
+            f.write(" {} {} {}\n".format(n[0], n[1], n[2]))
+    with open("dataut", "a") as f:
+        for fac in faces:
+            f.write(" 3")
+
+
 def main():
     print("Reading file...")
     mesh_points, mesh_triangles = read_pk_file("../mesh/Eros.pk")
@@ -63,6 +75,8 @@ def main():
     print("Writing to files..")
     tgen.write("../mesh/Eros_python.vtk")
     write_to_node_faces_ele_file("../mesh/Eros", nodes, mesh_triangles, elems)
+    print("Writing to FORTRAN files..")
+    write__tsoulis_fortran_files(nodes, mesh_triangles)
     # tgen.grid.plot(show_edges=True)
     print("Finished.")
 
