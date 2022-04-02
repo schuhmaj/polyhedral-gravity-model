@@ -55,6 +55,7 @@ def write_to_node_faces_ele_file(filename, nodes, faces, ele):
 
 
 def write__tsoulis_fortran_files(nodes, faces):
+    faces += 1
     with open("topoaut", "a") as f:
         for fac in faces:
             f.write(" {} {} {}\n".format(fac[0], fac[1], fac[2]))
@@ -73,8 +74,8 @@ def main():
     tgen = tetgen.TetGen(mesh_points, mesh_triangles)
     nodes, elems = tgen.tetrahedralize()
     print("Writing to files..")
-    tgen.write("../mesh/Eros_python.vtk")
-    write_to_node_faces_ele_file("../mesh/Eros", nodes, mesh_triangles, elems)
+    #tgen.write("../mesh/Eros_python.vtk")
+    #write_to_node_faces_ele_file("../mesh/Eros", nodes, mesh_triangles, elems)
     print("Writing to FORTRAN files..")
     write__tsoulis_fortran_files(nodes, mesh_triangles)
     # tgen.grid.plot(show_edges=True)
