@@ -158,6 +158,7 @@ namespace polyhedralGravity {
             });
 
 
+            //TODO This starts correct and slowly accumulates a difference when compared to the FORTRAN Impl.
             return acc + (Np / euclideanNorm(Np)  * (sum1 + h_p * sum2 + singularitiesPerPlane.first));
         });
 
