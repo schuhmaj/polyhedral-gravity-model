@@ -298,7 +298,16 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnPlane) {
     auto actualOrthogonalProjectionPointsOnPlane = systemUnderTest.calculateOrthogonalProjectionPointsOnPlane(
             expectedHessianPlanes, expectedPlaneUnitNormals, expectedPlaneDistances);
 
-    ASSERT_THAT(actualOrthogonalProjectionPointsOnPlane, ContainerEq(expectedOrthogonalProjectionPointsOnPlane));
+    for (size_t i = 0; i < actualOrthogonalProjectionPointsOnPlane.size(); ++i) {
+        for (size_t j = 0; j < 3; ++j) {
+            EXPECT_DOUBLE_EQ(
+                    actualOrthogonalProjectionPointsOnPlane[i][j],
+                    expectedOrthogonalProjectionPointsOnPlane[i][j])
+                    << "Difference for P' of plane=" << i << " and j=" << j;
+        }
+    }
+
+    //ASSERT_THAT(actualOrthogonalProjectionPointsOnPlane, ContainerEq(expectedOrthogonalProjectionPointsOnPlane));
 }
 
 TEST_F(GravityModelBigTest, SegmentNormalOrientations) {
