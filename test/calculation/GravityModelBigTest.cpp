@@ -49,15 +49,7 @@ protected:
 
     std::vector<std::array<double, 3>> expectedSegmentDistances;
 
-    std::vector<std::array<std::array<double, 2>, 3>> expected3DDistancesPerSegmentEndpoint;
-
-    std::vector<std::array<std::array<double, 2>, 3>> expected1DDistancesPerSegmentEndpoint;
-
     std::vector<std::array<polyhedralGravity::Distance, 3>> expectedDistancesPerSegmentEndpoint;
-
-    std::vector<std::array<double, 3>> expectedTranscendentalLN;
-
-    std::vector<std::array<double, 3>> expectedTranscendentalAN;
 
     std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
 
@@ -105,24 +97,6 @@ public:
         return result;
     }
 
-    [[nodiscard]] std::vector<polyhedralGravity::HessianPlane>
-    readHessianPlanes(const std::string &filename) const {
-        std::vector<polyhedralGravity::HessianPlane> result{countFaces};
-        std::ifstream infile(filename);
-        std::string line;
-        int i = 0;
-        while (std::getline(infile, line)) {
-            std::istringstream linestream(line);
-            double a, b, c, d;
-            if (!(linestream >> a >> b >> c >> d)) {
-                break;
-            }
-            result[i] = polyhedralGravity::HessianPlane{a, b, c, d};
-            i += 1;;
-        }
-        return result;
-    }
-
     [[nodiscard]] std::vector<std::array<double, 3>> readTwoDimensionalValue(const std::string &filename) const {
         std::vector<std::array<double, 3>> result{countFaces};
         std::ifstream infile(filename);
@@ -157,6 +131,42 @@ public:
         return result;
     }
 
+    [[nodiscard]] std::vector<polyhedralGravity::HessianPlane>
+    readHessianPlanes(const std::string &filename) const {
+        std::vector<polyhedralGravity::HessianPlane> result{countFaces};
+        std::ifstream infile(filename);
+        std::string line;
+        int i = 0;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double a, b, c, d;
+            if (!(linestream >> a >> b >> c >> d)) {
+                break;
+            }
+            result[i] = polyhedralGravity::HessianPlane{a, b, c, d};
+            i += 1;;
+        }
+        return result;
+    }
+
+    [[nodiscard]] std::vector<std::array<polyhedralGravity::Distance, 3>>
+    readDistances(const std::string &filename) const {
+        std::vector<std::array<polyhedralGravity::Distance, 3>> result{countFaces};
+        std::ifstream infile(filename);
+        std::string line;
+        int i = 0;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double l1, l2, s1, s2;
+            if (!(linestream >> l1 >> l2 >> s1 >> s2)) {
+                break;
+            }
+            result[i / 3][i % 3] = polyhedralGravity::Distance{l1, l2, s1, s2};
+            i += 1;;
+        }
+        return result;
+    }
+
     GravityModelBigTest() : ::testing::Test() {
         using namespace polyhedralGravity;
         using namespace util;
@@ -174,6 +184,14 @@ public:
                 readOneDimensionalValue("resources/GravityModelBigTestExpectedPlaneDistances.txt");
         expectedOrthogonalProjectionPointsOnPlane =
                 readOneDimensionalCartesian("resources/GravityModelBigTestExpectedOrthogonalPlaneProjectionPoints.txt");
+        expectedSegmentNormalOrientations =
+                readTwoDimensionalValue("resources/GravityModelBigTestExpectedSegmentOrientation.txt");
+        expectedOrthogonalProjectionPointsOnSegment = readTwoDimensionalCartesian(
+                "resources/GravityModelBigTestExpectedOrthogonalSegmentProjectionPoints.txt");
+        expectedSegmentDistances =
+                readTwoDimensionalValue("resources/GravityModelBigTestExpectedSegmentDistances.txt");
+        expectedDistancesPerSegmentEndpoint =
+                readDistances("resources/GravityModelBigTestExpectedDistances.txt");
     }
 
 };
