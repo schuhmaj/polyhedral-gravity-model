@@ -167,6 +167,41 @@ public:
         return result;
     }
 
+    [[nodiscard]] std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>>
+    readTranscendentalExpressions(const std::string &filename) const {
+        std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> result{countFaces};
+        std::ifstream infile(filename);
+        std::string line;
+        int i = 0;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double ln, an;
+            if (!(linestream >> ln >> an)) {
+                break;
+            }
+            result[i / 3][i % 3] = polyhedralGravity::TranscendentalExpression{ln, an};
+            i += 1;;
+        }
+        return result;
+    }
+
+    [[nodiscard]] std::vector<std::array<double, 3>>
+    readBetaSingularities(const std::string &filename) const {
+        std::vector<std::array<double, 3>> result{countFaces};
+        std::ifstream infile(filename);
+        std::string line;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            int i, j;
+            double sng;
+            if (!(linestream >> j >> i >> sng)) {
+                break;
+            }
+            result[i][j] = sng;
+        }
+        return result;
+    }
+
     GravityModelBigTest() : ::testing::Test() {
         using namespace polyhedralGravity;
         using namespace util;
@@ -192,6 +227,18 @@ public:
                 readTwoDimensionalValue("resources/GravityModelBigTestExpectedSegmentDistances.txt");
         expectedDistancesPerSegmentEndpoint =
                 readDistances("resources/GravityModelBigTestExpectedDistances.txt");
+        expectedTranscendentalExpressions =
+                readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
+        expectedAlphaSingularityTerms =
+                readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
+        expectedBetaSingularityTerms =
+                readBetaSingularities("resources/GravityModelBigTestExpectedBetaSingularities.txt");
+
+        expectedSingularityTerms.resize(expectedAlphaSingularityTerms.size());
+        for (int i = 0; i < expectedAlphaSingularityTerms.size(); ++i) {
+            expectedSingularityTerms[i] =
+                    std::make_pair(expectedAlphaSingularityTerms[i], expectedBetaSingularityTerms[i]);
+        }
     }
 
 };
