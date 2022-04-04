@@ -14,7 +14,10 @@
 
 /**
  * Contains Tests based on the example from Tsoulis FORTRAN implementation.
- * Hardcoded values taken from his implementation's results.
+ * Values read from the resource section
+ *
+ * TODO GNU Compiler produces failing tests due to rounding errors, more tolerance
+ * TODO Fix bug correlated to P'
  */
 class GravityModelBigTest : public ::testing::Test {
 
