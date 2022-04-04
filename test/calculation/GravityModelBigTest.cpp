@@ -24,7 +24,8 @@ protected:
     const size_t countNodesPerFace = 3;
 
     polyhedralGravity::Polyhedron _polyhedron{
-        polyhedralGravity::TetgenAdapter {{"resources/GravityModelBigTest.node", "resources/GravityModelBigTest.face"}}.getPolyhedron()};
+            polyhedralGravity::TetgenAdapter{
+                    {"resources/GravityModelBigTest.node", "resources/GravityModelBigTest.face"}}.getPolyhedron()};
 
     polyhedralGravity::GravityModel systemUnderTest{_polyhedron};
 
@@ -69,7 +70,8 @@ protected:
 
 public:
 
-    std::vector<std::array<std::array<double, 3>, 3>> readTwoDimensionalCartesian(const std::string &filename) {
+    [[nodiscard]] std::vector<std::array<std::array<double, 3>, 3>>
+    readTwoDimensionalCartesian(const std::string &filename) const {
         std::vector<std::array<std::array<double, 3>, 3>> result{countFaces};
         std::ifstream infile(filename);
         std::string line;
@@ -80,13 +82,13 @@ public:
             if (!(linestream >> x >> y >> z)) {
                 break;
             }
-            result[i / 3][i % 3] = std::array<double, 3> {x, y, z};
+            result[i / 3][i % 3] = std::array<double, 3>{x, y, z};
             i += 1;;
         }
         return result;
     }
 
-    std::vector<std::array<double, 3>> readOneDimensionaCartesian(const std::string &filename) {
+    [[nodiscard]] std::vector<std::array<double, 3>> readOneDimensionalCartesian(const std::string &filename) const {
         std::vector<std::array<double, 3>> result{countFaces};
         std::ifstream infile(filename);
         std::string line;
@@ -97,7 +99,59 @@ public:
             if (!(linestream >> x >> y >> z)) {
                 break;
             }
-            result[i] = std::array<double, 3> {x, y, z};
+            result[i] = std::array<double, 3>{x, y, z};
+            i += 1;;
+        }
+        return result;
+    }
+
+    [[nodiscard]] std::vector<polyhedralGravity::HessianPlane>
+    readHessianPlanes(const std::string &filename) const {
+        std::vector<polyhedralGravity::HessianPlane> result{countFaces};
+        std::ifstream infile(filename);
+        std::string line;
+        int i = 0;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double a, b, c, d;
+            if (!(linestream >> a >> b >> c >> d)) {
+                break;
+            }
+            result[i] = polyhedralGravity::HessianPlane{a, b, c, d};
+            i += 1;;
+        }
+        return result;
+    }
+
+    [[nodiscard]] std::vector<std::array<double, 3>> readTwoDimensionalValue(const std::string &filename) const {
+        std::vector<std::array<double, 3>> result{countFaces};
+        std::ifstream infile(filename);
+        std::string line;
+        int i = 0;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double x;
+            if (!(linestream >> x)) {
+                break;
+            }
+            result[i / 3][i % 3] = x;
+            i += 1;;
+        }
+        return result;
+    }
+
+    [[nodiscard]] std::vector<double> readOneDimensionalValue(const std::string &filename) const {
+        std::vector<double> result(countFaces, 0.0);
+        std::ifstream infile(filename);
+        std::string line;
+        int i = 0;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double x;
+            if (!(linestream >> x)) {
+                break;
+            }
+            result[i] = x;
             i += 1;;
         }
         return result;
@@ -109,7 +163,17 @@ public:
 
         expectedGij = readTwoDimensionalCartesian("resources/GravityModelBigTestExpectedGij.txt");
         expectedPlaneUnitNormals =
-                readOneDimensionaCartesian("resources/GravityModelBigTestExpectedPlaneUnitNormals.txt");
+                readOneDimensionalCartesian("resources/GravityModelBigTestExpectedPlaneUnitNormals.txt");
+        expectedSegmentUnitNormals =
+                readTwoDimensionalCartesian("resources/GravityModelBigTestExpectedSegmentUnitNormals.txt");
+        expectedPlaneNormalOrientations =
+                readOneDimensionalValue("resources/GravityModelBigTestExpectedPlaneOrientation.txt");
+        expectedHessianPlanes =
+                readHessianPlanes("resources/GravityModelBigTestExpectedHessianPlanes.txt");
+        expectedPlaneDistances =
+                readOneDimensionalValue("resources/GravityModelBigTestExpectedPlaneDistances.txt");
+        expectedOrthogonalProjectionPointsOnPlane =
+                readOneDimensionalCartesian("resources/GravityModelBigTestExpectedOrthogonalPlaneProjectionPoints.txt");
     }
 
 };
