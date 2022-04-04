@@ -303,7 +303,7 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnPlane) {
             EXPECT_DOUBLE_EQ(
                     actualOrthogonalProjectionPointsOnPlane[i][j],
                     expectedOrthogonalProjectionPointsOnPlane[i][j])
-                    << "Difference for P' of plane=" << i << " and j=" << j;
+                    << "Difference for P' of plane=" << i << " and coordinate-Nr.=" << j;
         }
     }
 
@@ -327,7 +327,19 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnSegment) {
             systemUnderTest.calculateOrthogonalProjectionPointsOnSegments(expectedOrthogonalProjectionPointsOnPlane,
                                                                           expectedSegmentNormalOrientations);
 
-    ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
+    for (size_t i = 0; i < actualOrthogonalProjectionPointsOnSegment.size(); ++i) {
+        for (size_t j = 0; j < 3; ++j) {
+            for (size_t k = 0; k < 3; ++k) {
+                EXPECT_NEAR(
+                        actualOrthogonalProjectionPointsOnSegment[i][j][k],
+                        expectedOrthogonalProjectionPointsOnSegment[i][j][k], 1e16)
+                                    << "Difference for P'' of segment=(" << i << ", " << j << ") and coordinate-Nr."
+                                    << k;
+            }
+        }
+    }
+
+    //ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }
 
 TEST_F(GravityModelBigTest, SegmentDistances) {
