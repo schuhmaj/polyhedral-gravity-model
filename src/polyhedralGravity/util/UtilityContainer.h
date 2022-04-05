@@ -10,6 +10,13 @@
 namespace polyhedralGravity::util {
 
     /**
+     * Alias for two-dimensional array with size M and N.
+     * M is the major size.
+     */
+    template<typename T, size_t M, size_t N>
+    using Matrix = std::array<std::array<T, N>, M>;
+
+    /**
      * Applies a binary function to elements of two containers piece by piece. The objects must
      * be iterable and should have the same size!
      * @tparam Container - an iterable object like an array or vector
@@ -167,6 +174,53 @@ namespace polyhedralGravity::util {
     }
 
     /**
+     * Computes the absolute value for each value in the given container
+     * @tparam Container - a iterable container, containing numerical values
+     * @param container - the container
+     * @return a container with the modified values
+     */
+    template<typename Container>
+    Container abs(const Container &container) {
+        Container ret = container;
+        std::transform(std::begin(container), std::end(container), std::begin(ret),
+                       [](const auto &element) { return std::abs(element); });
+        return ret;
+    }
+
+    /**
+     * Computes the determinant with the Sarrus rule for a 3x3 matrix.
+     * Notice that for square matrices det(A) = det(A^T).
+     * @tparam T - a numerical value
+     * @param matrix - the 3x3 matrix
+     * @return the determinant
+     */
+    template<typename T>
+    T det(const Matrix<T, 3, 3> &matrix) {
+        return matrix[0][0] * matrix[1][1] * matrix[2][2] + matrix[0][1] * matrix[1][2] * matrix[2][0]
+               + matrix[0][2] * matrix[1][0] * matrix[2][1] - matrix[0][2] * matrix[1][1] * matrix[2][0]
+               - matrix[0][0] * matrix[1][2] * matrix[2][1] - matrix[0][1] * matrix[1][0] * matrix[2][2];
+    }
+
+    /**
+     * Computes the transposed of a mxn matrix.
+     * @tparam T - the type of the matrix elements
+     * @tparam M - the row number
+     * @tparam N - the column number
+     * @param matrix - the matrix to transpose
+     * @return the transposed
+     */
+    template<typename T, size_t M, size_t N>
+    Matrix<T, M, N> transpose(const Matrix<T, M, N> &matrix) {
+        Matrix<T, N, M> transposed;
+        for (size_t i = 0; i < M; ++i) {
+            for (size_t j = 0; j < N; ++j) {
+                transposed[i][j] = matrix[j][i];
+            }
+        }
+        return transposed;
+    }
+
+    /**
     * Returns the cross product of two cartesian vectors.
     * @tparam T - a number
     * @param lhs - left vector
@@ -201,7 +255,7 @@ namespace polyhedralGravity::util {
      * @return -1, 0, 1 depending on the sign
      * @related https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
      */
-    template <typename T>
+    template<typename T>
     int sgn(T val) {
         return (T(0) < val) - (val < T(0));
     }

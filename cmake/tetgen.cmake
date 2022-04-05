@@ -28,7 +28,7 @@ if(NOT tetgen_POPULATED)
                 "${TETGEN_CXX}"
                 )
     else()
-        message(STATUS "A modified tetgen.cxx already exists! It is assumed that is the correct one")
+        message(STATUS "A modified tetgen.cxx already exists! It is assumed that is the correct one disabling output")
     endif()
 
     add_library(tetgen STATIC

@@ -70,11 +70,12 @@ namespace polyhedralGravity {
          * @param faces - vector containing the triangle faces.
          *
          * ASSERTS PRE-CONDITION
-         * @throws runtime_error if the no face contains the node zero indicating mathematical index
+         * @throws runtime_error if no face contains the node zero indicating mathematical index
          */
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
                 : _nodes{std::move(nodes)},
                   _faces{std::move(faces)} {
+            //Checks that the node with index zero is actually used
             if (_faces.end() == std::find_if(_faces.begin(), _faces.end(), [&](auto &face) {
                 return face[0] == 0 || face[1] == 0 || face[2] == 0;
             })) {
@@ -112,16 +113,6 @@ namespace polyhedralGravity {
         [[nodiscard]] const std::vector<std::array<size_t, 3>> &getFaces() const {
             return _faces;
         }
-
-        /**
-         * Returns references to the endpoints (nodes) of a given polyhedral segment.
-         * @param p - the polyhedral face
-         * @param q - the index of the segment inside the polyhedral face (triangle, so q is in [0, 2])
-         * @return a pair of two 3-dimensional coordinate points
-         * @example p = 1 and q = 2 will return the third segment from the second face
-         */
-        [[nodiscard]] std::pair<const std::array<double, 3> &, const std::array<double, 3> &>
-        getPolyhedralSegment(size_t p, size_t q) const;
 
     };
 
