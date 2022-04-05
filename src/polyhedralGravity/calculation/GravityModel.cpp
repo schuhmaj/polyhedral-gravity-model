@@ -4,7 +4,6 @@ namespace polyhedralGravity {
 
     void GravityModel::calculate() {
         using namespace util;
-        SPDLOG_INFO("Calculate...");
         auto gijVectors = calculateGij();
         auto planeUnitNormals = calculatePlaneUnitNormals(gijVectors);
         auto segmentUnitNormals = calculateSegmentUnitNormals(gijVectors, planeUnitNormals);
@@ -93,8 +92,6 @@ namespace polyhedralGravity {
             return acc + sigma_p * h_p * (sum1 + h_p * sum2 + singularitiesPerPlane.first);
         });
 
-        //TODO Until now V is absolutely equal to the FORTRAN implementation (if PI_2 is FORTRANly set) --> 2. deviation
-        // in this line
         V = (V * util::GRAVITATIONAL_CONSTANT * _density) / 2.0;
         SPDLOG_INFO("V= {}", V);
 
@@ -168,9 +165,7 @@ namespace polyhedralGravity {
                                 return acc + sigma_pq * transcendentalExpressions.an;
                             });
 
-
-                    //TODO This starts correct and slowly accumulates a difference when compared to the FORTRAN Impl.
-                    return acc + (Np / euclideanNorm(Np) * (sum1 + h_p * sum2 + singularitiesPerPlane.first));
+                    return acc + (Np * (sum1 + h_p * sum2 + singularitiesPerPlane.first));
                 });
 
         V2 = abs(V2 * (util::GRAVITATIONAL_CONSTANT * _density));
@@ -178,6 +173,22 @@ namespace polyhedralGravity {
         SPDLOG_INFO("Vx= {}", V2[0]);
         SPDLOG_INFO("Vy= {}", V2[1]);
         SPDLOG_INFO("Vz= {}", V2[2]);
+
+        /*
+         * Calculation of Vxx, Vyy, Vzz, Vxy, Vxz, Vyz
+         */
+
+        std::array<double, 6> V3{};
+
+
+
+        SPDLOG_INFO("Vxx= {}", V3[0]);
+        SPDLOG_INFO("Vyy= {}", V3[1]);
+        SPDLOG_INFO("Vzz= {}", V3[2]);
+        SPDLOG_INFO("Vxy= {}", V3[3]);
+        SPDLOG_INFO("Vxz= {}", V3[4]);
+        SPDLOG_INFO("Vyz= {}", V3[5]);
+
 
     }
 

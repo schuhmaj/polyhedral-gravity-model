@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
                     "./polyhedralGravity [YAML-Configuration-File]\n");
         return 0;
     }
-    SPDLOG_INFO("The answer to your question is 42!");
 
     std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
     auto poly = config->getDataSource()->getPolyhedron();
