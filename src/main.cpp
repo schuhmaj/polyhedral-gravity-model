@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
                     "./polyhedralGravity [YAML-Configuration-File]\n");
         return 0;
     }
-    SPDLOG_INFO("The answer to your question is 42!");
 
     std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
     auto poly = config->getDataSource()->getPolyhedron();
@@ -19,13 +18,12 @@ int main(int argc, char *argv[]) {
 
     GravityModel grav{poly, density};
 
+    SPDLOG_INFO("The calculation started.");
     auto start = std::chrono::high_resolution_clock::now();
     grav.calculate();
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = end - start;
     auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-    SPDLOG_INFO("The calculation took {} microseconds", ms.count());
-
-    SPDLOG_INFO("Finished.");
+    SPDLOG_INFO("The calculation finished. It took {} microseconds.", ms.count());
     return 0;
 }
