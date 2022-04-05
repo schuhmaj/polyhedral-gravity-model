@@ -208,7 +208,7 @@ namespace polyhedralGravity {
                     const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(
                             tuple);
                     const Array3 &Np = thrust::get<6>(tuple);
-                    const auto &npqPerPlane = thrust::get<7>(tuple);
+                    const Array3Triplet &npqPerPlane = thrust::get<7>(tuple);
 
 
                     auto sum1Start = thrust::make_zip_iterator(thrust::make_tuple(
@@ -224,7 +224,7 @@ namespace polyhedralGravity {
                             [](const Array3 &acc, const auto &tuple) {
                                 const Array3 &npq = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
-                                return acc + npq * transcendentalExpressions.ln;
+                                return acc + (npq * transcendentalExpressions.ln);
                             });
 
                     auto sum2Start = thrust::make_zip_iterator(thrust::make_tuple(
