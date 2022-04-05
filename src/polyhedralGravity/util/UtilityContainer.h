@@ -262,6 +262,28 @@ namespace polyhedralGravity::util {
     }
 
     /**
+     * Concatenates two std::array of different sizes to one array.
+     * @tparam T - the shared type of the arrays
+     * @tparam M - the size of the first container
+     * @tparam N  - the size of the second container
+     * @param first - the first array
+     * @param second - the second array
+     * @return a new array of size M+N with type T
+     */
+    template<typename T, size_t M, size_t N>
+    std::array<T, M+N> concat(const std::array<T, M> &first, const std::array<T, N> &second) {
+        std::array<T, M+N> result{};
+        size_t index = 0;
+        for (auto &el : first) {
+            result[index++] = el;
+        }
+        for (auto &el : second) {
+            result[index++] = el;
+        }
+        return result;
+    }
+
+    /**
      * Operator << for an array of any size.
      * @tparam T - type of the array, must have an << operator overload
      * @tparam N - size of the array
