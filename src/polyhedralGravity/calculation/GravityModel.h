@@ -96,10 +96,10 @@ namespace polyhedralGravity {
          * Geometrically, N_i stands perpendicular on plane i.
          *
          * The dimension of i will be equal to the number of faces.
-         * @param g - the G_ij vectors
+         * @param segmentVectors - the G_ij vectors of each segment
          * @return plane unit normals
          */
-        std::vector<Array3> calculatePlaneUnitNormals(const std::vector<Array3Triplet> &g);
+        std::vector<Array3> calculatePlaneUnitNormals(const std::vector<Array3Triplet> &segmentVectors);
 
         /**
          * Calculates the segment unit normals n_ij according to Tsoulis equation (20).
@@ -108,15 +108,14 @@ namespace polyhedralGravity {
          *
          * The dimension of i will be equal to the number of faces, whereas the dimension j mirrors the number of
          * segments forming one face. Since we always use triangles, j will be 3.
-         * @param g - the G_ij vectors
+         * @param segmentVectors - the G_ij vectors of each segment
          * @param planeUnitNormals - the plane unit normals
          * @return segment unit normals
          */
-        std::vector<Array3Triplet> calculateSegmentUnitNormals(const std::vector<Array3Triplet> &g,
+        std::vector<Array3Triplet> calculateSegmentUnitNormals(const std::vector<Array3Triplet> &segmentVectors,
                                                                const std::vector<Array3> &planeUnitNormals);
 
         /**
-         * TODO? Maybe do this just in time instead of calculating everything at once and storing in a vector
          * Calculates the plane normal orientations, sigma_p, according to equation (21).
          * The sigma_p values represents the relative position of computation point P with respect to the
          * pointing direction of N_p. E. g. if N_p points to the half-space containing P, the inner product of
@@ -138,7 +137,6 @@ namespace polyhedralGravity {
         std::vector<HessianPlane> calculateFacesToHessianPlanes(const Array3 &p = {0, 0, 0});
 
         /**
-         * TODO Inline?
          * Calculates the Hessian Plane form spanned by three given points p, q, and r.
          * @param p - first point on the plane
          * @param q - second point on the plane

@@ -220,7 +220,7 @@ namespace polyhedralGravity {
                             transcendentalExpressionsPerPlane.end()));
 
                     const Array3 sum1 = std::accumulate(
-                            sum1Start, sum1End, Array3 {0.0, 0.0, 0.0},
+                            sum1Start, sum1End, Array3{0.0, 0.0, 0.0},
                             [](const Array3 &acc, const auto &tuple) {
                                 const Array3 &npq = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
@@ -278,24 +278,27 @@ namespace polyhedralGravity {
         return g;
     }
 
-    std::vector<Array3> GravityModel::calculatePlaneUnitNormals(const std::vector<Array3Triplet> &g) {
-        std::vector<Array3> planeUnitNormals{g.size()};
+    std::vector<Array3> GravityModel::calculatePlaneUnitNormals(const std::vector<Array3Triplet> &segmentVectors) {
+        std::vector<Array3> planeUnitNormals{segmentVectors.size()};
         //Calculate N_i as (G_i1 * G_i2) / |G_i1 * G_i2| with * being the cross product
-        std::transform(g.cbegin(), g.cend(), planeUnitNormals.begin(), [](const auto &gi) -> Array3 {
-            using namespace util;
-            const Array3 crossProduct = cross(gi[0], gi[1]);
-            const double norm = euclideanNorm(crossProduct);
-            return crossProduct / norm;
-        });
+        std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.begin(),
+                       [](const auto &gi) -> Array3 {
+                           using namespace util;
+                           const Array3 crossProduct = cross(gi[0], gi[1]);
+                           const double norm = euclideanNorm(crossProduct);
+                           return crossProduct / norm;
+                       });
         return planeUnitNormals;
     }
 
-    std::vector<Array3Triplet> GravityModel::calculateSegmentUnitNormals(const std::vector<Array3Triplet> &g,
-                                                                         const std::vector<Array3> &planeUnitNormals) {
-        std::vector<Array3Triplet> segmentUnitNormals{g.size()};
+    std::vector<Array3Triplet>
+    GravityModel::calculateSegmentUnitNormals(const std::vector<Array3Triplet> &segmentVectors,
+                                              const std::vector<Array3> &planeUnitNormals) {
+        std::vector<Array3Triplet> segmentUnitNormals{segmentVectors.size()};
         //Calculate n_ij as (G_ij * N_i) / |G_ig * N_i| with * being the cross product
         //Outer "loop" over G_i (running i) and N_i calculating n_i
-        std::transform(g.cbegin(), g.cend(), planeUnitNormals.cbegin(), segmentUnitNormals.begin(),
+        std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.cbegin(),
+                       segmentUnitNormals.begin(),
                        [](const Array3Triplet &gi, const Array3 &Ni) {
                            Array3Triplet ni{};
                            //Inner "loop" over G_ij (fixed i, running j) with parameter N_i calculating n_ij
@@ -394,8 +397,8 @@ namespace polyhedralGravity {
             //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
             //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
             Array3 intersections = {plane.a == 0.0 ? 0.0 : plane.d / plane.a,
-                                       plane.b == 0.0 ? 0.0 : plane.d / plane.b,
-                                       plane.c == 0.0 ? 0.0 : plane.d / plane.c};
+                                    plane.b == 0.0 ? 0.0 : plane.d / plane.b,
+                                    plane.c == 0.0 ? 0.0 : plane.d / plane.c};
 
             for (unsigned int index = 0; index < 3; ++index) {
                 if (intersections[index] < 0) {
@@ -498,7 +501,6 @@ namespace polyhedralGravity {
     Array3 GravityModel::calculateOrthogonalProjectionOnSegment(const Array3 &v1, const Array3 &v2,
                                                                 const Array3 &pPrime) {
         using namespace util;
-        Array3 pDoublePrime{};
         //Preparing our the planes/ equations in matrix form
         const Array3 matrixRow1 = v2 - v1;
         const Array3 matrixRow2 = cross(v1 - pPrime, matrixRow1);
@@ -507,10 +509,11 @@ namespace polyhedralGravity {
         Matrix<double, 3, 3> columnMatrix = transpose(Matrix<double, 3, 3>{matrixRow1, matrixRow2, matrixRow3});
         //Calculation and solving the equations of above
         const double determinant = det(columnMatrix);
-        pDoublePrime[0] = det(Matrix<double, 3, 3>{d, columnMatrix[1], columnMatrix[2]});
-        pDoublePrime[1] = det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]});
-        pDoublePrime[2] = det(Matrix<double, 3, 3>{columnMatrix[0], columnMatrix[1], d});
-        return pDoublePrime / determinant;
+        return Array3{
+                det(Matrix<double, 3, 3>{d, columnMatrix[1], columnMatrix[2]}),
+                det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]}),
+                det(Matrix<double, 3, 3>{columnMatrix[0], columnMatrix[1], d})
+        } / determinant;
     }
 
     std::vector<Array3> GravityModel::calculateSegmentDistances(
