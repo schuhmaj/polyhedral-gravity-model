@@ -47,7 +47,7 @@ TEST(UtilityContainer, VectorScalarMul) {
 
 TEST(UtilityContainer, Determinant_1) {
     using namespace ::polyhedralGravity::util;
-    std::array<std::array<double, 3>, 3> matrix{{{3, 0, 1}, {1, 2, 5}, {-1, 4, 2}}};
+    Matrix<double, 3, 3> matrix{{{3, 0, 1}, {1, 2, 5}, {-1, 4, 2}}};
 
     double expectedDeterminant = -42.0;
     double actualDeterminant = det(matrix);
@@ -56,7 +56,7 @@ TEST(UtilityContainer, Determinant_1) {
 
 TEST(UtilityContainer, Determinant_2) {
     using namespace ::polyhedralGravity::util;
-    std::array<std::array<int, 3>, 3> matrix{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}};
+    Matrix<int, 3, 3> matrix{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}};
 
     double expectedDeterminant = 0.0;
     double actualDeterminant = det(matrix);
