@@ -680,6 +680,7 @@ namespace polyhedralGravity {
                                   //If either sigmaPQ has no sign AND either of the distances of P' to the two
                                   //segment endpoints is zero OR the 1D and 3D distances are below some threshold
                                   //then LN_pq is zero, too
+                                  //TODO (distance.s1 + distance.s2 < 1e-10 && distance.l1 + distance.l2 < 1e-10)?!
                                   if ((sigmaPQ == 0.0 &&
                                        (euclideanNorm(pPrime - v1) == 0.0 || euclideanNorm(pPrime - v2) == 0.0)) ||
                                       (distance.s1 + distance.s2 < 1e-10 && distance.l1 + distance.l2 < 1e-10)) {
