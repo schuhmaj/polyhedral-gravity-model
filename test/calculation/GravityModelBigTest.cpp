@@ -13,11 +13,12 @@
 
 
 /**
- * Contains Tests based on the example from Tsoulis FORTRAN implementation.
- * Values read from the resource section
+ * Contains Tests based on the Eros mesh taken from
+ * https://github.com/darioizzo/geodesyNets/tree/master/3dmeshes (last accessed: 07.04.2022)
  *
- * TODO GNU Compiler produces failing tests due to rounding errors, more tolerance
- * TODO Fix bug correlated to P'
+ * The values are in the corresponding files in test/resources which are used to check the C++
+ * implementation are calculated by the Tsoulis reference implementation in FORTRAN.
+ *
  */
 class GravityModelBigTest : public ::testing::Test {
 
