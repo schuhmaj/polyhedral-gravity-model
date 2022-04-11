@@ -3,6 +3,7 @@ import pickle as pk
 import numpy as np
 
 # meshing
+import pyvista
 import tetgen
 
 
@@ -104,8 +105,12 @@ def main():
     write__tsoulis_fortran_files("../mesh/Eros/", nodes, mesh_triangles)
 
     # Plot the tetrahralized mesh
-    # print("Showing Plot")
+    print("Showing Plot")
     # tgen.grid.plot(show_edges=True)
+    pl = pyvista.Plotter()
+    pl.add_mesh(tgen.grid)
+    # pl.add_axes_at_origin(labels_off=True)
+    pl.show()
 
     print("Finished.")
 
