@@ -5,6 +5,7 @@ import numpy as np
 # meshing
 import pyvista
 import tetgen
+import meshio as mio
 
 
 def read_pk_file(filename):
@@ -82,6 +83,12 @@ def write__tsoulis_fortran_files(path, nodes, faces):
             f.write(" 3")
 
 
+def write_other(path, name, nodes, faces):
+    cells = [("triangle", faces)]
+    mesh = mio.Mesh(nodes, cells)
+    mesh.write((path + name))
+
+
 def main():
     # Read the input .pk file
     print("Reading file...")
@@ -102,15 +109,19 @@ def main():
 
     # Print the input files for the FORTRAN implementation of the Polyhedral Model by Tsoulis
     print("Writing FORTRAN files..")
-    write__tsoulis_fortran_files("../mesh/Eros/", nodes, mesh_triangles)
+    write__tsoulis_fortran_files("../mesh/Eros/", mesh_points, mesh_triangles)
+
+    # Write other files
+    # print("Writing other files...")
+    # write_other("../mesh/Eros/", "Eros.ply", mesh_points, mesh_triangles)
 
     # Plot the tetrahralized mesh
-    print("Showing Plot")
-    # tgen.grid.plot(show_edges=True)
-    pl = pyvista.Plotter()
-    pl.add_mesh(tgen.grid)
-    # pl.add_axes_at_origin(labels_off=True)
-    pl.show()
+    # print("Showing Plot")
+    # # tgen.grid.plot(show_edges=True)
+    # pl = pyvista.Plotter()
+    # pl.add_mesh(tgen.grid)
+    # # pl.add_axes_at_origin(labels_off=True)
+    # pl.show()
 
     print("Finished.")
 
