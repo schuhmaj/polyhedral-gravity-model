@@ -6,6 +6,7 @@ import numpy as np
 import pyvista
 import tetgen
 import meshio as mio
+import openmesh as om
 
 
 def read_pk_file(filename):
@@ -71,10 +72,9 @@ def write__tsoulis_fortran_files(path, nodes, faces):
     :param faces: list of faces
     :return: void
     """
-    faces += 1
     with open(path + "topoaut", "w") as f:
         for fac in faces:
-            f.write(" {} {} {}\n".format(fac[0], fac[1], fac[2]))
+            f.write(" {} {} {}\n".format(fac[0] + 1, fac[1] + 1, fac[2] + 1))
     with open(path + "xyzposnew", "w") as f:
         for n in nodes:
             f.write(" {} {} {}\n".format(n[0], n[1], n[2]))
@@ -84,9 +84,13 @@ def write__tsoulis_fortran_files(path, nodes, faces):
 
 
 def write_other(path, name, nodes, faces):
-    cells = [("triangle", faces)]
-    mesh = mio.Mesh(nodes, cells)
-    mesh.write((path + name))
+    mesh = om.TriMesh()
+    mesh.add_vertices(nodes)
+    mesh.add_faces(faces)
+    om.write_mesh((path+name), mesh)
+    # cells = [("triangle", faces)]
+    # mesh = mio.Mesh(nodes, cells)
+    # mesh.write((path + name))
 
 
 def main():
@@ -112,8 +116,8 @@ def main():
     write__tsoulis_fortran_files("../mesh/Eros/", mesh_points, mesh_triangles)
 
     # Write other files
-    # print("Writing other files...")
-    # write_other("../mesh/Eros/", "Eros.ply", mesh_points, mesh_triangles)
+    print("Writing other files...")
+    write_other("../mesh/Eros/", "Eros.ply", nodes, mesh_triangles)
 
     # Plot the tetrahralized mesh
     # print("Showing Plot")
