@@ -24,28 +24,34 @@ def read_pk_file(filename):
     return mesh_points, mesh_triangles
 
 
-def write_to_node_faces_ele_file(filename, nodes, faces, ele):
-    with open(filename + ".node", "a") as f:
+def write_to_node_faces_ele_file(path, filename, nodes, faces, ele):
+    """
+    Write to a .node, .face and .ele file
+    :param path: String of the path where to write
+    :param filename: String of the file names
+    :param nodes: list of node coordinates
+    :param faces: list of faces
+    :param ele: list of polyhedral elements
+    :return: void
+    """
+    with open(path + filename + ".node", "w") as f:
         f.write("# Node count, 3 dimensions, no attribute, no boundary marker\n")
-        # TODO Very ugly division! Can cause problems, fix this
         f.write("{} {} {} {}\n".format(int(nodes.size / 3), 3, 0, 0))
         f.write("# Node index, node coordinates\n")
         index = 0
         for n in nodes:
             f.write("{} {} {} {}\n".format(index, n[0], n[1], n[2]))
             index += 1
-    with open(filename + ".face", "a") as f:
+    with open(path + filename + ".face", "w") as f:
         f.write("# Number of faces, boundary marker off\n")
-        # TODO Very ugly division! Can cause problems, fix this
         f.write("{} {}\n".format(int(faces.size / 3), 0))
         f.write("# Face index, nodes of face\n")
         index = 0
         for fac in faces:
             f.write("{} {} {} {}\n".format(index, fac[0], fac[1], fac[2]))
             index += 1
-    with open(filename + ".ele", "a") as f:
+    with open(path + filename + ".ele", "w") as f:
         f.write("# number of tetrahedra, number of nodes per tet, no region attribute\n")
-        # TODO Very ugly division! Can cause problems, fix this
         f.write("{} {} {}\n".format(int(ele.size / 4), 4, 0))
         f.write("# tetrahedra index, nodes\n")
         index = 0
@@ -54,31 +60,53 @@ def write_to_node_faces_ele_file(filename, nodes, faces, ele):
             index += 1
 
 
-def write__tsoulis_fortran_files(nodes, faces):
+def write__tsoulis_fortran_files(path, nodes, faces):
+    """
+    Writes to a topout, xyposnew and dataut file - exactly the input file which the FORTRAN implementation
+    by Tsoulis uses.
+    :param path: String of the path where to write
+    :param nodes: list of node coordinates
+    :param faces: list of faces
+    :return: void
+    """
     faces += 1
-    with open("topoaut", "a") as f:
+    with open(path + "topoaut", "w") as f:
         for fac in faces:
             f.write(" {} {} {}\n".format(fac[0], fac[1], fac[2]))
-    with open("xyzposnew", "a") as f:
+    with open(path + "xyzposnew", "w") as f:
         for n in nodes:
             f.write(" {} {} {}\n".format(n[0], n[1], n[2]))
-    with open("dataut", "a") as f:
+    with open(path + "dataut", "w") as f:
         for fac in faces:
             f.write(" 3")
 
 
 def main():
+    # Read the input .pk file
     print("Reading file...")
-    mesh_points, mesh_triangles = read_pk_file("../mesh/Eros.pk")
+    mesh_points, mesh_triangles = read_pk_file("../mesh/input/Eros.pk")
+
+    # Tetrahralize the mesh
     print("Tetrahralize...")
     tgen = tetgen.TetGen(mesh_points, mesh_triangles)
     nodes, elems = tgen.tetrahedralize()
-    print("Writing to files..")
-    #tgen.write("../mesh/Eros_python.vtk")
-    #write_to_node_faces_ele_file("../mesh/Eros", nodes, mesh_triangles, elems)
-    print("Writing to FORTRAN files..")
-    write__tsoulis_fortran_files(nodes, mesh_triangles)
+
+    # Print a vtk file, diplayable with ParaView
+    print("Writing vtk files...")
+    tgen.write("../mesh/Eros/Eros.vtk")
+
+    # Print the input files for the C++ implementation of the Polyhedral Model
+    print("Writing polyhedron-cpp input files..")
+    write_to_node_faces_ele_file("../mesh/Eros/", "Eros", nodes, mesh_triangles, elems)
+
+    # Print the input files for the FORTRAN implementation of the Polyhedral Model by Tsoulis
+    print("Writing FORTRAN files..")
+    write__tsoulis_fortran_files("../mesh/Eros/", nodes, mesh_triangles)
+
+    # Plot the tetrahralized mesh
+    # print("Showing Plot")
     # tgen.grid.plot(show_edges=True)
+
     print("Finished.")
 
 
