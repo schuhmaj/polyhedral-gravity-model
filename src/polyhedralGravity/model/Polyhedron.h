@@ -56,7 +56,8 @@ namespace polyhedralGravity {
                 return face[0] == 0 || face[1] == 0 || face[2] == 0;
             })) {
                 throw std::runtime_error("The node with index zero (0) was never used in any face! This is "
-                                         "no valid polyhedron. Probable issue: Started counting at one (1).");
+                                         "no valid polyhedron. Probable issue: Started numbering the vertices of "
+                                         "the polyhedron at one (1).");
             }
         }
 
