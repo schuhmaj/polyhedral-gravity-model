@@ -13,13 +13,14 @@ namespace polyhedralGravity {
         }
 
         //2. Convert tetgenio to Polyhedron
-        return convertTetgenToPolyhedron();
+        return {_vertices, _faces};
     }
 
     void TetgenAdapter::readNode(const std::string &filename) {
         if (this->checkIntegrity(filename, 'v')) {
             try {
                 _tetgenio.load_node(const_cast<char *>(filename.c_str()));
+                this->addVertices();
             } catch (...) {
                 throw std::runtime_error(
                         "The nodes were not read because of an error in Tetgen!"
@@ -32,6 +33,7 @@ namespace polyhedralGravity {
         if (this->checkIntegrity(filename, 'f')) {
             try {
                 _tetgenio.load_face(const_cast<char *>(filename.c_str()));
+                this->addFacesByTrifaces();
             } catch (...) {
                 throw std::runtime_error(
                         "The faces were not read because of an error in Tetgen! This could indicate several "
@@ -42,22 +44,12 @@ namespace polyhedralGravity {
         }
     }
 
-    void TetgenAdapter::readElements(const std::string &filename) {
-        if (this->checkIntegrity(filename, 'a')) {
-            try {
-                _tetgenio.load_elem(const_cast<char *>(filename.c_str()));
-            } catch (...) {
-                throw std::runtime_error(
-                        "The elements were not read because of an error in Tetgen!"
-                );
-            }
-        }
-    }
-
     void TetgenAdapter::readOff(const std::string &filename) {
         if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_off(const_cast<char *>(filename.c_str()));
+                this->addVertices();
+                this->addFacesByFacetList();
             } catch (...) {
                 throw std::runtime_error(
                         "The faces were not read because of an error in Tetgen! This could indicate several "
@@ -72,6 +64,8 @@ namespace polyhedralGravity {
         if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_ply(const_cast<char *>(filename.c_str()));
+                this->addVertices();
+                this->addFacesByFacetList();
             } catch (...) {
                 throw std::runtime_error(
                         "The faces were not read because of an error in Tetgen! This could indicate several "
@@ -86,6 +80,15 @@ namespace polyhedralGravity {
         if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_stl(const_cast<char *>(filename.c_str()));
+                this->addVertices();
+                this->addFacesByFacetList();
+
+                tetgenbehavior tetgenbehavior;
+                tetgenbehavior.zeroindex = 1;
+                tetrahedralize(&tetgenbehavior, &_tetgenio, &_tetgenio);
+
+                this->addVertices();
+                this->addFacesByTrifaces();
             } catch (...) {
                 throw std::runtime_error(
                         "The faces were not read because of an error in Tetgen! This could indicate several "
@@ -100,6 +103,14 @@ namespace polyhedralGravity {
         if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_medit(const_cast<char *>(filename.c_str()), 0);
+                this->addVertices();
+                this->addFacesByFacetList();
+                // Additionally .mesh files start counting the index at 1, instead of 0, so decrement all faces by one
+                std::transform(_faces.begin(), _faces.end(), _faces.begin(), [](const std::array<size_t, 3> &face) {
+                    using namespace util;
+                    return face - 1;
+                });
+
             } catch (...) {
                 throw std::runtime_error(
                         "The faces were not read because of an error in Tetgen! This could indicate several "
@@ -123,32 +134,34 @@ namespace polyhedralGravity {
         return true;
     }
 
-    Polyhedron TetgenAdapter::convertTetgenToPolyhedron() const {
-        std::vector<std::array<double, 3>> nodes{};
-        nodes.reserve(_tetgenio.numberofpoints);
+    void TetgenAdapter::addVertices() {
+        _vertices.clear();
+        _vertices.reserve(_tetgenio.numberofpoints);
         for (size_t i = 0; i < _tetgenio.numberofpoints * 3; i += 3) {
-            nodes.push_back({_tetgenio.pointlist[i],
+            _vertices.push_back({_tetgenio.pointlist[i],
                              _tetgenio.pointlist[i + 1],
                              _tetgenio.pointlist[i + 2]});
         }
+    }
 
-        //Trifacet versio
-        std::vector<std::array<size_t, 3>> faces{};
-        faces.reserve(_tetgenio.numberoftrifaces);
+    void TetgenAdapter::addFacesByTrifaces() {
+        _faces.clear();
+        _faces.reserve(_tetgenio.numberoftrifaces);
         for (size_t i = 0; i < _tetgenio.numberoftrifaces * 3; i += 3) {
-            faces.push_back({static_cast<size_t>(_tetgenio.trifacelist[i]),
+            _faces.push_back({static_cast<size_t>(_tetgenio.trifacelist[i]),
                              static_cast<size_t>(_tetgenio.trifacelist[i + 1]),
                              static_cast<size_t>(_tetgenio.trifacelist[i + 2])});
         }
-        //Polygon version
-        faces.reserve(_tetgenio.numberoffacets);
-        for (size_t i = 0; i < _tetgenio.numberoffacets; i += 3) {
-            //TODO Error Handling if polygonlist > 1
-            faces.push_back({static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[0]),
+    }
+
+    void TetgenAdapter::addFacesByFacetList() {
+        _faces.clear();
+        _faces.reserve(_tetgenio.numberoffacets);
+        for (size_t i = 0; i < _tetgenio.numberoffacets; ++i) {
+            _faces.push_back({static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[0]),
                              static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[1]),
                              static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[2])});
         }
-        return {nodes, faces};
     }
 
 }

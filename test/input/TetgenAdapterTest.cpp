@@ -119,6 +119,7 @@ TEST_F(TetgenAdapterTest, readSimpleStl) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
-    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+    for (const auto &actualVertice : actualPolyhedron.getNodes()) {
+        ASSERT_THAT(_expectedNodes, Contains(actualVertice));
+    }
 }
