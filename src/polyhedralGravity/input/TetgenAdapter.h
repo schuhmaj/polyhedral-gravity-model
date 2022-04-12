@@ -118,10 +118,11 @@ namespace polyhedralGravity {
         /**
          * Checks if the polyhedron is integer and not already defined by other properties
          * @param filename - string with the current read file, for more detailed exceptions
+         * @param what - what to check: f = faces, v = vertices, a = all
          * @return true if everything is ok
          * @throws an exception if not
          */
-        bool checkIntegrity(const std::string &filename) const;
+        bool checkIntegrity(const std::string &filename, char what) const;
 
         /**
          * Converts the tetgenio structure to a more slim Polyhedron used by this implementation.

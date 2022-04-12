@@ -17,7 +17,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readNode(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'v')) {
             try {
                 _tetgenio.load_node(const_cast<char *>(filename.c_str()));
             } catch (...) {
@@ -29,7 +29,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readFace(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'f')) {
             try {
                 _tetgenio.load_face(const_cast<char *>(filename.c_str()));
             } catch (...) {
@@ -43,7 +43,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readElements(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_elem(const_cast<char *>(filename.c_str()));
             } catch (...) {
@@ -55,7 +55,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readOff(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_off(const_cast<char *>(filename.c_str()));
             } catch (...) {
@@ -69,7 +69,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readPly(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_ply(const_cast<char *>(filename.c_str()));
             } catch (...) {
@@ -83,7 +83,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readStl(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_stl(const_cast<char *>(filename.c_str()));
             } catch (...) {
@@ -97,7 +97,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readMesh(const std::string &filename) {
-        if (this->checkIntegrity(filename)) {
+        if (this->checkIntegrity(filename, 'a')) {
             try {
                 _tetgenio.load_medit(const_cast<char *>(filename.c_str()), 0);
             } catch (...) {
@@ -110,12 +110,12 @@ namespace polyhedralGravity {
         }
     }
 
-    bool TetgenAdapter::checkIntegrity(const std::string &filename) const {
-        if (_tetgenio.numberofpoints != 0) {
+    bool TetgenAdapter::checkIntegrity(const std::string &filename, char what) const {
+        if ((what == 'v' || what == 'a') && _tetgenio.numberofpoints != 0) {
             throw std::runtime_error(
                     "The Polyhedron already has well defined nodes! The information of " + filename
                     + ".node is redundant!");
-        } else if (_tetgenio.numberoftrifaces != 0 || _tetgenio.numberoffacets != 0) {
+        } else if ((what == 'f' || what == 'a') && (_tetgenio.numberoftrifaces != 0 || _tetgenio.numberoffacets != 0)) {
             throw std::runtime_error(
                     "The Polyhedron already has well defined faces! The information of " + filename
                     + ".node is redundant!");
