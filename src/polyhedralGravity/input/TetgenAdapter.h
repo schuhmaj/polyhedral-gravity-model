@@ -66,6 +66,39 @@ namespace polyhedralGravity {
          */
         void readElements(const std::string &filename);
 
+
+        /**
+         * Reads elements from a .off file (Geomview’s polyhedral file format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readOff(const std::string &filename);
+
+
+        /**
+         * Reads elements from a .ply file (Polyhedral file format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readPly(const std::string &filename);
+
+
+        /**
+         * Reads elements from a .stl file (Stereolithography format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readStl(const std::string &filename);
+
+        /**
+         * Reads elements from a .mesh file (Medit’s mesh file format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readMesh(const std::string &filename);
+
+
+
     private:
 
         /**
@@ -75,23 +108,20 @@ namespace polyhedralGravity {
         const std::map<std::string, std::function<void(const std::string &name)>> _suffixToOperation{
                 {"node", [this](const std::string &name) { this->readNode(name); }},
                 {"face", [this](const std::string &name) { this->readFace(name); }},
-                {"ele",  [this](const std::string &name) { this->readElements(name); }}
+                {"ele",  [this](const std::string &name) { this->readElements(name); }},
+                {"off",  [this](const std::string &name) { this->readOff(name); }},
+                {"ply",  [this](const std::string &name) { this->readPly(name); }},
+                {"stl",  [this](const std::string &name) { this->readStl(name); }},
+                {"mesh",  [this](const std::string &name) { this->readMesh(name); }}
         };
 
         /**
-         * Does the polyhedron have nodes?
+         * Checks if the polyhedron is integer and not already defined by other properties
+         * @param filename - string with the current read file, for more detailed exceptions
+         * @return true if everything is ok
+         * @throws an exception if not
          */
-        bool _hasNodes{false};
-
-        /**
-         * Does the polyhedron have faces?
-         */
-        bool _hasFaces{false};
-
-        /**
-         * Does the polyhedron have elements?
-         */
-        bool _hasElements{false};
+        bool checkIntegrity(const std::string &filename) const;
 
         /**
          * Converts the tetgenio structure to a more slim Polyhedron used by this implementation.

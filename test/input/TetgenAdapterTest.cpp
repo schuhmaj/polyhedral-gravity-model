@@ -7,12 +7,9 @@
 
 class TetgenAdapterTest : public ::testing::Test {
 
-};
+protected:
 
-TEST_F(TetgenAdapterTest, readSimpleNode) {
-    using namespace testing;
-    using namespace ::polyhedralGravity;
-    std::vector<std::array<double, 3>> expectedNodes = {
+    std::vector<std::array<double, 3>> _expectedNodes = {
             {-20, 0,  25},
             {0,   0,  25},
             {0,   10, 25},
@@ -23,22 +20,7 @@ TEST_F(TetgenAdapterTest, readSimpleNode) {
             {-20, 10, 15}
     };
 
-    std::vector<std::string> simpleFiles {
-        "resources/TetgenAdapterTestReadSimple.node",
-        "resources/TetgenAdapterTestReadSimple.face",
-    };
-
-    TetgenAdapter tetgenAdapter{simpleFiles};
-    auto actualPolyhedron = tetgenAdapter.getPolyhedron();
-
-    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(expectedNodes));
-}
-
-
-TEST_F(TetgenAdapterTest, readSimpleFace) {
-    using namespace testing;
-    using namespace ::polyhedralGravity;
-    std::vector<std::array<size_t, 3>> expectedFaces = {
+    std::vector<std::array<size_t, 3>> _expectedFaces = {
             {0, 1, 3},
             {1, 2, 3},
             {0, 4, 5},
@@ -53,6 +35,28 @@ TEST_F(TetgenAdapterTest, readSimpleFace) {
             {4, 7, 6}
     };
 
+};
+
+TEST_F(TetgenAdapterTest, readSimpleNode) {
+    using namespace testing;
+    using namespace ::polyhedralGravity;
+
+    std::vector<std::string> simpleFiles {
+        "resources/TetgenAdapterTestReadSimple.node",
+        "resources/TetgenAdapterTestReadSimple.face",
+    };
+
+    TetgenAdapter tetgenAdapter{simpleFiles};
+    auto actualPolyhedron = tetgenAdapter.getPolyhedron();
+
+    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+}
+
+
+TEST_F(TetgenAdapterTest, readSimpleFace) {
+    using namespace testing;
+    using namespace ::polyhedralGravity;
+
     std::vector<std::string> simpleFiles;
     simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.node");
     simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.face");
@@ -60,5 +64,61 @@ TEST_F(TetgenAdapterTest, readSimpleFace) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(expectedFaces));
+    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+}
+
+TEST_F(TetgenAdapterTest, readSimpleMesh) {
+    using namespace testing;
+    using namespace ::polyhedralGravity;
+
+    std::vector<std::string> simpleFiles;
+    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.mesh");
+
+    TetgenAdapter tetgenAdapter{simpleFiles};
+    auto actualPolyhedron = tetgenAdapter.getPolyhedron();
+
+    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+}
+
+TEST_F(TetgenAdapterTest, readSimpleOff) {
+    using namespace testing;
+    using namespace ::polyhedralGravity;
+
+    std::vector<std::string> simpleFiles;
+    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.off");
+
+    TetgenAdapter tetgenAdapter{simpleFiles};
+    auto actualPolyhedron = tetgenAdapter.getPolyhedron();
+
+    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+}
+
+TEST_F(TetgenAdapterTest, readSimplePly) {
+    using namespace testing;
+    using namespace ::polyhedralGravity;
+
+    std::vector<std::string> simpleFiles;
+    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.ply");
+
+    TetgenAdapter tetgenAdapter{simpleFiles};
+    auto actualPolyhedron = tetgenAdapter.getPolyhedron();
+
+    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+}
+
+TEST_F(TetgenAdapterTest, readSimpleStl) {
+    using namespace testing;
+    using namespace ::polyhedralGravity;
+
+    std::vector<std::string> simpleFiles;
+    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.stl");
+
+    TetgenAdapter tetgenAdapter{simpleFiles};
+    auto actualPolyhedron = tetgenAdapter.getPolyhedron();
+
+    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
 }
