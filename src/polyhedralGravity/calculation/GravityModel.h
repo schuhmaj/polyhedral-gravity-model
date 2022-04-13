@@ -12,6 +12,7 @@
 #include "thrust/iterator/zip_iterator.h"
 #include "thrust/iterator/counting_iterator.h"
 #include "thrust/transform.h"
+#include "polyhedralGravity/util/UtilityThrust.h"
 
 namespace polyhedralGravity {
 

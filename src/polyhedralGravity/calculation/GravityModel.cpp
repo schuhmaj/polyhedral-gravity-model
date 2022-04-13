@@ -39,21 +39,10 @@ namespace polyhedralGravity {
          * Calculate V
          */
 
-        auto firstV = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.begin(),
-                                                                   planeDistances.begin(),
-                                                                   segmentNormalOrientation.begin(),
-                                                                   segmentDistances.begin(),
-                                                                   transcendentalExpressions.begin(),
-                                                                   singularities.begin()));
+        auto zipIteratorV = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
+                                          segmentDistances, transcendentalExpressions, singularities);
 
-        auto lastV = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.end(),
-                                                                  planeDistances.end(),
-                                                                  segmentNormalOrientation.end(),
-                                                                  segmentDistances.end(),
-                                                                  transcendentalExpressions.end(),
-                                                                  singularities.end()));
-
-        double V = std::accumulate(firstV, lastV, 0.0, [](double acc, const auto &tuple) {
+        double V = std::accumulate(zipIteratorV.first, zipIteratorV.second, 0.0, [](double acc, const auto &tuple) {
             const double sigma_p = thrust::get<0>(tuple);
             const double h_p = thrust::get<1>(tuple);
             const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
@@ -61,34 +50,27 @@ namespace polyhedralGravity {
             const auto &transcendentalExpressionsPerPlane = thrust::get<4>(tuple);
             const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(tuple);
 
-            auto sum1Start = thrust::make_zip_iterator(thrust::make_tuple(sigmaPQPerPlane.begin(),
-                                                                          segmentDistancePerPlane.begin(),
-                                                                          transcendentalExpressionsPerPlane.begin()));
+            //Sum 1
+            auto zipIteratorSum1 = util::zipPair(sigmaPQPerPlane, segmentDistancePerPlane,
+                                                 transcendentalExpressionsPerPlane);
+            const double sum1 = std::accumulate(zipIteratorSum1.first, zipIteratorSum1.second,
+                                                0.0, [](double acc, const auto &tuple) {
+                        const double &sigma_pq = thrust::get<0>(tuple);
+                        const double &h_pq = thrust::get<1>(tuple);
+                        const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(tuple);
+                        return acc + sigma_pq * h_pq * transcendentalExpressions.ln;
+                    });
 
-            auto sum1End = thrust::make_zip_iterator(thrust::make_tuple(sigmaPQPerPlane.end(),
-                                                                        segmentDistancePerPlane.end(),
-                                                                        transcendentalExpressionsPerPlane.end()));
+            //Sum 2
+            auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane, transcendentalExpressionsPerPlane);
+            const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
+                                                0.0, [](double acc, const auto &tuple) {
+                        const double &sigma_pq = thrust::get<0>(tuple);
+                        const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
+                        return acc + sigma_pq * transcendentalExpressions.an;
+                    });
 
-            const double sum1 = std::accumulate(sum1Start, sum1End, 0.0, [](double acc, const auto &tuple) {
-                const double &sigma_pq = thrust::get<0>(tuple);
-                const double &h_pq = thrust::get<1>(tuple);
-                const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(tuple);
-                return acc + sigma_pq * h_pq * transcendentalExpressions.ln;
-            });
-
-            auto sum2Start = thrust::make_zip_iterator(thrust::make_tuple(sigmaPQPerPlane.begin(),
-                                                                          transcendentalExpressionsPerPlane.begin()));
-
-            auto sum2End = thrust::make_zip_iterator(thrust::make_tuple(sigmaPQPerPlane.end(),
-                                                                        transcendentalExpressionsPerPlane.end()));
-
-            const double sum2 = std::accumulate(sum2Start, sum2End, 0.0, [](double acc, const auto &tuple) {
-                const double &sigma_pq = thrust::get<0>(tuple);
-                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
-                return acc + sigma_pq * transcendentalExpressions.an;
-            });
-
-
+            //Sum up everything
             return acc + sigma_p * h_p * (sum1 + h_p * sum2 + singularitiesPerPlane.first);
         });
 
@@ -101,24 +83,12 @@ namespace polyhedralGravity {
          * TODO This code cries because it is a code clone and very unhappy about this circumstance
          */
 
-        auto firstV2 = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.begin(),
-                                                                    planeDistances.begin(),
-                                                                    segmentNormalOrientation.begin(),
-                                                                    segmentDistances.begin(),
-                                                                    transcendentalExpressions.begin(),
-                                                                    singularities.begin(),
-                                                                    planeUnitNormals.begin()));
-
-        auto lastV2 = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.end(),
-                                                                   planeDistances.end(),
-                                                                   segmentNormalOrientation.end(),
-                                                                   segmentDistances.end(),
-                                                                   transcendentalExpressions.end(),
-                                                                   singularities.end(),
-                                                                   planeUnitNormals.end()));
+        auto zipIteratorV2 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
+                                           segmentDistances, transcendentalExpressions, singularities,
+                                           planeUnitNormals);
 
         Array3 V2 = std::accumulate(
-                firstV2, lastV2, Array3{0.0, 0.0, 0.0},
+                zipIteratorV2.first, zipIteratorV2.second, Array3{0.0, 0.0, 0.0},
                 [](const Array3 &acc, const auto &tuple) {
                     using namespace util;
                     const double sigma_p = thrust::get<0>(tuple);
@@ -130,18 +100,11 @@ namespace polyhedralGravity {
                             tuple);
                     const Array3 &Np = thrust::get<6>(tuple);
 
-                    auto sum1Start = thrust::make_zip_iterator(thrust::make_tuple(
-                            sigmaPQPerPlane.begin(),
-                            segmentDistancePerPlane.begin(),
-                            transcendentalExpressionsPerPlane.begin()));
-
-                    auto sum1End = thrust::make_zip_iterator(thrust::make_tuple(
-                            sigmaPQPerPlane.end(),
-                            segmentDistancePerPlane.end(),
-                            transcendentalExpressionsPerPlane.end()));
-
+                    //Sum 1
+                    auto zipIteratorSum1 = util::zipPair(sigmaPQPerPlane, segmentDistancePerPlane,
+                                                         transcendentalExpressionsPerPlane);
                     const double sum1 = std::accumulate(
-                            sum1Start, sum1End, 0.0,
+                            zipIteratorSum1.first, zipIteratorSum1.second, 0.0,
                             [](double acc, const auto &tuple) {
                                 const double &sigma_pq = thrust::get<0>(tuple);
                                 const double &h_pq = thrust::get<1>(tuple);
@@ -149,22 +112,16 @@ namespace polyhedralGravity {
                                 return acc + sigma_pq * h_pq * transcendentalExpressions.ln;
                             });
 
-                    auto sum2Start = thrust::make_zip_iterator(thrust::make_tuple(
-                            sigmaPQPerPlane.begin(),
-                            transcendentalExpressionsPerPlane.begin()));
-
-                    auto sum2End = thrust::make_zip_iterator(thrust::make_tuple(
-                            sigmaPQPerPlane.end(),
-                            transcendentalExpressionsPerPlane.end()));
-
-                    const double sum2 = std::accumulate(
-                            sum2Start, sum2End, 0.0,
-                            [](double acc, const auto &tuple) {
+                    //Sum 2
+                    auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane, transcendentalExpressionsPerPlane);
+                    const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
+                                                        0.0, [](double acc, const auto &tuple) {
                                 const double &sigma_pq = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
                                 return acc + sigma_pq * transcendentalExpressions.an;
                             });
 
+                    //Sum up everything
                     return acc + (Np * (sum1 + h_p * sum2 + singularitiesPerPlane.first));
                 });
 
@@ -178,26 +135,12 @@ namespace polyhedralGravity {
          * Calculation of Vxx, Vyy, Vzz, Vxy, Vxz, Vyz
          */
 
-        auto firstV3 = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.begin(),
-                                                                    planeDistances.begin(),
-                                                                    segmentNormalOrientation.begin(),
-                                                                    segmentDistances.begin(),
-                                                                    transcendentalExpressions.begin(),
-                                                                    singularities.begin(),
-                                                                    planeUnitNormals.begin(),
-                                                                    segmentUnitNormals.begin()));
-
-        auto lastV3 = thrust::make_zip_iterator(thrust::make_tuple(planeNormalOrientation.end(),
-                                                                   planeDistances.end(),
-                                                                   segmentNormalOrientation.end(),
-                                                                   segmentDistances.end(),
-                                                                   transcendentalExpressions.end(),
-                                                                   singularities.end(),
-                                                                   planeUnitNormals.end(),
-                                                                   segmentUnitNormals.end()));
+        auto zipIteratorV3 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
+                                           segmentDistances, transcendentalExpressions, singularities,
+                                           planeUnitNormals, segmentUnitNormals);
 
         std::array<double, 6> V3 = std::accumulate(
-                firstV3, lastV3, std::array<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                zipIteratorV3.first, zipIteratorV3.second, std::array<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
                 [](const std::array<double, 6> &acc, const auto &tuple) {
                     using namespace util;
                     const double sigma_p = thrust::get<0>(tuple);
@@ -211,16 +154,10 @@ namespace polyhedralGravity {
                     const Array3Triplet &npqPerPlane = thrust::get<7>(tuple);
 
 
-                    auto sum1Start = thrust::make_zip_iterator(thrust::make_tuple(
-                            npqPerPlane.begin(),
-                            transcendentalExpressionsPerPlane.begin()));
-
-                    auto sum1End = thrust::make_zip_iterator(thrust::make_tuple(
-                            npqPerPlane.end(),
-                            transcendentalExpressionsPerPlane.end()));
-
+                    //Sum 1
+                    auto zipIteratorSum1 = util::zipPair(npqPerPlane, transcendentalExpressionsPerPlane);
                     const Array3 sum1 = std::accumulate(
-                            sum1Start, sum1End, Array3{0.0, 0.0, 0.0},
+                            zipIteratorSum1.first, zipIteratorSum1.second, Array3{0.0, 0.0, 0.0},
                             [](const Array3 &acc, const auto &tuple) {
                                 const Array3 &npq = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
@@ -235,14 +172,16 @@ namespace polyhedralGravity {
                             sigmaPQPerPlane.end(),
                             transcendentalExpressionsPerPlane.end()));
 
-                    const double sum2 = std::accumulate(
-                            sum2Start, sum2End, 0.0,
-                            [](double acc, const auto &tuple) {
+                    //Sum 2
+                    auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane, transcendentalExpressionsPerPlane);
+                    const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
+                                                        0.0, [](double acc, const auto &tuple) {
                                 const double &sigma_pq = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
                                 return acc + sigma_pq * transcendentalExpressions.an;
                             });
 
+                    //Sum up everything
                     const Array3 subSum = (sum1 + (Np * (sigma_p * sum2))) + singularitiesPerPlane.second;
 
                     const Array3 first = Np * subSum;
@@ -359,15 +298,9 @@ namespace polyhedralGravity {
         std::vector<Array3> orthogonalProjectionPointsOfP{planeUnitNormals.size()};
 
         //Zip the three required arguments together: Plane normal N_i, Plane Distance h_i and the Hessian Form
-        auto first = thrust::make_zip_iterator(thrust::make_tuple(planeUnitNormals.begin(),
-                                                                  planeDistances.begin(),
-                                                                  hessianPlanes.begin()));
+        auto zip = util::zipPair(planeUnitNormals, planeDistances, hessianPlanes);
 
-        auto last = thrust::make_zip_iterator(thrust::make_tuple(planeUnitNormals.end(),
-                                                                 planeDistances.end(),
-                                                                 hessianPlanes.end()));
-
-        thrust::transform(first, last, orthogonalProjectionPointsOfP.begin(), [](const auto &tuple) {
+        thrust::transform(zip.first, zip.second, orthogonalProjectionPointsOfP.begin(), [](const auto &tuple) {
             using namespace util;
             const Array3 &Ni = thrust::get<0>(tuple);
             const double hi = thrust::get<1>(tuple);
@@ -444,15 +377,10 @@ namespace polyhedralGravity {
         std::vector<Array3Triplet> orthogonalProjectionPointsOfPPrime{orthogonalProjectionPointsOnPlane.size()};
 
         //Zip the three required arguments together: P' for every plane, sigma_pq for every segment, the faces
-        auto first = thrust::make_zip_iterator(thrust::make_tuple(orthogonalProjectionPointsOnPlane.begin(),
-                                                                  segmentNormalOrientation.begin(),
-                                                                  _polyhedron.getFaces().begin()));
-        auto last = thrust::make_zip_iterator(thrust::make_tuple(orthogonalProjectionPointsOnPlane.end(),
-                                                                 segmentNormalOrientation.end(),
-                                                                 _polyhedron.getFaces().end()));
+        auto zip = util::zipPair(orthogonalProjectionPointsOnPlane, segmentNormalOrientation, _polyhedron.getFaces());
 
         //The outer loop with the running i --> the planes
-        thrust::transform(first, last, orthogonalProjectionPointsOfPPrime.begin(), [&](const auto &tuple) {
+        thrust::transform(zip.first, zip.second, orthogonalProjectionPointsOfPPrime.begin(), [&](const auto &tuple) {
             //P' for plane i, sigma_pq[i] with fixed i, the nodes making up plane i
             const auto &pPrime = thrust::get<0>(tuple);
             const auto &sigmaP = thrust::get<1>(tuple);
@@ -527,74 +455,64 @@ namespace polyhedralGravity {
         std::vector<std::array<Distance, 3>> distances{gij.size()};
 
         //Zip the three required arguments together: G_ij for every segment, P'' for every segment
-        auto first = thrust::make_zip_iterator(thrust::make_tuple(gij.begin(),
-                                                                  orthogonalProjectionPointsOnSegment.begin(),
-                                                                  _polyhedron.getFaces().begin()));
-        auto last = thrust::make_zip_iterator(thrust::make_tuple(gij.end(),
-                                                                 orthogonalProjectionPointsOnSegment.end(),
-                                                                 _polyhedron.getFaces().end()));
+        auto zip = util::zipPair(gij, orthogonalProjectionPointsOnSegment, _polyhedron.getFaces());
 
-        thrust::transform(first, last, distances.begin(), [&](const auto &tuple) {
+        thrust::transform(zip.first, zip.second, distances.begin(), [&](const auto &tuple) {
             const auto &gi = thrust::get<0>(tuple);
             const auto &pDoublePrimePerPlane = thrust::get<1>(tuple);
             const auto &face = thrust::get<2>(tuple);
 
             std::array<Distance, 3> distancesArray{};
             auto counterJ = thrust::counting_iterator<unsigned int>(0);
+            auto innerZip = util::zipPair(gi, pDoublePrimePerPlane);
 
-            auto first = thrust::make_zip_iterator(thrust::make_tuple(gi.begin(),
-                                                                      pDoublePrimePerPlane.begin(),
-                                                                      counterJ));
-            auto last = thrust::make_zip_iterator(thrust::make_tuple(gi.end(),
-                                                                     pDoublePrimePerPlane.end(),
-                                                                     counterJ + 3));
+            thrust::transform(innerZip.first, innerZip.second, counterJ,
+                              distancesArray.begin(), [&](const auto &tuple, unsigned int j) {
+                        using namespace util;
+                        Distance distance{};
+                        const Array3 &gijVector = thrust::get<0>(tuple);
+                        const Array3 &pDoublePrime = thrust::get<1>(tuple);
 
-            thrust::transform(first, last, distancesArray.begin(), [&](const auto &tuple) {
-                using namespace util;
-                Distance distance{};
-                const Array3 &gijVector = thrust::get<0>(tuple);
-                const Array3 &pDoublePrime = thrust::get<1>(tuple);
-                const unsigned int j = thrust::get<2>(tuple);
+                        //Get the vertices (endpoints) of this segment
+                        const auto &v1 = _polyhedron.getVertex(face[j]);
+                        const auto &v2 = _polyhedron.getVertex(face[(j + 1) % 3]);
 
-                //Get the vertices (endpoints) of this segment
-                const auto &v1 = _polyhedron.getVertex(face[j]);
-                const auto &v2 = _polyhedron.getVertex(face[(j + 1) % 3]);
+                        //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints v1 and v2
+                        distance.l1 = euclideanNorm(v1);
+                        distance.l2 = euclideanNorm(v2);
+                        //Calculate the 1D distances between P'' (every segment has its own) and the segment endpoints v1 and v2
+                        distance.s1 = euclideanNorm(pDoublePrime - v1);
+                        distance.s2 = euclideanNorm(pDoublePrime - v2);
 
-                //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints v1 and v2
-                distance.l1 = euclideanNorm(v1);
-                distance.l2 = euclideanNorm(v2);
-                //Calculate the 1D distances between P'' (every segment has its own) and the segment endpoints v1 and v2
-                distance.s1 = euclideanNorm(pDoublePrime - v1);
-                distance.s2 = euclideanNorm(pDoublePrime - v2);
-
-                //Change the sign depending on certain conditions
-                //1D and 3D distance are small
-                if (std::abs(distance.s1 - distance.l1) < 1e-10 && std::abs(distance.s2 - distance.l2) < 1e-10) {
-                    if (distance.s2 < distance.s1) {
-                        distance.s1 *= -1.0;
-                        distance.s2 *= -1.0;
-                        distance.l1 *= -1.0;
-                        distance.l2 *= -1.0;
+                        //Change the sign depending on certain conditions
+                        //1D and 3D distance are small
+                        if (std::abs(distance.s1 - distance.l1) < 1e-10 &&
+                            std::abs(distance.s2 - distance.l2) < 1e-10) {
+                            if (distance.s2 < distance.s1) {
+                                distance.s1 *= -1.0;
+                                distance.s2 *= -1.0;
+                                distance.l1 *= -1.0;
+                                distance.l2 *= -1.0;
+                                return distance;
+                            } else if (distance.s2 == distance.s1) {
+                                distance.s1 *= -1.0;
+                                distance.l1 *= -1.0;
+                                return distance;
+                            }
+                        } else {
+                            //condition: P'' lies on the segment described by G_ij
+                            const double norm = euclideanNorm(gijVector);
+                            if (distance.s1 < norm && distance.s2 < norm) {
+                                distance.s1 *= -1.0;
+                                return distance;
+                            } else if (distance.s2 < distance.s1) {
+                                distance.s1 *= -1.0;
+                                distance.s2 *= -1.0;
+                                return distance;
+                            }
+                        }
                         return distance;
-                    } else if (distance.s2 == distance.s1) {
-                        distance.s1 *= -1.0;
-                        distance.l1 *= -1.0;
-                        return distance;
-                    }
-                } else {
-                    //condition: P'' lies on the segment described by G_ij
-                    const double norm = euclideanNorm(gijVector);
-                    if (distance.s1 < norm && distance.s2 < norm) {
-                        distance.s1 *= -1.0;
-                        return distance;
-                    } else if (distance.s2 < distance.s1) {
-                        distance.s1 *= -1.0;
-                        distance.s2 *= -1.0;
-                        return distance;
-                    }
-                }
-                return distance;
-            });
+                    });
             return distancesArray;
         });
         return distances;
@@ -610,21 +528,10 @@ namespace polyhedralGravity {
         std::vector<std::array<TranscendentalExpression, 3>> transcendentalExpressions{distances.size()};
 
         //Zip iterator consisting of  3D and 1D distances l1/l2 and s1/2 | h_p | h_pq | sigma_pq | P'_p | faces
-        //TODO Add h_pq
-        auto first = thrust::make_zip_iterator(thrust::make_tuple(distances.begin(),
-                                                                  planeDistances.begin(),
-                                                                  segmentDistances.begin(),
-                                                                  segmentNormalOrientation.begin(),
-                                                                  orthogonalProjectionPointsOnPlane.begin(),
-                                                                  _polyhedron.getFaces().begin()));
-        auto last = thrust::make_zip_iterator(thrust::make_tuple(distances.end(),
-                                                                 planeDistances.end(),
-                                                                 segmentDistances.end(),
-                                                                 segmentNormalOrientation.end(),
-                                                                 orthogonalProjectionPointsOnPlane.end(),
-                                                                 _polyhedron.getFaces().end()));
+        auto zip = util::zipPair(distances, planeDistances, segmentDistances, segmentNormalOrientation,
+                                 orthogonalProjectionPointsOnPlane, _polyhedron.getFaces());
 
-        thrust::transform(first, last, transcendentalExpressions.begin(), [&](const auto &tuple) {
+        thrust::transform(zip.first, zip.second, transcendentalExpressions.begin(), [&](const auto &tuple) {
             const auto &distancesPerPlane = thrust::get<0>(tuple);
             const double hp = thrust::get<1>(tuple);
             const auto &segmentDistancesPerPlane = thrust::get<2>(tuple);
@@ -636,17 +543,13 @@ namespace polyhedralGravity {
 
 
             //Zip iterator consisting of 3D and 1D distances l1/l2 and s1/2 for this plane | sigma_pq for this plane
-            auto first = thrust::make_zip_iterator(thrust::make_tuple(distancesPerPlane.begin(),
-                                                                      segmentDistancesPerPlane.begin(),
-                                                                      segmentNormalOrientationPerPlane.begin()));
-            auto last = thrust::make_zip_iterator(thrust::make_tuple(distancesPerPlane.end(),
-                                                                     segmentDistancesPerPlane.end(),
-                                                                     segmentNormalOrientationPerPlane.end()));
+            auto innerZip =
+                    util::zipPair(distancesPerPlane, segmentDistancesPerPlane, segmentNormalOrientationPerPlane);
 
             //Result for this plane
             std::array<TranscendentalExpression, 3> transcendentalExpressionsPerPlane{};
 
-            thrust::transform(first, last, counterJ, transcendentalExpressionsPerPlane.begin(),
+            thrust::transform(innerZip.first, innerZip.second, counterJ, transcendentalExpressionsPerPlane.begin(),
                               [&](const auto &tuple, const unsigned int j) {
                                   using namespace util;
                                   const Distance &distance = thrust::get<0>(tuple);
@@ -704,23 +607,12 @@ namespace polyhedralGravity {
         //The result
         std::vector<std::pair<double, Array3>> singularities{planeDistances.size()};
 
-        //Zip iterator consisting of G_ij vectors | sigma_pq | faces | P' | h_p
-        auto first = thrust::make_zip_iterator(thrust::make_tuple(gijVectors.begin(),
-                                                                  segmentNormalOrientation.begin(),
-                                                                  _polyhedron.getFaces().begin(),
-                                                                  orthogonalProjectionPointsOnPlane.begin(),
-                                                                  planeDistances.begin(),
-                                                                  planeNormalOrientation.begin(),
-                                                                  planeUnitNormals.begin()));
-        auto last = thrust::make_zip_iterator(thrust::make_tuple(gijVectors.end(),
-                                                                 segmentNormalOrientation.end(),
-                                                                 _polyhedron.getFaces().end(),
-                                                                 orthogonalProjectionPointsOnPlane.end(),
-                                                                 planeDistances.end(),
-                                                                 planeNormalOrientation.end(),
-                                                                 planeUnitNormals.end()));
+        //Zip iterator consisting of G_ij vectors | sigma_pq | faces | P' | h_p | sigma_p | N_i
+        auto zip = util::zipPair(gijVectors, segmentNormalOrientation, _polyhedron.getFaces(),
+                                 orthogonalProjectionPointsOnPlane, planeDistances, planeNormalOrientation,
+                                 planeUnitNormals);
 
-        thrust::transform(first, last, singularities.begin(), [&](const auto &tuple) {
+        thrust::transform(zip.first, zip.second, singularities.begin(), [&](const auto &tuple) {
             const auto &gijVectorsPerPlane = thrust::get<0>(tuple);
             const auto segmentNormalOrientationPerPlane = thrust::get<1>(tuple);
             const auto &face = thrust::get<2>(tuple);
@@ -739,14 +631,10 @@ namespace polyhedralGravity {
             // as the vector of v1 and v2
             // then P' is located on one line segment G_p of plane p, but not on any of its vertices
             auto counterJ = thrust::counting_iterator<unsigned int>(0);
-            auto secondCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(
-                    gijVectorsPerPlane.begin(),
-                    segmentNormalOrientationPerPlane.begin(),
-                    counterJ));
-            auto secondCaseEnd = thrust::make_zip_iterator(thrust::make_tuple(
-                    gijVectorsPerPlane.end(),
-                    segmentNormalOrientationPerPlane.end(),
-                    counterJ + 3));
+            auto secondCaseBegin = util::zip(gijVectorsPerPlane.begin(), segmentNormalOrientationPerPlane.begin(),
+                                             counterJ);
+            auto secondCaseEnd = util::zip(gijVectorsPerPlane.end(), segmentNormalOrientationPerPlane.end(),
+                                           counterJ + 3);
             if (std::any_of(secondCaseBegin, secondCaseEnd, [&](const auto &tuple) {
                 using namespace util;
                 const Array3 &gij = thrust::get<0>(tuple);
@@ -768,12 +656,8 @@ namespace polyhedralGravity {
             //3. case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
             // then P' is located at one of G_p's vertices
             auto counterJ3 = thrust::counting_iterator<int>(0);
-            auto thirdCaseBegin = thrust::make_zip_iterator(thrust::make_tuple(
-                    segmentNormalOrientationPerPlane.begin(),
-                    counterJ3));
-            auto thirdCaseEnd = thrust::make_zip_iterator(thrust::make_tuple(
-                    segmentNormalOrientationPerPlane.end(),
-                    counterJ3 + 3));
+            auto thirdCaseBegin = util::zip(segmentNormalOrientationPerPlane.begin(), counterJ3);
+            auto thirdCaseEnd = util::zip(segmentNormalOrientationPerPlane.end(), counterJ3 + 3);
             double e1;
             double e2;
             unsigned int j;
