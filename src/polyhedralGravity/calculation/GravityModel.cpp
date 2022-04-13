@@ -4,7 +4,7 @@ namespace polyhedralGravity {
 
     void GravityModel::calculate() {
         using namespace util;
-        auto gijVectors = calculateGij();
+        auto gijVectors = calculateSegmentVectors();
         auto planeUnitNormals = calculatePlaneUnitNormals(gijVectors);
         auto segmentUnitNormals = calculateSegmentUnitNormals(gijVectors, planeUnitNormals);
 
@@ -265,14 +265,14 @@ namespace polyhedralGravity {
 
     }
 
-    std::vector<Array3Triplet> GravityModel::calculateGij() {
+    std::vector<Array3Triplet> GravityModel::calculateSegmentVectors() {
         std::vector<Array3Triplet> g{_polyhedron.countFaces()};
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), g.begin(),
                        [&](const auto &face) -> Array3Triplet {
                            using util::operator-;
-                           const auto &node0 = _polyhedron.getNode(face[0]);
-                           const auto &node1 = _polyhedron.getNode(face[1]);
-                           const auto &node2 = _polyhedron.getNode(face[2]);
+                           const auto &node0 = _polyhedron.getVertex(face[0]);
+                           const auto &node1 = _polyhedron.getVertex(face[1]);
+                           const auto &node2 = _polyhedron.getVertex(face[2]);
                            return {node1 - node0, node2 - node1, node0 - node2};
                        });
         return g;
@@ -323,7 +323,7 @@ namespace polyhedralGravity {
                        [&](const Array3 &ni, const std::array<size_t, 3> &gi) {
                            using namespace util;
                            //The first vertices' coordinates of the given face consisting of G_i's
-                           const auto &Gi1 = _polyhedron.getNode(gi[0]);
+                           const auto &Gi1 = _polyhedron.getVertex(gi[0]);
                            //We abstain on the double multiplication with -1 in the line above and beyond since two
                            //times multiplying with -1 equals no change
                            return sgn(dot(ni, Gi1), util::EPSILON);
@@ -338,9 +338,9 @@ namespace polyhedralGravity {
         std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), hessianPlanes.begin(),
                        [&](const auto &face) -> HessianPlane {
                            using namespace util;
-                           const auto &node0 = _polyhedron.getNode(face[0]);
-                           const auto &node1 = _polyhedron.getNode(face[1]);
-                           const auto &node2 = _polyhedron.getNode(face[2]);
+                           const auto &node0 = _polyhedron.getVertex(face[0]);
+                           const auto &node1 = _polyhedron.getVertex(face[1]);
+                           const auto &node2 = _polyhedron.getVertex(face[2]);
                            //The three vertices put up the plane, p is the origin of the reference system default 0,0,0
                            return computeHessianPlane(node0, node1, node2, p);
                        });
@@ -431,9 +431,9 @@ namespace polyhedralGravity {
                        [&](const Array3 &projectionPoint, const std::array<size_t, 3> &face)
                                -> Array3Triplet {
                            using util::operator-;
-                           const auto &node0 = _polyhedron.getNode(face[0]);
-                           const auto &node1 = _polyhedron.getNode(face[1]);
-                           const auto &node2 = _polyhedron.getNode(face[2]);
+                           const auto &node0 = _polyhedron.getVertex(face[0]);
+                           const auto &node1 = _polyhedron.getVertex(face[1]);
+                           const auto &node2 = _polyhedron.getVertex(face[2]);
                            return {projectionPoint - node0, projectionPoint - node1, projectionPoint - node2};
                        });
         //The second part of equation (23)
@@ -487,8 +487,8 @@ namespace polyhedralGravity {
                                   } else {
                                       //In one of the half space, calculate the projection point P'' for the segment
                                       //with the endpoints v1 and v2
-                                      const auto &v1 = _polyhedron.getNode(face[j]);
-                                      const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                                      const auto &v1 = _polyhedron.getVertex(face[j]);
+                                      const auto &v2 = _polyhedron.getVertex(face[(j + 1) % 3]);
                                       return calculateOrthogonalProjectionOnSegment(v1, v2, pPrime);
                                   }
                               });
@@ -573,8 +573,8 @@ namespace polyhedralGravity {
                 const unsigned int j = thrust::get<2>(tuple);
 
                 //Get the vertices (endpoints) of this segment
-                const auto &v1 = _polyhedron.getNode(face[j]);
-                const auto &v2 = _polyhedron.getNode(face[(j + 1) % 3]);
+                const auto &v1 = _polyhedron.getVertex(face[j]);
+                const auto &v2 = _polyhedron.getVertex(face[(j + 1) % 3]);
 
                 //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints v1 and v2
                 distance.l1 = euclideanNorm(v1);
@@ -673,8 +673,8 @@ namespace polyhedralGravity {
                                   TranscendentalExpression transcendentalExpressionPerSegment{};
 
                                   //Vertices (endpoints) of this segment
-                                  const Array3 &v1 = _polyhedron.getNode(face[(j + 1) % 3]);
-                                  const Array3 &v2 = _polyhedron.getNode(face[j]);
+                                  const Array3 &v1 = _polyhedron.getVertex(face[(j + 1) % 3]);
+                                  const Array3 &v2 = _polyhedron.getVertex(face[j]);
 
                                   //Compute LN_pq according to (14)
                                   //If either sigmaPQ has no sign AND either of the distances of P' to the two
@@ -773,8 +773,8 @@ namespace polyhedralGravity {
                     return false;
                 }
 
-                const Array3 &v1 = _polyhedron.getNode(face[(j + 1) % 3]);
-                const Array3 &v2 = _polyhedron.getNode(face[j]);
+                const Array3 &v1 = _polyhedron.getVertex(face[(j + 1) % 3]);
+                const Array3 &v2 = _polyhedron.getVertex(face[j]);
                 const double gijNorm = euclideanNorm(gij);
                 return euclideanNorm(pPrime - v1) < gijNorm && euclideanNorm(pPrime - v2) < gijNorm;
             })) {
@@ -802,8 +802,8 @@ namespace polyhedralGravity {
                     return false;
                 }
 
-                const Array3 &v1 = _polyhedron.getNode(face[(j + 1) % 3]);
-                const Array3 &v2 = _polyhedron.getNode(face[j]);
+                const Array3 &v1 = _polyhedron.getVertex(face[(j + 1) % 3]);
+                const Array3 &v2 = _polyhedron.getVertex(face[j]);
                 e1 = euclideanNorm(pPrime - v1);
                 e2 = euclideanNorm(pPrime - v2);
                 return e1 == 0.0 || e2 == 0.0;

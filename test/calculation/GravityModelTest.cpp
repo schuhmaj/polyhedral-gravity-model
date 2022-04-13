@@ -329,7 +329,7 @@ public:
 TEST_F(GravityModelTest, GijVectors) {
     using namespace testing;
 
-    auto actualGij = systemUnderTest.calculateGij();
+    auto actualGij = systemUnderTest.calculateSegmentVectors();
 
     ASSERT_THAT(actualGij, ContainerEq(expectedGij));
 }

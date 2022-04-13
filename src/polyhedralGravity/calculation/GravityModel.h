@@ -77,8 +77,8 @@ namespace polyhedralGravity {
         void calculate();
 
         /**
-         * Calculates the G_ij vectors according to Tsoulis equation (18). Each of these vectors G_ij represents one
-         * line segment of the polyhedron.
+         * Calculates the segment vectors G_ij according to Tsoulis equation (18).
+         * Each of these vectors G_ij represents one line segment of the polyhedron.
          *
          * Subscript i stands for the corresponding plane/ face of the polyhedron. The subscript j stands for
          * the specific vector whose endpoints are two of the three vertices making up the plane. The vertices are used
@@ -89,7 +89,7 @@ namespace polyhedralGravity {
          * given polyhedral's faces always consist of three segments/ nodes (triangles).
          * @return G_ij vectors
          */
-        std::vector<Array3Triplet> calculateGij();
+        std::vector<Array3Triplet> calculateSegmentVectors();
 
         /**
          * Calculate the plane unit normals N_i vectors according to Tsoulis equation (19).
@@ -276,6 +276,8 @@ namespace polyhedralGravity {
                 const std::vector<double> &planeDistances,
                 const std::vector<double> &planeNormalOrientation,
                 const std::vector<Array3> &planeUnitNormals);
+
+
 
     };
 
