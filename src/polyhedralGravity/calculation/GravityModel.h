@@ -278,6 +278,11 @@ namespace polyhedralGravity {
                 const std::vector<Array3> &planeUnitNormals);
 
 
+        Array3Triplet computeSegmentVectorsForPlane(const std::array<size_t, 3> &face);
+
+        Array3 computePlaneUnitNormalForPlane(const Array3 &segmentVector1, const Array3 &segmentVector2);
+
+        Array3Triplet computeSegmentUnitNormalForPlane(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
 
     };
 

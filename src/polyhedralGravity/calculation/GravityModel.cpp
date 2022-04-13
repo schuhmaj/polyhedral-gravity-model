@@ -266,27 +266,20 @@ namespace polyhedralGravity {
     }
 
     std::vector<Array3Triplet> GravityModel::calculateSegmentVectors() {
-        std::vector<Array3Triplet> g{_polyhedron.countFaces()};
-        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), g.begin(),
-                       [&](const auto &face) -> Array3Triplet {
-                           using util::operator-;
-                           const auto &node0 = _polyhedron.getVertex(face[0]);
-                           const auto &node1 = _polyhedron.getVertex(face[1]);
-                           const auto &node2 = _polyhedron.getVertex(face[2]);
-                           return {node1 - node0, node2 - node1, node0 - node2};
+        std::vector<Array3Triplet> segmentVectors{_polyhedron.countFaces()};
+        std::transform(_polyhedron.getFaces().cbegin(), _polyhedron.getFaces().cend(), segmentVectors.begin(),
+                       [&](const std::array<size_t, 3> &face) -> Array3Triplet {
+                           return computeSegmentVectorsForPlane(face);
                        });
-        return g;
+        return segmentVectors;
     }
 
     std::vector<Array3> GravityModel::calculatePlaneUnitNormals(const std::vector<Array3Triplet> &segmentVectors) {
         std::vector<Array3> planeUnitNormals{segmentVectors.size()};
         //Calculate N_i as (G_i1 * G_i2) / |G_i1 * G_i2| with * being the cross product
         std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.begin(),
-                       [](const auto &gi) -> Array3 {
-                           using namespace util;
-                           const Array3 crossProduct = cross(gi[0], gi[1]);
-                           const double norm = euclideanNorm(crossProduct);
-                           return crossProduct / norm;
+                       [&](const Array3Triplet &segmentVectorsForPlane) -> Array3 {
+                           return computePlaneUnitNormalForPlane(segmentVectorsForPlane[0], segmentVectorsForPlane[1]);
                        });
         return planeUnitNormals;
     }
@@ -299,17 +292,8 @@ namespace polyhedralGravity {
         //Outer "loop" over G_i (running i) and N_i calculating n_i
         std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.cbegin(),
                        segmentUnitNormals.begin(),
-                       [](const Array3Triplet &gi, const Array3 &Ni) {
-                           Array3Triplet ni{};
-                           //Inner "loop" over G_ij (fixed i, running j) with parameter N_i calculating n_ij
-                           std::transform(gi.cbegin(), gi.end(), ni.begin(),
-                                          [&Ni](const auto &gij) -> Array3 {
-                                              using namespace util;
-                                              const Array3 crossProduct = cross(gij, Ni);
-                                              const double norm = euclideanNorm(crossProduct);
-                                              return crossProduct / norm;
-                                          });
-                           return ni;
+                       [&](const Array3Triplet &segmentVectorsForPlane, const Array3 &planeUnitNormal) {
+                           return computeSegmentUnitNormalForPlane(segmentVectorsForPlane, planeUnitNormal);
                        });
         return segmentUnitNormals;
     }
@@ -822,6 +806,34 @@ namespace polyhedralGravity {
         });
 
         return singularities;
+    }
+
+    Array3Triplet GravityModel::computeSegmentVectorsForPlane(const std::array<size_t, 3> &face) {
+        using util::operator-;
+        const auto &node0 = _polyhedron.getVertex(face[0]);
+        const auto &node1 = _polyhedron.getVertex(face[1]);
+        const auto &node2 = _polyhedron.getVertex(face[2]);
+        return {node1 - node0, node2 - node1, node0 - node2};
+    }
+
+    Array3 GravityModel::computePlaneUnitNormalForPlane(const Array3 &segmentVector1, const Array3 &segmentVector2) {
+        using namespace util;
+        const Array3 crossProduct = cross(segmentVector1, segmentVector2);
+        const double norm = euclideanNorm(crossProduct);
+        return crossProduct / norm;
+    }
+
+    Array3Triplet
+    GravityModel::computeSegmentUnitNormalForPlane(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal) {
+        Array3Triplet segmentUnitNormal{};
+        std::transform(segmentVectors.cbegin(), segmentVectors.end(), segmentUnitNormal.begin(),
+                       [&planeUnitNormal](const Array3 &segmentVector) -> Array3 {
+                           using namespace util;
+                           const Array3 crossProduct = cross(segmentVector, planeUnitNormal);
+                           const double norm = euclideanNorm(crossProduct);
+                           return crossProduct / norm;
+                       });
+        return segmentUnitNormal;
     }
 
 
