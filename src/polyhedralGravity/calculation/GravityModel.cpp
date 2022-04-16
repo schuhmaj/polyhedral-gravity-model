@@ -2,7 +2,8 @@
 
 namespace polyhedralGravity {
 
-    void GravityModel::calculate() {
+    GravityModelResult GravityModel::evaluate(
+            const Polyhedron &polyhedron, double density, const Array3 &computationPoint) {
         using namespace util;
         auto gijVectors = calculateSegmentVectors();
         auto planeUnitNormals = calculatePlaneUnitNormals(gijVectors);
@@ -201,7 +202,7 @@ namespace polyhedralGravity {
         SPDLOG_INFO("Vxz= {}", V3[4]);
         SPDLOG_INFO("Vyz= {}", V3[5]);
 
-
+        return {};
     }
 
     std::vector<Array3Triplet> GravityModel::calculateSegmentVectors() {
@@ -282,7 +283,7 @@ namespace polyhedralGravity {
 
     std::vector<double> GravityModel::calculatePlaneDistances(const std::vector<HessianPlane> &plane) {
         std::vector<double> planeDistances(plane.size(), 0.0);
-        //For each plane calculate h_p as D/sqrt(A^2 + B^2 + C^2)
+        //For each plane evaluate h_p as D/sqrt(A^2 + B^2 + C^2)
         std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
                        [](const HessianPlane &plane) -> double {
                            return std::abs(
@@ -397,7 +398,7 @@ namespace polyhedralGravity {
                                       //Geometrically trivial case, in neither of the half space --> already on segment
                                       return pPrime;
                                   } else {
-                                      //In one of the half space, calculate the projection point P'' for the segment
+                                      //In one of the half space, evaluate the projection point P'' for the segment
                                       //with the endpoints v1 and v2
                                       const auto &v1 = _polyhedron.getVertex(face[j]);
                                       const auto &v2 = _polyhedron.getVertex(face[(j + 1) % 3]);

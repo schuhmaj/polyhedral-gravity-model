@@ -65,17 +65,25 @@ namespace polyhedralGravity {
         /**
          * Construct as new GravityModel Calculation with an polyhedron as input
          * @param polyhedron - Poylhedron
-         * @param density - the constant density of the Polyhedron
+         * @param density - the constant density of the Polyhedron in [kg/m^3]
          */
         GravityModel(const Polyhedron &polyhedron, double density)
                 : _polyhedron{polyhedron},
                   _density{density} {}
 
         /**
-         * Executes the whole calculation.
-         * TODO: return values or via getResult()?
+         * Evaluates the polyhedrale gravity model for a given constant density polyhedron at computation
+         * point P.
+         * @param polyhedron - the polyhedron consisting of vertices and triangular faces
+         * @param density - the constant density in [kg/m^3]
+         * @param computationPoint - the computation Point P (default: {0,0,0})
+         * @return the GravityModelResult containing the potential, the acceleration and the change of acceleration
+         * at computation Point P
          */
-        void calculate();
+        GravityModelResult evaluate(
+                const Polyhedron &polyhedron,
+                double density,
+                const Array3 &computationPoint = {0.0, 0.0, 0.0});
 
         /**
          * Calculates the segment vectors G_ij according to Tsoulis equation (18).

@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
     SPDLOG_INFO("The calculation started.");
     auto start = std::chrono::high_resolution_clock::now();
-    grav.calculate();
+    grav.evaluate(poly, density, {0.0, 0.0, 0.0});
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = end - start;
     auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
