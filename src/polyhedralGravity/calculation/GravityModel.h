@@ -258,11 +258,34 @@ namespace polyhedralGravity {
                                   const std::vector<Array3> &planeUnitNormals);
 
 
+        /**
+         * Computes the segment vectors G_ij for one plane of the polyhedron according to Tsoulis (18).
+         * The segment vectors G_ij represent the vector from one vertex of the face to the neighboring vertex and
+         * depict every line segment of the triangular face (A-B-C)
+         * @param vertex0 - the first vertex A
+         * @param vertex1 - the second vertex B
+         * @param vertex2 - the third vertex C
+         * @return the segment vectors for a plane
+         */
         Array3Triplet
         computeSegmentVectorsForPlane(const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2);
 
+        /**
+         * Computes the plane unit normal N_p for one plane p of the polyhedron according to Tsoulis (19).
+         * The plane unit normal is the outward pointing normal of the face from the polyhedron.
+         * @param segmentVector1 - first edge
+         * @param segmentVector2 - second edge
+         * @return plane unit normal
+         */
         Array3 computePlaneUnitNormalForPlane(const Array3 &segmentVector1, const Array3 &segmentVector2);
 
+        /**
+         * Computes the segment unit normals n_pq for one plane p of the polyhedron according to Tsoulis (20).
+         * The segment unit normal n_pq represent the normal of one line segment of a polyhedrale face.
+         * @param segmentVectors - the segment vectors of the face G_p(0-2)
+         * @param planeUnitNormal - the plane unit normal N_p
+         * @return segment unit normals n_pq for plane p with q = {0, 1, 2}
+         */
         Array3Triplet computeSegmentUnitNormalForPlane(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
 
     };
