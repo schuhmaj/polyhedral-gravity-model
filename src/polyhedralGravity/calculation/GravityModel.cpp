@@ -311,37 +311,22 @@ namespace polyhedralGravity {
             const std::vector<Array3> &orthogonalProjectionPointsOnPlane) {
         std::vector<Array3> segmentNormalOrientations{segmentUnitNormals.size()};
 
-        std::vector<Array3Triplet> x{segmentUnitNormals.size()};
+        auto zip = util::zipPair(polyhedron.getFaces(), orthogonalProjectionPointsOnPlane, segmentUnitNormals);
 
-        //First part of equation (23):
-        //Calculate x_P' - x_ij^1 (x_P' is the projectionPoint and x_ij^1 is the first vertices of one segment,
-        //i.e. the coordinates of the training-planes' nodes
-        //The result is saved in x
-        std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
-                       polyhedron.getFaces().cbegin(), x.begin(),
-                       [&](const Array3 &projectionPoint, const std::array<size_t, 3> &face)
-                               -> Array3Triplet {
-                           using util::operator-;
-                           const auto &node0 = polyhedron.getVertex(face[0]);
-                           const auto &node1 = polyhedron.getVertex(face[1]);
-                           const auto &node2 = polyhedron.getVertex(face[2]);
-                           return {projectionPoint - node0, projectionPoint - node1, projectionPoint - node2};
-                       });
-        //The second part of equation (23)
-        //Calculate n_ij * x_ij with * being the dot product and use the inverted sgn to determine the value of sigma_pq
-        //running over n_i and x_i (running i)
-        std::transform(segmentUnitNormals.cbegin(), segmentUnitNormals.cend(), x.cbegin(),
-                       segmentNormalOrientations.begin(),
-                       [](const Array3Triplet &ni, const Array3Triplet &xi) {
-                           //running over n_ij and x_ij (fixed i, running j)
-                           std::array<double, 3> sigmaPQ{};
-                           std::transform(ni.cbegin(), ni.cend(), xi.cbegin(), sigmaPQ.begin(),
-                                          [](const Array3 &nij, const Array3 &xij) {
-                                              using namespace util;
-                                              return sgn((dot(nij, xij)), util::EPSILON) * -1.0;
-                                          });
-                           return sigmaPQ;
-                       });
+        //Calculates the segment normal orientation sigma_pq for every plane p
+        thrust::transform(zip.first, zip.second, segmentNormalOrientations.begin(), [&](const auto &tuple) {
+            const std::array<size_t, 3> &face = thrust::get<0>(tuple);
+            const Array3 &projectionPointOnPlaneForPlane = thrust::get<1>(tuple);
+            const Array3Triplet &segmentUnitNormalsForPlane = thrust::get<2>(tuple);
+
+            //The three vertices of the current triangle plane
+            const Array3 &vertex0 = polyhedron.getVertex(face[0]);
+            const Array3 &vertex1 = polyhedron.getVertex(face[1]);
+            const Array3 &vertex2 = polyhedron.getVertex(face[2]);
+
+            return computeSegmentNormalOrientationsForPlane(
+                    vertex0, vertex1, vertex2, projectionPointOnPlaneForPlane, segmentUnitNormalsForPlane);
+        });
         return segmentNormalOrientations;
     }
 
@@ -752,6 +737,32 @@ namespace polyhedralGravity {
             }
         }
         return orthogonalProjectionPoint;
+    }
+
+    Array3 GravityModel::computeSegmentNormalOrientationsForPlane(
+            const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2,
+            const Array3 &projectionPointOnPlane,
+            const Array3Triplet &segmentUnitNormalsForPlane) {
+        using namespace util;
+        std::array<double, 3> segmentNormalOrientations{};
+        //First part of equation (23):
+        //Calculate x_P' - x_ij^1 (x_P' is the projectionPoint and x_ij^1 is the first vertices of one segment,
+        //i.e. the coordinates of the training-planes' nodes
+        //The result x is saved in interimResult
+        Array3Triplet interimResult =
+                {projectionPointOnPlane - vertex0,
+                 projectionPointOnPlane - vertex1,
+                 projectionPointOnPlane - vertex2};
+
+        //The second part of equation (23)
+        //Calculate n_ij * x_ij with * being the dot product and use the inverted sgn to determine the value of sigma_pq
+        std::transform(segmentUnitNormalsForPlane.cbegin(), segmentUnitNormalsForPlane.cend(),
+                       interimResult.cbegin(), segmentNormalOrientations.begin(),
+                       [](const Array3 &segmentNormalOrientation, const Array3 &interim) {
+                    using namespace util;
+                    return sgn((dot(segmentNormalOrientation, interim)), util::EPSILON) * -1.0;
+                });
+        return segmentNormalOrientations;
     }
 
 

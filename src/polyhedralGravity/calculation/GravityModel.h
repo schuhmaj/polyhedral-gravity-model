@@ -322,6 +322,11 @@ namespace polyhedralGravity {
                 double planeDistance,
                 const HessianPlane &hessianPlane);
 
+        Array3 computeSegmentNormalOrientationsForPlane(
+                const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2,
+                const Array3 &projectionPointOnPlane,
+                const Array3Triplet &segmentUnitNormalsForPlane);
+
     };
 
 }
