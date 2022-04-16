@@ -294,34 +294,13 @@ namespace polyhedralGravity {
         //Zip the three required arguments together: Plane normal N_i, Plane Distance h_i and the Hessian Form
         auto zip = util::zipPair(planeUnitNormals, planeDistances, hessianPlanes);
 
+        //Calculates the Projection Point P' for every plane p
         thrust::transform(zip.first, zip.second, orthogonalProjectionPointsOfP.begin(), [](const auto &tuple) {
             using namespace util;
-            const Array3 &Ni = thrust::get<0>(tuple);
-            const double hi = thrust::get<1>(tuple);
-            const HessianPlane &plane = thrust::get<2>(tuple);
-
-            //Calculate the projection point by (22) P'_ = N_i / norm(N_i) * h_i
-            // norm(N_i) is always 1 since N_i is a "normed" vector --> we do not need this division
-            Array3 orthogonalProjectionPoint = Ni * hi;
-
-            //Calculate the sign of the projections points x, y, z coordinates and apply it
-            //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
-            //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
-            Array3 intersections = {plane.a == 0.0 ? 0.0 : plane.d / plane.a,
-                                    plane.b == 0.0 ? 0.0 : plane.d / plane.b,
-                                    plane.c == 0.0 ? 0.0 : plane.d / plane.c};
-
-            for (unsigned int index = 0; index < 3; ++index) {
-                if (intersections[index] < 0) {
-                    orthogonalProjectionPoint[index] = std::abs(orthogonalProjectionPoint[index]);
-                } else {
-                    if (Ni[index] > 0) {
-                        orthogonalProjectionPoint[index] = -1.0 * orthogonalProjectionPoint[index];
-                    }
-                    orthogonalProjectionPoint[index] = orthogonalProjectionPoint[index];
-                }
-            }
-            return orthogonalProjectionPoint;
+            const Array3 &planeUnitNormal = thrust::get<0>(tuple);
+            const double planeDistance = thrust::get<1>(tuple);
+            const HessianPlane &hessianPlane = thrust::get<2>(tuple);
+            return computeOrthogonalProjectionPointsOnPlaneForPlane(planeUnitNormal, planeDistance, hessianPlane);
         });
         return orthogonalProjectionPointsOfP;
     }
@@ -744,6 +723,35 @@ namespace polyhedralGravity {
                 hessianPlane.a * hessianPlane.a +
                 hessianPlane.b * hessianPlane.b +
                 hessianPlane.c * hessianPlane.c));
+    }
+
+    Array3 GravityModel::computeOrthogonalProjectionPointsOnPlaneForPlane(
+            const Array3 &planeUnitNormal,
+            double planeDistance,
+            const HessianPlane &hessianPlane) {
+        using namespace util;
+        //Calculate the projection point by (22) P'_ = N_i / norm(N_i) * h_i
+        // norm(N_i) is always 1 since N_i is a "normed" vector --> we do not need this division
+        Array3 orthogonalProjectionPoint = planeUnitNormal * planeDistance;
+
+        //Calculate the sign of the projections points x, y, z coordinates and apply it
+        //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
+        //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
+        Array3 intersections = {hessianPlane.a == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.a,
+                                hessianPlane.b == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.b,
+                                hessianPlane.c == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.c};
+
+        for (unsigned int index = 0; index < 3; ++index) {
+            if (intersections[index] < 0) {
+                orthogonalProjectionPoint[index] = std::abs(orthogonalProjectionPoint[index]);
+            } else {
+                if (planeUnitNormal[index] > 0) {
+                    orthogonalProjectionPoint[index] = -1.0 * orthogonalProjectionPoint[index];
+                }
+                orthogonalProjectionPoint[index] = orthogonalProjectionPoint[index];
+            }
+        }
+        return orthogonalProjectionPoint;
     }
 
 

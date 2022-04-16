@@ -309,6 +309,19 @@ namespace polyhedralGravity {
          */
         double computePlaneDistanceForPlane(const HessianPlane &hessianPlane);
 
+        /**
+         * Calculates P' for a given plane p according to equation (22) of Tsoulis paper.
+         * P' is the orthogonal projection of the computation point P onto the plane S_p.
+         * @param planeUnitNormal - the plane unit normal N_p
+         * @param planeDistance - the distance from P to the plane h_p
+         * @param hessianPlane - the Hessian Plane Form
+         * @return P' for this plane
+         */
+        Array3 computeOrthogonalProjectionPointsOnPlaneForPlane(
+                const Array3 &planeUnitNormal,
+                double planeDistance,
+                const HessianPlane &hessianPlane);
+
     };
 
 }
