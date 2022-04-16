@@ -117,19 +117,6 @@ namespace polyhedralGravity {
                 const Array3 &p = {0.0, 0.0, 0.0});
 
         /**
-         * Calculates the Hessian Plane form spanned by three given points p, q, and r.
-         * @param p - first point on the plane
-         * @param q - second point on the plane
-         * @param r - third point on the plane
-         * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
-         * @return HessianPlane
-         * @related Cross-Product method https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
-         */
-        HessianPlane computeHessianPlane(const Array3 &p, const Array3 &q,
-                                         const Array3 &r, const Array3 &origin = {0.0, 0.0, 0.0});
-
-
-        /**
          * Calculates the plane distances h_p of computation point P from each plane S_p
          * according to the following equation:
          * h_p = D / sqrt(A^2+B^2+C^2)
@@ -139,6 +126,7 @@ namespace polyhedralGravity {
          * @return plane distances h_p
          */
         std::vector<double> calculatePlaneDistances(const std::vector<HessianPlane> &plane);
+
 
         /**
          * Calculates the origins P' for each plane S_p according to equation (22) of Tsoulis paper.
@@ -153,7 +141,6 @@ namespace polyhedralGravity {
         calculateOrthogonalProjectionPointsOnPlane(const std::vector<HessianPlane> &hessianPlanes,
                                                    const std::vector<Array3> &planeUnitNormals,
                                                    const std::vector<double> &planeDistances);
-
 
         /**
          * Calculates the segment normal orientations, sigma_pq, according to equation (23).
@@ -171,6 +158,7 @@ namespace polyhedralGravity {
         std::vector<Array3> calculateSegmentNormalOrientations(const Polyhedron &polyhedron,
                                                                const std::vector<Array3Triplet> &segmentUnitNormals,
                                                                const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
+
 
         /**
          * Calculates the origins P'' for each line segment G_pq according to equation (24), (25) and (26) of Tsoulis
@@ -257,7 +245,6 @@ namespace polyhedralGravity {
                                   const std::vector<double> &planeNormalOrientation,
                                   const std::vector<Array3> &planeUnitNormals);
 
-
         /**
          * Computes the segment vectors G_ij for one plane of the polyhedron according to Tsoulis (18).
          * The segment vectors G_ij represent the vector from one vertex of the face to the neighboring vertex and
@@ -269,6 +256,7 @@ namespace polyhedralGravity {
          */
         Array3Triplet
         computeSegmentVectorsForPlane(const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2);
+
 
         /**
          * Computes the plane unit normal N_p for one plane p of the polyhedron according to Tsoulis (19).
@@ -298,7 +286,28 @@ namespace polyhedralGravity {
          * @param vertex0 - the first vertex of the plane
          * @return plane normal orientation
          */
-        double computePlaneNormalOrientation(const Array3 &planeUnitNormal, const Array3 &vertex0);
+        double computePlaneNormalOrientationForPlane(const Array3 &planeUnitNormal, const Array3 &vertex0);
+
+        /**
+         * Calculates the Hessian Plane form spanned by three given points p, q, and r.
+         * @param p - first point on the plane
+         * @param q - second point on the plane
+         * @param r - third point on the plane
+         * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
+         * @return HessianPlane
+         * @related Cross-Product method https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
+         */
+        HessianPlane computeHessianPlane(const Array3 &p, const Array3 &q,
+                                         const Array3 &r, const Array3 &origin = {0.0, 0.0, 0.0});
+
+        /**
+         * Calculates the plane distances h_p of computation point P to the plane S_p given in Hessian Form
+         * according to the following equation:
+         * h_p = D / sqrt(A^2+B^2+C^2)
+         * @param hessianPlane - Hessian Plane Form of S_p
+         * @return plane distance h_p
+         */
+        double computePlaneDistanceForPlane(const HessianPlane &hessianPlane);
 
     };
 

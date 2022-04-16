@@ -253,11 +253,10 @@ namespace polyhedralGravity {
                        [&polyhedron](const Array3 &planeUnitNormal, const std::array<size_t, 3> &face) {
                            //The first vertices' coordinates of the given face consisting of G_i's
                            const auto &vertex0 = polyhedron.getVertex(face[0]);
-                           return computePlaneNormalOrientation(planeUnitNormal , vertex0);
+                           return computePlaneNormalOrientationForPlane(planeUnitNormal, vertex0);
                        });
         return planeNormalOrientations;
     }
-
 
     std::vector<HessianPlane> GravityModel::calculateFacesToHessianPlanes(
             const Polyhedron &polyhedron,
@@ -265,34 +264,23 @@ namespace polyhedralGravity {
         std::vector<HessianPlane> hessianPlanes{polyhedron.countFaces()};
         //Calculate for each face/ plane/ triangle (here) the Hessian Plane
         std::transform(polyhedron.getFaces().cbegin(), polyhedron.getFaces().cend(), hessianPlanes.begin(),
-                       [&](const auto &face) -> HessianPlane {
+                       [&](const std::array<size_t, 3> &face) -> HessianPlane {
                            using namespace util;
-                           const auto &node0 = polyhedron.getVertex(face[0]);
-                           const auto &node1 = polyhedron.getVertex(face[1]);
-                           const auto &node2 = polyhedron.getVertex(face[2]);
+                           const Array3 &vertex0 = polyhedron.getVertex(face[0]);
+                           const Array3 &vertex1 = polyhedron.getVertex(face[1]);
+                           const Array3 &vertex2 = polyhedron.getVertex(face[2]);
                            //The three vertices put up the plane, p is the origin of the reference system default 0,0,0
-                           return computeHessianPlane(node0, node1, node2, p);
+                           return computeHessianPlane(vertex0, vertex1, vertex2, p);
                        });
         return hessianPlanes;
     }
 
-    HessianPlane GravityModel::computeHessianPlane(const Array3 &p, const Array3 &q,
-                                                   const Array3 &r, const Array3 &origin) {
-        using namespace util;
-        const auto crossProduct = cross(p - q, p - r);
-        const auto res = (origin - p) * crossProduct;
-        const double d = res[0] + res[1] + res[2];
-
-        return {crossProduct[0], crossProduct[1], crossProduct[2], d};
-    }
-
     std::vector<double> GravityModel::calculatePlaneDistances(const std::vector<HessianPlane> &plane) {
         std::vector<double> planeDistances(plane.size(), 0.0);
-        //For each plane evaluate h_p as D/sqrt(A^2 + B^2 + C^2)
+        //For each plane compute h_p
         std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
                        [](const HessianPlane &plane) -> double {
-                           return std::abs(
-                                   plane.d / std::sqrt(plane.a * plane.a + plane.b * plane.b + plane.c * plane.c));
+                           return computePlaneDistanceForPlane(plane);
                        });
         return planeDistances;
     }
@@ -732,12 +720,30 @@ namespace polyhedralGravity {
         return segmentUnitNormal;
     }
 
-    double GravityModel::computePlaneNormalOrientation(const Array3 &planeUnitNormal, const Array3 &vertex0) {
+    double GravityModel::computePlaneNormalOrientationForPlane(const Array3 &planeUnitNormal, const Array3 &vertex0) {
         using namespace util;
         //Calculate N_i * -G_i1 where * is the dot product and then use the inverted sgn
         //We abstain on the double multiplication with -1 in the line above and beyond since two
         //times multiplying with -1 equals no change
         return sgn(dot(planeUnitNormal, vertex0), util::EPSILON);
+    }
+
+    HessianPlane GravityModel::computeHessianPlane(const Array3 &p, const Array3 &q,
+                                                   const Array3 &r, const Array3 &origin) {
+        using namespace util;
+        const auto crossProduct = cross(p - q, p - r);
+        const auto res = (origin - p) * crossProduct;
+        const double d = res[0] + res[1] + res[2];
+
+        return {crossProduct[0], crossProduct[1], crossProduct[2], d};
+    }
+
+    double GravityModel::computePlaneDistanceForPlane(const HessianPlane &hessianPlane) {
+        //Compute h_p as D/sqrt(A^2 + B^2 + C^2)
+        return std::abs(hessianPlane.d / std::sqrt(
+                hessianPlane.a * hessianPlane.a +
+                hessianPlane.b * hessianPlane.b +
+                hessianPlane.c * hessianPlane.c));
     }
 
 
