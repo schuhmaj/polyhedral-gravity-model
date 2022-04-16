@@ -10,6 +10,7 @@
 #include "polyhedralGravity/util/UtilityContainer.h"
 #include "spdlog/spdlog.h"
 #include "thrust/iterator/zip_iterator.h"
+#include "thrust/iterator/transform_iterator.h"
 #include "thrust/iterator/counting_iterator.h"
 #include "thrust/transform.h"
 #include "polyhedralGravity/util/UtilityThrust.h"
@@ -33,43 +34,10 @@ namespace polyhedralGravity {
     using Array3Triplet = std::array<Array3, 3>;
 
     /**
-     * TODO? Make the whole thing to a namespace, only stamp coupling between methods more practical?
+     * Namespace containing the methods used to evaluate the polyhedrale Gravity Model
+     * TODO: insert ::detail namespace for 'private' methods
      */
-    class GravityModel {
-
-        /**
-         * The Polyhedron for which we evaluated the gravity at point P
-         */
-        const Polyhedron _polyhedron;
-
-        /**
-         * The constant density of the polyhedron in [kg/m^3].
-         * The density is initialized with the default constant density 2670.0 from Tsoulis Paper (above (4)).
-         */
-        const double _density{util::DEFAULT_CONSTANT_DENSITY};
-
-        /**
-         * The result of the evaluation of the gravity model
-         */
-        GravityModelResult _gravityResult{};
-
-    public:
-
-        /**
-         * Construct as new GravityModel Calculation with an polyhedron as input
-         * @param polyhedron - Poylhedron
-         */
-        explicit GravityModel(const Polyhedron &polyhedron)
-                : _polyhedron{polyhedron} {}
-
-        /**
-         * Construct as new GravityModel Calculation with an polyhedron as input
-         * @param polyhedron - Poylhedron
-         * @param density - the constant density of the Polyhedron in [kg/m^3]
-         */
-        GravityModel(const Polyhedron &polyhedron, double density)
-                : _polyhedron{polyhedron},
-                  _density{density} {}
+    namespace GravityModel {
 
         /**
          * Evaluates the polyhedrale gravity model for a given constant density polyhedron at computation
@@ -98,7 +66,7 @@ namespace polyhedralGravity {
          * given polyhedral's faces always consist of three segments/ nodes (triangles).
          * @return G_ij vectors
          */
-        std::vector<Array3Triplet> calculateSegmentVectors();
+        std::vector<Array3Triplet> calculateSegmentVectors(const Polyhedron &polyhedron);
 
         /**
          * Calculate the plane unit normals N_i vectors according to Tsoulis equation (19).
@@ -135,7 +103,8 @@ namespace polyhedralGravity {
          * @param planeUnitNormals - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculatePlaneNormalOrientations(const std::vector<Array3> &planeUnitNormals);
+        std::vector<double> calculatePlaneNormalOrientations(const Polyhedron &polyhedron,
+                                                             const std::vector<Array3> &planeUnitNormals);
 
 
         /**
@@ -143,7 +112,9 @@ namespace polyhedralGravity {
          * @param p - the reference point for which the transformation should be executed (default origin {0, 0, 0})
          * @return vector of Hessian Normal Planes
          */
-        std::vector<HessianPlane> calculateFacesToHessianPlanes(const Array3 &p = {0, 0, 0});
+        std::vector<HessianPlane> calculateFacesToHessianPlanes(
+                const Polyhedron &polyhedron,
+                const Array3 &p = {0.0, 0.0, 0.0});
 
         /**
          * Calculates the Hessian Plane form spanned by three given points p, q, and r.
@@ -197,9 +168,9 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the orthogonal projection points P'_i of P on each plane i
          * @return sigma_pq
          */
-        std::vector<Array3> calculateSegmentNormalOrientations(
-                const std::vector<Array3Triplet> &segmentUnitNormals,
-                const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
+        std::vector<Array3> calculateSegmentNormalOrientations(const Polyhedron &polyhedron,
+                                                               const std::vector<Array3Triplet> &segmentUnitNormals,
+                                                               const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
 
         /**
          * Calculates the origins P'' for each line segment G_pq according to equation (24), (25) and (26) of Tsoulis
@@ -208,9 +179,9 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the P' for every plane
          * @return the P'' for every line segment of the polyhedron
          */
-        std::vector<Array3Triplet> calculateOrthogonalProjectionPointsOnSegments(
-                const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
-                const std::vector<Array3> &segmentNormalOrientation);
+        std::vector<Array3Triplet> calculateOrthogonalProjectionPointsOnSegments(const Polyhedron &polyhedron,
+                                                                                 const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
+                                                                                 const std::vector<Array3> &segmentNormalOrientation);
 
         /**
          * Calculates the point P'' for a given Segment consisting of vertices v1 and v2 and the orthogonal projection
@@ -241,14 +212,13 @@ namespace polyhedralGravity {
          * Calculates the 1D distances s1_pq and s2_pq between orthogonal projection of P on the line
          * segment P''_pq and the line segment endpoints for each polyhedral segment.
          * The results are stored in the Distance struct for each segment.
-         * @param gij - the segment vectors
+         * @param segmentVectors - the segment vectors
          * @param orthogonalProjectionPointsOnSegment - the P'' for every segment
          * @return Distance struct containing l1, l2, s1, s2
          */
-        std::vector<std::array<Distance, 3>> calculateDistances(
-                const std::vector<Array3Triplet> &gij,
-                const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment
-        );
+        std::vector<std::array<Distance, 3>>
+        calculateDistances(const Polyhedron &polyhedron, const std::vector<Array3Triplet> &segmentVectors,
+                           const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment);
 
         /**
          * TODO Contains enorm duplicate!
@@ -262,32 +232,34 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the orthogonal Projection Points P' for every plane
          * @return the Transcendental Expressions LN and AN for every segment
          */
-        std::vector<std::array<TranscendentalExpression, 3>> calculateTranscendentalExpressions(
-                const std::vector<std::array<Distance, 3>> &distances,
-                const std::vector<double> &planeDistances,
-                const std::vector<Array3> &segmentDistances,
-                const std::vector<Array3> &segmentNormalOrientation,
-                const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
+        std::vector<std::array<TranscendentalExpression, 3>>
+        calculateTranscendentalExpressions(const Polyhedron &polyhedron,
+                                           const std::vector<std::array<Distance, 3>> &distances,
+                                           const std::vector<double> &planeDistances,
+                                           const std::vector<Array3> &segmentDistances,
+                                           const std::vector<Array3> &segmentNormalOrientation,
+                                           const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
 
         /**
          * TODO Contains enorm duplicate!
          * Calculates the singularities (correction) terms according to the Flow text.
-         * @param gijVectors - the segment vectors
+         * @param segmentVectors - the segment vectors
          * @param segmentNormalOrientation - the segment normal orientations sigma_pq
          * @param orthogonalProjectionPointsOnPlane - the orthogonal projection points per Plane P'
          * @param planeDistances - the plane distances h_p
          * @return the singularities terms
          */
-        std::vector<std::pair<double, Array3>> calculateSingularityTerms(
-                const std::vector<Array3Triplet> &gijVectors,
-                const std::vector<Array3> &segmentNormalOrientation,
-                const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
-                const std::vector<double> &planeDistances,
-                const std::vector<double> &planeNormalOrientation,
-                const std::vector<Array3> &planeUnitNormals);
+        std::vector<std::pair<double, Array3>>
+        calculateSingularityTerms(const Polyhedron &polyhedron, const std::vector<Array3Triplet> &segmentVectors,
+                                  const std::vector<Array3> &segmentNormalOrientation,
+                                  const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
+                                  const std::vector<double> &planeDistances,
+                                  const std::vector<double> &planeNormalOrientation,
+                                  const std::vector<Array3> &planeUnitNormals);
 
 
-        Array3Triplet computeSegmentVectorsForPlane(const std::array<size_t, 3> &face);
+        Array3Triplet
+        computeSegmentVectorsForPlane(const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2);
 
         Array3 computePlaneUnitNormalForPlane(const Array3 &segmentVector1, const Array3 &segmentVector2);
 

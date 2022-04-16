@@ -2,7 +2,7 @@
 gravityModel:
   input:
     polyhedron:
-      - "../example-config/data/cube.node"
+      - "../example-config/data/cube_origin.node"
       - "../example-config/data/cube.face"
     density: 1.0
     points:

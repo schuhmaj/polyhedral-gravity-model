@@ -31,8 +31,6 @@ protected:
             polyhedralGravity::TetgenAdapter{
                     {"resources/GravityModelBigTest.node", "resources/GravityModelBigTest.face"}}.getPolyhedron()};
 
-    polyhedralGravity::GravityModel systemUnderTest{_polyhedron};
-
     std::vector<std::array<std::array<double, 3>, 3>> expectedGij;
 
     std::vector<std::array<double, 3>> expectedPlaneUnitNormals;
@@ -250,7 +248,7 @@ public:
 TEST_F(GravityModelBigTest, GijVectors) {
     using namespace testing;
 
-    auto actualGij = systemUnderTest.calculateSegmentVectors();
+    auto actualGij = polyhedralGravity::GravityModel::calculateSegmentVectors(_polyhedron);
 
     ASSERT_THAT(actualGij, ContainerEq(expectedGij));
 }
@@ -258,7 +256,7 @@ TEST_F(GravityModelBigTest, GijVectors) {
 TEST_F(GravityModelBigTest, PlaneUnitNormals) {
     using namespace testing;
 
-    auto actualPlaneUnitNormals = systemUnderTest.calculatePlaneUnitNormals(expectedGij);
+    auto actualPlaneUnitNormals = polyhedralGravity::GravityModel::calculatePlaneUnitNormals(expectedGij);
 
     ASSERT_THAT(actualPlaneUnitNormals, ContainerEq(expectedPlaneUnitNormals));
 }
@@ -266,7 +264,8 @@ TEST_F(GravityModelBigTest, PlaneUnitNormals) {
 TEST_F(GravityModelBigTest, SegmentUnitNormals) {
     using namespace testing;
 
-    auto actualSegmentUnitNormals = systemUnderTest.calculateSegmentUnitNormals(expectedGij, expectedPlaneUnitNormals);
+    auto actualSegmentUnitNormals = polyhedralGravity::GravityModel::calculateSegmentUnitNormals(expectedGij,
+                                                                                                 expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualSegmentUnitNormals, ContainerEq(expectedSegmentUnitNormals));
 }
@@ -274,7 +273,8 @@ TEST_F(GravityModelBigTest, SegmentUnitNormals) {
 TEST_F(GravityModelBigTest, PlaneNormalOrientations) {
     using namespace testing;
 
-    auto actualPlaneNormalOrientations = systemUnderTest.calculatePlaneNormalOrientations(expectedPlaneUnitNormals);
+    auto actualPlaneNormalOrientations = polyhedralGravity::GravityModel::calculatePlaneNormalOrientations(_polyhedron,
+                                                                                                           expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualPlaneNormalOrientations, ContainerEq(expectedPlaneNormalOrientations));
 }
@@ -283,7 +283,7 @@ TEST_F(GravityModelBigTest, HessianPlane) {
     using namespace testing;
     using namespace polyhedralGravity;
 
-    auto actualHessianPlane = systemUnderTest.calculateFacesToHessianPlanes();
+    auto actualHessianPlane = polyhedralGravity::GravityModel::calculateFacesToHessianPlanes(_polyhedron);
 
     ASSERT_EQ(actualHessianPlane, expectedHessianPlanes);
 }
@@ -291,7 +291,7 @@ TEST_F(GravityModelBigTest, HessianPlane) {
 TEST_F(GravityModelBigTest, PlaneDistances) {
     using namespace testing;
 
-    auto actualPlaneDistances = systemUnderTest.calculatePlaneDistances(expectedHessianPlanes);
+    auto actualPlaneDistances = polyhedralGravity::GravityModel::calculatePlaneDistances(expectedHessianPlanes);
 
     ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistances));
 }
@@ -299,7 +299,7 @@ TEST_F(GravityModelBigTest, PlaneDistances) {
 TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnPlane) {
     using namespace testing;
 
-    auto actualOrthogonalProjectionPointsOnPlane = systemUnderTest.calculateOrthogonalProjectionPointsOnPlane(
+    auto actualOrthogonalProjectionPointsOnPlane = polyhedralGravity::GravityModel::calculateOrthogonalProjectionPointsOnPlane(
             expectedHessianPlanes, expectedPlaneUnitNormals, expectedPlaneDistances);
 
     for (size_t i = 0; i < actualOrthogonalProjectionPointsOnPlane.size(); ++i) {
@@ -307,7 +307,7 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnPlane) {
             EXPECT_DOUBLE_EQ(
                     actualOrthogonalProjectionPointsOnPlane[i][j],
                     expectedOrthogonalProjectionPointsOnPlane[i][j])
-                    << "Difference for P' of plane=" << i << " and coordinate-Nr.=" << j;
+                                << "Difference for P' of plane=" << i << " and coordinate-Nr.=" << j;
         }
     }
 
@@ -318,8 +318,8 @@ TEST_F(GravityModelBigTest, SegmentNormalOrientations) {
     using namespace testing;
 
     auto actualSegmentNormalOrientations =
-            systemUnderTest.calculateSegmentNormalOrientations(expectedSegmentUnitNormals,
-                                                               expectedOrthogonalProjectionPointsOnPlane);
+            polyhedralGravity::GravityModel::calculateSegmentNormalOrientations(_polyhedron, expectedSegmentUnitNormals,
+                                                                                expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualSegmentNormalOrientations, ContainerEq(expectedSegmentNormalOrientations));
 }
@@ -328,8 +328,9 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnSegment) {
     using namespace testing;
 
     auto actualOrthogonalProjectionPointsOnSegment =
-            systemUnderTest.calculateOrthogonalProjectionPointsOnSegments(expectedOrthogonalProjectionPointsOnPlane,
-                                                                          expectedSegmentNormalOrientations);
+            polyhedralGravity::GravityModel::calculateOrthogonalProjectionPointsOnSegments(_polyhedron,
+                                                                                           expectedOrthogonalProjectionPointsOnPlane,
+                                                                                           expectedSegmentNormalOrientations);
 
     for (size_t i = 0; i < actualOrthogonalProjectionPointsOnSegment.size(); ++i) {
         for (size_t j = 0; j < 3; ++j) {
@@ -350,8 +351,8 @@ TEST_F(GravityModelBigTest, SegmentDistances) {
     using namespace testing;
 
     auto actualSegmentDistances =
-            systemUnderTest.calculateSegmentDistances(expectedOrthogonalProjectionPointsOnPlane,
-                                                      expectedOrthogonalProjectionPointsOnSegment);
+            polyhedralGravity::GravityModel::calculateSegmentDistances(expectedOrthogonalProjectionPointsOnPlane,
+                                                                       expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualSegmentDistances, ContainerEq(expectedSegmentDistances));
 }
@@ -360,7 +361,8 @@ TEST_F(GravityModelBigTest, DistancesPerSegmentEndpoint) {
     using namespace testing;
 
     auto actualDistancesPerSegmentEndpoint =
-            systemUnderTest.calculateDistances(expectedGij, expectedOrthogonalProjectionPointsOnSegment);
+            polyhedralGravity::GravityModel::calculateDistances(_polyhedron, expectedGij,
+                                                                expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
 }
@@ -369,11 +371,12 @@ TEST_F(GravityModelBigTest, TranscendentalExpressions) {
     using namespace testing;
 
     auto actualTranscendentalExpressions =
-            systemUnderTest.calculateTranscendentalExpressions(expectedDistancesPerSegmentEndpoint,
-                                                               expectedPlaneDistances,
-                                                               expectedSegmentDistances,
-                                                               expectedSegmentNormalOrientations,
-                                                               expectedOrthogonalProjectionPointsOnPlane);
+            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_polyhedron,
+                                                                                expectedDistancesPerSegmentEndpoint,
+                                                                                expectedPlaneDistances,
+                                                                                expectedSegmentDistances,
+                                                                                expectedSegmentNormalOrientations,
+                                                                                expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
 }
@@ -382,10 +385,12 @@ TEST_F(GravityModelBigTest, SingularityTerms) {
     using namespace testing;
 
     auto actualSingularityTerms =
-            systemUnderTest.calculateSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
-                                                      expectedOrthogonalProjectionPointsOnPlane,
-                                                      expectedPlaneDistances, expectedPlaneNormalOrientations,
-                                                      expectedPlaneUnitNormals);
+            polyhedralGravity::GravityModel::calculateSingularityTerms(_polyhedron, expectedGij,
+                                                                       expectedSegmentNormalOrientations,
+                                                                       expectedOrthogonalProjectionPointsOnPlane,
+                                                                       expectedPlaneDistances,
+                                                                       expectedPlaneNormalOrientations,
+                                                                       expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
 }
