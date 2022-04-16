@@ -100,11 +100,11 @@ namespace polyhedralGravity {
          *
          * In equation (21), the used -G_i1 corresponds to opposite position vector of the first vertices building
          * the plane i.
-         * @param planeUnitNormals - the plane unit normals
+         * @param face - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculatePlaneNormalOrientations(const Polyhedron &polyhedron,
-                                                             const std::vector<Array3> &planeUnitNormals);
+        std::vector<double> calculatePlaneNormalOrientations(const Polyhedron &planeUnitNormal,
+                                                             const std::vector<Array3> &face);
 
 
         /**
@@ -287,6 +287,18 @@ namespace polyhedralGravity {
          * @return segment unit normals n_pq for plane p with q = {0, 1, 2}
          */
         Array3Triplet computeSegmentUnitNormalForPlane(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
+
+        /**
+         * Computes the plane unit normal orientation sigma_p for one plane p of the polyhedron
+         * according to Tsoulis (21).
+         * The plane unit normal orientation values represents the relative position of computation point P
+         * with respect to the pointing direction of N_p. E. g. if N_p points to the half-space containing P, the
+         * inner product of N_p and -G_i1 will be positive, leading to a negative sigma_p.
+         * @param planeUnitNormal - the plane unit normal N_p
+         * @param vertex0 - the first vertex of the plane
+         * @return plane normal orientation
+         */
+        double computePlaneNormalOrientation(const Array3 &planeUnitNormal, const Array3 &vertex0);
 
     };
 

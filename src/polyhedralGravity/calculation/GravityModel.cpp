@@ -209,6 +209,7 @@ namespace polyhedralGravity {
 
     std::vector<Array3Triplet> GravityModel::calculateSegmentVectors(const Polyhedron &polyhedron) {
         std::vector<Array3Triplet> segmentVectors{polyhedron.countFaces()};
+        //Calculate G_ij for every plane given as input the three vertices of every face
         std::transform(polyhedron.getFaces().cbegin(), polyhedron.getFaces().cend(), segmentVectors.begin(),
                        [&polyhedron](const std::array<size_t, 3> &face) -> Array3Triplet {
                            const Array3 &vertex0 = polyhedron.getVertex(face[0]);
@@ -221,7 +222,7 @@ namespace polyhedralGravity {
 
     std::vector<Array3> GravityModel::calculatePlaneUnitNormals(const std::vector<Array3Triplet> &segmentVectors) {
         std::vector<Array3> planeUnitNormals{segmentVectors.size()};
-        //Calculate N_i as (G_i1 * G_i2) / |G_i1 * G_i2| with * being the cross product
+        //Calculate N_p for every plane given as input: G_i0 and G_i1 of every plane
         std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.begin(),
                        [](const Array3Triplet &segmentVectorsForPlane) -> Array3 {
                            return computePlaneUnitNormalForPlane(segmentVectorsForPlane[0], segmentVectorsForPlane[1]);
@@ -233,8 +234,7 @@ namespace polyhedralGravity {
             const std::vector<Array3Triplet> &segmentVectors,
             const std::vector<Array3> &planeUnitNormals) {
         std::vector<Array3Triplet> segmentUnitNormals{segmentVectors.size()};
-        //Calculate n_ij as (G_ij * N_i) / |G_ig * N_i| with * being the cross product
-        //Outer "loop" over G_i (running i) and N_i calculating n_i
+        //Loop" over G_i (running i=p) and N_p calculating n_p for every plane
         std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.cbegin(),
                        segmentUnitNormals.begin(),
                        [](const Array3Triplet &segmentVectorsForPlane, const Array3 &planeUnitNormal) {
@@ -247,16 +247,13 @@ namespace polyhedralGravity {
             const Polyhedron &polyhedron,
             const std::vector<Array3> &planeUnitNormals) {
         std::vector<double> planeNormalOrientations(planeUnitNormals.size(), 0.0);
-        //Calculate N_i * -G_i1 where * is the dot product and then use the inverted sgn
+        //Calculate sigma_p for every plane given as input: N_p and vertex0 of every face
         std::transform(planeUnitNormals.cbegin(), planeUnitNormals.cend(), polyhedron.getFaces().begin(),
                        planeNormalOrientations.begin(),
-                       [&polyhedron](const Array3 &ni, const std::array<size_t, 3> &gi) {
-                           using namespace util;
+                       [&polyhedron](const Array3 &planeUnitNormal, const std::array<size_t, 3> &face) {
                            //The first vertices' coordinates of the given face consisting of G_i's
-                           const auto &Gi1 = polyhedron.getVertex(gi[0]);
-                           //We abstain on the double multiplication with -1 in the line above and beyond since two
-                           //times multiplying with -1 equals no change
-                           return sgn(dot(ni, Gi1), util::EPSILON);
+                           const auto &vertex0 = polyhedron.getVertex(face[0]);
+                           return computePlaneNormalOrientation(planeUnitNormal , vertex0);
                        });
         return planeNormalOrientations;
     }
@@ -709,11 +706,13 @@ namespace polyhedralGravity {
     Array3Triplet GravityModel::computeSegmentVectorsForPlane(
             const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2) {
         using util::operator-;
+        //Calculate G_ij
         return {vertex1 - vertex0, vertex2 - vertex1, vertex0 - vertex2};
     }
 
     Array3 GravityModel::computePlaneUnitNormalForPlane(const Array3 &segmentVector1, const Array3 &segmentVector2) {
         using namespace util;
+        //Calculate N_i as (G_i1 * G_i2) / |G_i1 * G_i2| with * being the cross product
         const Array3 crossProduct = cross(segmentVector1, segmentVector2);
         const double norm = euclideanNorm(crossProduct);
         return crossProduct / norm;
@@ -722,6 +721,7 @@ namespace polyhedralGravity {
     Array3Triplet GravityModel::computeSegmentUnitNormalForPlane(
             const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal) {
         Array3Triplet segmentUnitNormal{};
+        //Calculate n_ij as (G_ij * N_i) / |G_ig * N_i| with * being the cross product
         std::transform(segmentVectors.cbegin(), segmentVectors.end(), segmentUnitNormal.begin(),
                        [&planeUnitNormal](const Array3 &segmentVector) -> Array3 {
                            using namespace util;
@@ -730,6 +730,14 @@ namespace polyhedralGravity {
                            return crossProduct / norm;
                        });
         return segmentUnitNormal;
+    }
+
+    double GravityModel::computePlaneNormalOrientation(const Array3 &planeUnitNormal, const Array3 &vertex0) {
+        using namespace util;
+        //Calculate N_i * -G_i1 where * is the dot product and then use the inverted sgn
+        //We abstain on the double multiplication with -1 in the line above and beyond since two
+        //times multiplying with -1 equals no change
+        return sgn(dot(planeUnitNormal, vertex0), util::EPSILON);
     }
 
 
