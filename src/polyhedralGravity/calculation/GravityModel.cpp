@@ -348,7 +348,7 @@ namespace polyhedralGravity {
             const Array3 &orthogonalProjectionPointOnPlane = thrust::get<0>(tuple);
             const Array3 &segmentNormalOrientationsForPlane = thrust::get<1>(tuple);
             const Array3Triplet &face = thrust::get<2>(tuple);
-            return computeOrthogonalProjectionPointsOnSegmentsPerPlane(
+            return computeOrthogonalProjectionPointsOnSegmentsForPlane(
                     orthogonalProjectionPointOnPlane, segmentNormalOrientationsForPlane, face);
         });
 
@@ -726,14 +726,14 @@ namespace polyhedralGravity {
         return segmentNormalOrientations;
     }
 
-    Array3Triplet GravityModel::computeOrthogonalProjectionPointsOnSegmentsPerPlane(
+    Array3Triplet GravityModel::computeOrthogonalProjectionPointsOnSegmentsForPlane(
             const Array3 &projectionPointOnPlane,
             const Array3 &segmentNormalOrientations,
             const Array3Triplet &face) {
         auto counterJ = thrust::counting_iterator<unsigned int>(0);
         Array3Triplet orthogonalProjectionPointOnSegmentPerPlane{};
 
-        //The inner loop with fixed i, running over the j --> the segments of a plane
+        //Running over the segments of this plane
         thrust::transform(segmentNormalOrientations.begin(), segmentNormalOrientations.end(),
                           counterJ, orthogonalProjectionPointOnSegmentPerPlane.begin(),
                           [&](const double &segmentNormalOrientation, const unsigned int j) {

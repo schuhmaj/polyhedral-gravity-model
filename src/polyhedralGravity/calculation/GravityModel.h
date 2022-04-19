@@ -299,7 +299,7 @@ namespace polyhedralGravity {
         double computePlaneDistanceForPlane(const HessianPlane &hessianPlane);
 
         /**
-         * Calculates P' for a given plane p according to equation (22) of Tsoulis paper.
+         * Computes P' for a given plane p according to equation (22) of Tsoulis paper.
          * P' is the orthogonal projection of the computation point P onto the plane S_p.
          * @param planeUnitNormal - the plane unit normal N_p
          * @param planeDistance - the distance from P to the plane h_p
@@ -311,11 +311,25 @@ namespace polyhedralGravity {
                 double planeDistance,
                 const HessianPlane &hessianPlane);
 
+        /**
+         * Computes the segment normal orientations sigma_pq for a given plane p.
+         * @param vertices - the vertices of this plane
+         * @param projectionPointOnPlane - the projection point P' for this plane
+         * @param segmentUnitNormalsForPlane - the segment unit normals sigma_pq for this plane
+         * @return the segment normal orientations for the plane p
+         */
         Array3 computeSegmentNormalOrientationsForPlane(const Array3Triplet &vertices,
                                                         const Array3 &projectionPointOnPlane,
                                                         const Array3Triplet &segmentUnitNormalsForPlane);
 
-        Array3Triplet computeOrthogonalProjectionPointsOnSegmentsPerPlane(
+        /**
+         * Computes the orthogonal projection Points P'' foreach segment q of a given plane p.
+         * @param projectionPointOnPlane - the projection Point P'
+         * @param segmentNormalOrientations - the segment normal orientations sigma_pq for this plane p
+         * @param face - the vertices of the plane p
+         * @return the orthogonal projection points of P on the segment P'' foreach segment q of p
+         */
+        Array3Triplet computeOrthogonalProjectionPointsOnSegmentsForPlane(
                 const Array3 &projectionPointOnPlane,
                 const Array3 &segmentNormalOrientations,
                 const Array3Triplet &face);
