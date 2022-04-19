@@ -227,7 +227,6 @@ namespace polyhedralGravity {
                                            const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
 
         /**
-         * TODO Contains enorm duplicate!
          * Calculates the singularities (correction) terms according to the Flow text.
          * @param segmentVectors - the segment vectors
          * @param segmentNormalOrientation - the segment normal orientations sigma_pq
@@ -236,11 +235,12 @@ namespace polyhedralGravity {
          * @return the singularities terms
          */
         std::vector<std::pair<double, Array3>>
-        calculateSingularityTerms(const Polyhedron &polyhedron, const std::vector<Array3Triplet> &segmentVectors,
+        calculateSingularityTerms(const Array3 &computationPoint, const Polyhedron &polyhedron,
+                                  const std::vector<Array3Triplet> &segmentVectors,
                                   const std::vector<Array3> &segmentNormalOrientation,
                                   const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
                                   const std::vector<double> &planeDistances,
-                                  const std::vector<double> &planeNormalOrientation,
+                                  const std::vector<double> &planeNormalOrientations,
                                   const std::vector<Array3> &planeUnitNormals);
 
         /**
@@ -399,6 +399,27 @@ namespace polyhedralGravity {
                 const Array3 &segmentDistancesForPlane,
                 const Array3 &segmentNormalOrientationsForPlane,
                 const Array3 &orthogonalProjectionPointOnPlane,
+                const Array3Triplet &face);
+
+        /**
+         * TODO Contains enorm duplicate!
+         * Calculates the singularities (correction) terms according to the Flow text for a given plane p.
+         * @param segmentVectorsForPlane - the segment vectors for a given plane
+         * @param segmentNormalOrientationForPlane - the segment orientation sigma_pq
+         * @param orthogonalProjectionPointOnPlane - the projection point P'
+         * @param planeUnitNormal - the plane unit normal N_p
+         * @param planeDistance - the plane distance h_p
+         * @param planeNormalOrientation - the plane normal orientation sigma_p
+         * @param face - the vertices of plane p
+         * @return the singularities for a plane p
+         */
+        std::pair<double, Array3> computeSingularityTermsForPlane(
+                const Array3Triplet &segmentVectorsForPlane,
+                const Array3 &segmentNormalOrientationForPlane,
+                const Array3 &orthogonalProjectionPointOnPlane,
+                const Array3 &planeUnitNormal,
+                double planeDistance,
+                double planeNormalOrientation,
                 const Array3Triplet &face);
 
 

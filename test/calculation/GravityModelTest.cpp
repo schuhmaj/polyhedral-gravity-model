@@ -473,7 +473,7 @@ TEST_F(GravityModelTest, SingularityTerms) {
     using namespace testing;
 
     auto actualSingularityTerms =
-            polyhedralGravity::GravityModel::calculateSingularityTerms(_polyhedron, expectedGij,
+            polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
                                                                        expectedSegmentNormalOrientations,
                                                                        expectedOrthogonalProjectionPointsOnPlane,
                                                                        expectedPlaneDistances,
