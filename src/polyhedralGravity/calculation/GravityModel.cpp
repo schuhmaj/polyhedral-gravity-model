@@ -11,7 +11,7 @@ namespace polyhedralGravity {
         auto polyhedronIterator = transformPolyhedron(polyhedron, computationPoint);
 
         GravityModelResult result{};
-        result = thrust::transform_reduce(
+        result = thrust::transform_reduce(//TODO thrust::device,
                 polyhedronIterator.first, polyhedronIterator.second, [](const Array3Triplet &face) {
                     using namespace util;
                     Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0],

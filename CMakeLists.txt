@@ -36,6 +36,7 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 # TODO, Make this an option for the user
 # CPP = Serial execution, We also set the DEVICE to CPP since the default CUDA should not be a dependency
+# TODO Best Speedup: Thrust HOST CPP DEVICE OMP
 thrust_create_target(Thrust HOST CPP DEVICE CPP)
 target_link_libraries(${PROJECT_NAME}_lib
         Thrust
