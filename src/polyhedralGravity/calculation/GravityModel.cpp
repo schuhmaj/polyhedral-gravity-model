@@ -5,180 +5,116 @@ namespace polyhedralGravity {
     GravityModelResult GravityModel::evaluate(
             const Polyhedron &polyhedron, double density, const Array3 &computationPoint) {
         using namespace util;
+        /*
+         * Calculate V and Vx, Vy, Vz and Vxx, Vyy, Vzz, Vxy, Vxz, Vyz
+         */
+        auto polyhedronIterator = transformPolyhedron(polyhedron, computationPoint);
+
         GravityModelResult result{};
+        result = std::accumulate(polyhedronIterator.first, polyhedronIterator.second,
+                                    result, [](GravityModelResult acc, const Array3Triplet &face) {
+                    Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0], face[1], face[2]);
+                    Array3 planeUnitNormal = computePlaneUnitNormalForPlane(segmentVectors[0], segmentVectors[1]);
+                    Array3Triplet segmentUnitNormals = computeSegmentUnitNormalForPlane(segmentVectors,
+                                                                                        planeUnitNormal);
+                    double planeNormalOrientation = computePlaneNormalOrientationForPlane(planeUnitNormal, face[0]);
+                    HessianPlane hessianPlane = computeHessianPlane(face[0], face[1], face[2]);
+                    double planeDistance = computePlaneDistanceForPlane(hessianPlane);
+                    Array3 orthogonalProjectionPointOnPlane =
+                            computeOrthogonalProjectionPointsOnPlaneForPlane(
+                                    planeUnitNormal, planeDistance, hessianPlane);
+                    Array3 segmentNormalOrientations = computeSegmentNormalOrientationsForPlane(
+                            face, orthogonalProjectionPointOnPlane, segmentUnitNormals);
+                    Array3Triplet orthogonalProjectionPointsOnSegmentsForPlane =
+                            computeOrthogonalProjectionPointsOnSegmentsForPlane(
+                                    orthogonalProjectionPointOnPlane, segmentNormalOrientations, face);
+                    Array3 segmentDistances = computeSegmentDistancesForPlane(
+                            orthogonalProjectionPointOnPlane, orthogonalProjectionPointsOnSegmentsForPlane);
+                    std::array<Distance, 3> distances = computeDistancesForPlane(
+                            segmentVectors, orthogonalProjectionPointsOnSegmentsForPlane, face);
+                    std::array<TranscendentalExpression, 3> transcendentalExpressions =
+                            computeTranscendentalExpressionsForPlane(distances, planeDistance, segmentDistances,
+                                                                     segmentNormalOrientations,
+                                                                     orthogonalProjectionPointOnPlane, face);
+                    std::pair<double, Array3> singularities =
+                            computeSingularityTermsForPlane(segmentVectors, segmentNormalOrientations,
+                                                            orthogonalProjectionPointOnPlane,
+                                                            planeUnitNormal, planeDistance,
+                                                            planeNormalOrientation, face);
+                    //Sum 1 - potential and acceleration
+                    auto zipIteratorSum1PA = util::zipPair(segmentNormalOrientations,
+                                                         segmentDistances,
+                                                         transcendentalExpressions);
+                    const double sum1PA = std::accumulate(zipIteratorSum1PA.first,
+                                                          zipIteratorSum1PA.second,
+                                                        0.0, [](double acc,
+                                                                const auto &tuple) {
+                                const double &sigma_pq = thrust::get<0>(tuple);
+                                const double &h_pq = thrust::get<1>(tuple);
+                                const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(
+                                        tuple);
+                                return acc + sigma_pq * h_pq *
+                                             transcendentalExpressions.ln;
+                            });
 
-        auto gijVectors = calculateSegmentVectors(polyhedron);
-        auto planeUnitNormals = calculatePlaneUnitNormals(gijVectors);
-        auto segmentUnitNormals = calculateSegmentUnitNormals(gijVectors, planeUnitNormals);
-
-        auto planeNormalOrientation = calculatePlaneNormalOrientations(computationPoint, polyhedron, planeUnitNormals);
-
-        auto hessianPlanes = calculateFacesToHessianPlanes(computationPoint, polyhedron);
-
-        auto planeDistances = calculatePlaneDistances(hessianPlanes);
-
-        auto orthogonalProjectionOnPlane =
-                calculateOrthogonalProjectionPointsOnPlane(hessianPlanes, planeUnitNormals, planeDistances);
-
-        auto segmentNormalOrientation =
-                calculateSegmentNormalOrientations(computationPoint, polyhedron, segmentUnitNormals,
-                                                   orthogonalProjectionOnPlane);
-
-        auto orthogonalProjectionOnSegment =
-                calculateOrthogonalProjectionPointsOnSegments(computationPoint, polyhedron, orthogonalProjectionOnPlane,
-                                                              segmentNormalOrientation);
-
-        auto segmentDistances = calculateSegmentDistances(orthogonalProjectionOnPlane, orthogonalProjectionOnSegment);
-
-        auto distances = calculateDistances(computationPoint, polyhedron, gijVectors, orthogonalProjectionOnSegment);
-
-        auto transcendentalExpressions =
-                calculateTranscendentalExpressions(computationPoint, polyhedron, distances, planeDistances,
-                                                   segmentDistances,
-                                                   segmentNormalOrientation, orthogonalProjectionOnPlane);
-
-        auto singularities =
-                calculateSingularityTerms(computationPoint, polyhedron, gijVectors, segmentNormalOrientation,
-                                          orthogonalProjectionOnPlane,
-                                          planeDistances, planeNormalOrientation, planeUnitNormals);
-
-        /*
-         * Calculate V and Vx, Vy, Vz
-         */
-
-        auto zipIterator1 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
-                                          segmentDistances, transcendentalExpressions, singularities,
-                                          planeUnitNormals);
-
-        std::pair<double, Array3> potentialAndAcceleration = std::make_pair(0.0, Array3{0.0, 0.0, 0.0});
-        potentialAndAcceleration =
-                std::accumulate(zipIterator1.first, zipIterator1.second,
-                                potentialAndAcceleration, [](std::pair<double, Array3> acc, const auto &tuple) {
-                            const double sigma_p = thrust::get<0>(tuple);
-                            const double h_p = thrust::get<1>(tuple);
-                            const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
-                            const auto &segmentDistancePerPlane = thrust::get<3>(tuple);
-                            const auto &transcendentalExpressionsPerPlane = thrust::get<4>(
-                                    tuple);
-                            const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(
-                                    tuple);
-                            const Array3 &Np = thrust::get<6>(tuple);
-
-                            //Sum 1
-                            auto zipIteratorSum1 = util::zipPair(sigmaPQPerPlane,
-                                                                 segmentDistancePerPlane,
-                                                                 transcendentalExpressionsPerPlane);
-                            const double sum1 = std::accumulate(zipIteratorSum1.first,
-                                                                zipIteratorSum1.second,
-                                                                0.0, [](double acc,
-                                                                        const auto &tuple) {
-                                        const double &sigma_pq = thrust::get<0>(tuple);
-                                        const double &h_pq = thrust::get<1>(tuple);
-                                        const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(
-                                                tuple);
-                                        return acc + sigma_pq * h_pq *
-                                                     transcendentalExpressions.ln;
-                                    });
-
-                            //Sum 2
-                            auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane,
-                                                                 transcendentalExpressionsPerPlane);
-                            const double sum2 = std::accumulate(zipIteratorSum2.first,
-                                                   zipIteratorSum2.second,
-                                                   0.0, [](double acc, const auto &tuple) {
-                                        const double &sigma_pq = thrust::get<0>(tuple);
-                                        const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
-                                                tuple);
-                                        return acc + sigma_pq * transcendentalExpressions.an;
-                                    });
-
-                            //Sum up everything
-                            const double planeSum =
-                                    sum1 + h_p * sum2 + singularitiesPerPlane.first;
-                            return std::make_pair(
-                                    acc.first + sigma_p * h_p * planeSum,
-                                    acc.second + Np * planeSum
-                            );
-                        });
-
-        const double prefix = util::GRAVITATIONAL_CONSTANT * density;
-
-        result.gravitationalPotential = (potentialAndAcceleration.first * prefix) / 2.0;
-        result.gravitationalPotentialDerivative = abs(potentialAndAcceleration.second * prefix);
-        SPDLOG_INFO("V= {}", result.gravitationalPotential);
-        SPDLOG_INFO("Vx= {}", result.gravitationalPotentialDerivative[0]);
-        SPDLOG_INFO("Vy= {}", result.gravitationalPotentialDerivative[1]);
-        SPDLOG_INFO("Vz= {}", result.gravitationalPotentialDerivative[2]);
-
-        /*
-         * Calculation of Vxx, Vyy, Vzz, Vxy, Vxz, Vyz
-         */
-
-        auto zipIterator2 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
-                                           segmentDistances, transcendentalExpressions, singularities,
-                                           planeUnitNormals, segmentUnitNormals);
-
-        std::array<double, 6> V3 = std::accumulate(
-                zipIterator2.first, zipIterator2.second, std::array<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                [](const std::array<double, 6> &acc, const auto &tuple) {
-                    using namespace util;
-                    const double sigma_p = thrust::get<0>(tuple);
-                    const double h_p = thrust::get<1>(tuple);
-                    const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
-                    const auto &segmentDistancePerPlane = thrust::get<3>(tuple);
-                    const auto &transcendentalExpressionsPerPlane = thrust::get<4>(tuple);
-                    const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(
-                            tuple);
-                    const Array3 &Np = thrust::get<6>(tuple);
-                    const Array3Triplet &npqPerPlane = thrust::get<7>(tuple);
-
-
-                    //Sum 1
-                    auto zipIteratorSum1 = util::zipPair(npqPerPlane, transcendentalExpressionsPerPlane);
-                    const Array3 sum1 = std::accumulate(
-                            zipIteratorSum1.first, zipIteratorSum1.second, Array3{0.0, 0.0, 0.0},
+                    //Sum 1 - tensor
+                    auto zipIteratorSum1T = util::zipPair(segmentUnitNormals,
+                                                         transcendentalExpressions);
+                    const Array3 sum1T = std::accumulate(
+                            zipIteratorSum1T.first, zipIteratorSum1T.second, Array3{0.0, 0.0, 0.0},
                             [](const Array3 &acc, const auto &tuple) {
                                 const Array3 &npq = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
                                 return acc + (npq * transcendentalExpressions.ln);
                             });
 
-                    auto sum2Start = thrust::make_zip_iterator(thrust::make_tuple(
-                            sigmaPQPerPlane.begin(),
-                            transcendentalExpressionsPerPlane.begin()));
-
-                    auto sum2End = thrust::make_zip_iterator(thrust::make_tuple(
-                            sigmaPQPerPlane.end(),
-                            transcendentalExpressionsPerPlane.end()));
-
-                    //Sum 2
-                    auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane, transcendentalExpressionsPerPlane);
-                    const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
+                    //Sum 2 - for both the same
+                    auto zipIteratorSum2 = util::zipPair(segmentNormalOrientations,
+                                                         transcendentalExpressions);
+                    const double sum2 = std::accumulate(zipIteratorSum2.first,
+                                                        zipIteratorSum2.second,
                                                         0.0, [](double acc, const auto &tuple) {
                                 const double &sigma_pq = thrust::get<0>(tuple);
-                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
+                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
+                                        tuple);
                                 return acc + sigma_pq * transcendentalExpressions.an;
                             });
 
-                    //Sum up everything
-                    const Array3 subSum = (sum1 + (Np * (sigma_p * sum2))) + singularitiesPerPlane.second;
+                    //Sum up everything (potential and acceleration)
+                    const double planeSumPA = sum1PA + planeDistance * sum2 + singularities.first;
 
-                    const Array3 first = Np * subSum;
-                    const Array3 reorderedNp = {Np[0], Np[0], Np[1]};
+                    //Sum up everything (tensor)
+                    const Array3 subSum = (sum1T + (planeUnitNormal * (planeNormalOrientation * sum2))) + singularities.second;
+                    const Array3 first = planeUnitNormal * subSum;
+                    const Array3 reorderedNp = {planeUnitNormal[0], planeUnitNormal[0], planeUnitNormal[1]};
                     const Array3 reorderedSubSum = {subSum[1], subSum[2], subSum[2]};
                     const Array3 second = reorderedNp * reorderedSubSum;
 
-                    return acc + concat(first, second);
+                    //Accumulate and return
+                    return GravityModelResult {
+                        acc.gravitationalPotential + planeNormalOrientation * planeDistance * planeSumPA,
+                        acc.gravitationalPotentialDerivative + planeUnitNormal * planeSumPA,
+                        acc.gradiometricTensor + concat(first, second)
+                    };
                 });
 
-        result.gradiometricTensor = V3 * prefix;
+        const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
+        result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
+        result.gravitationalPotentialDerivative = abs(result.gravitationalPotentialDerivative * prefix);
+        result.gradiometricTensor = result.gradiometricTensor * prefix;
+        SPDLOG_INFO("V= {}", result.gravitationalPotential);
+        SPDLOG_INFO("Vx= {}", result.gravitationalPotentialDerivative[0]);
+        SPDLOG_INFO("Vy= {}", result.gravitationalPotentialDerivative[1]);
+        SPDLOG_INFO("Vz= {}", result.gravitationalPotentialDerivative[2]);
         SPDLOG_INFO("Vxx= {}", result.gradiometricTensor[0]);
         SPDLOG_INFO("Vyy= {}", result.gradiometricTensor[1]);
         SPDLOG_INFO("Vzz= {}", result.gradiometricTensor[2]);
         SPDLOG_INFO("Vxy= {}", result.gradiometricTensor[3]);
         SPDLOG_INFO("Vxz= {}", result.gradiometricTensor[4]);
         SPDLOG_INFO("Vyz= {}", result.gradiometricTensor[5]);
+
+        result.p = computationPoint;
 
         return result;
     }

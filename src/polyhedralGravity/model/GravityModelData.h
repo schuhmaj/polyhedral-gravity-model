@@ -91,7 +91,7 @@ namespace polyhedralGravity {
         /**
          * The point P at which the gravity model was evaluated.
          */
-        const std::array<double, 3> p;
+        std::array<double, 3> p{};
 
         /**
          * The gravitational potential in [m^2/s^2] <--> [J/kg] at point P.
@@ -125,6 +125,12 @@ namespace polyhedralGravity {
          */
         explicit GravityModelResult(const std::array<double, 3> &p1)
                 : p{p1} {}
+
+        GravityModelResult(double gravitationalPotential, const std::array<double, 3> &gravitationalPotentialDerivative,
+                           const std::array<double, 6> &gradiometricTensor)
+                : gravitationalPotential(gravitationalPotential),
+                  gravitationalPotentialDerivative(gravitationalPotentialDerivative),
+                  gradiometricTensor(gradiometricTensor) {}
 
     };
 
