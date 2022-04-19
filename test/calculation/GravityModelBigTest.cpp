@@ -376,7 +376,7 @@ TEST_F(GravityModelBigTest, TranscendentalExpressions) {
     using namespace testing;
 
     auto actualTranscendentalExpressions =
-            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_polyhedron,
+            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
                                                                                 expectedDistancesPerSegmentEndpoint,
                                                                                 expectedPlaneDistances,
                                                                                 expectedSegmentDistances,

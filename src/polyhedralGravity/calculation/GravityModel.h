@@ -208,7 +208,6 @@ namespace polyhedralGravity {
                            const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment);
 
         /**
-         * TODO Contains enorm duplicate!
          * Calculates the Transcendental Expressions LN_pq and AN_pq for every line segment of the polyhedron.
          * LN_pq is calculated according to (14) using the natural logarithm and AN_pq is calculated according
          * to (15) using the arctan.
@@ -220,7 +219,7 @@ namespace polyhedralGravity {
          * @return the Transcendental Expressions LN and AN for every segment
          */
         std::vector<std::array<TranscendentalExpression, 3>>
-        calculateTranscendentalExpressions(const Polyhedron &polyhedron,
+        calculateTranscendentalExpressions(const Array3 &computationPoint, const Polyhedron &polyhedron,
                                            const std::vector<std::array<Distance, 3>> &distances,
                                            const std::vector<double> &planeDistances,
                                            const std::vector<Array3> &segmentDistances,
@@ -378,6 +377,28 @@ namespace polyhedralGravity {
         std::array<Distance, 3> computeDistancesForPlane(
                 const Array3Triplet &segmentVectorsForPlane,
                 const Array3Triplet &orthogonalProjectionPointsOnSegmentForPlane,
+                const Array3Triplet &face);
+
+        /**
+         * TODO Contains enorm duplicate!
+         * Calculates the Transcendental Expressions LN_pq and AN_pq for every line segment of the polyhedron for
+         * a given plane p.
+         * LN_pq is calculated according to (14) using the natural logarithm and AN_pq is calculated according
+         * to (15) using the arctan.
+         * @param distancesForPlane - the distances l1, l2, s1, s2 foreach segment q of plane p
+         * @param planeDistance - the plane distance h_p for plane p
+         * @param segmentDistancesForPlane - the segment distance h_pq for segment q of plane p
+         * @param segmentNormalOrientationsForPlane - the segment normal orientations n_pq for a plane p
+         * @param orthogonalProjectionPointOnPlane - the orthogonal projection point P' for plane p
+         * @param face - the vertices of plane p
+         * @return LN_pq and AN_pq foreach segment q of plane p
+         */
+        std::array<TranscendentalExpression, 3> computeTranscendentalExpressionsForPlane(
+                const std::array<Distance, 3> &distancesForPlane,
+                double planeDistance,
+                const Array3 &segmentDistancesForPlane,
+                const Array3 &segmentNormalOrientationsForPlane,
+                const Array3 &orthogonalProjectionPointOnPlane,
                 const Array3Triplet &face);
 
 
