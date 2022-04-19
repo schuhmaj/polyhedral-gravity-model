@@ -366,7 +366,7 @@ TEST_F(GravityModelBigTest, DistancesPerSegmentEndpoint) {
     using namespace testing;
 
     auto actualDistancesPerSegmentEndpoint =
-            polyhedralGravity::GravityModel::calculateDistances(_polyhedron, expectedGij,
+            polyhedralGravity::GravityModel::calculateDistances(_computationPoint, _polyhedron, expectedGij,
                                                                 expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));

@@ -35,6 +35,14 @@ namespace polyhedralGravity {
 
     /**
      * Namespace containing the methods used to evaluate the polyhedrale Gravity Model
+     * @note Naming scheme corresponds to the following:
+     * evaluate()           --> main Method for evaluating the gravity model
+     * colculate*()         --> methods which calculate the full vector of a certain property (for all planes/ segments)
+     * compute*ForPlane()   --> methods which calculate a property of ONE plane
+     * compute*ForSegment() --> methods which calculate a property of ONE segment
+     *
+     * Typically a calculate() functions calls repeatedly foreach plane p the compute*ForPlane() method which then calls
+     * the compute*ForSegment() foreach segment q (triangle faces --> three times)
      * TODO: insert ::detail namespace for 'private' methods
      */
     namespace GravityModel {
@@ -195,7 +203,8 @@ namespace polyhedralGravity {
          * @return Distance struct containing l1, l2, s1, s2
          */
         std::vector<std::array<Distance, 3>>
-        calculateDistances(const Polyhedron &polyhedron, const std::vector<Array3Triplet> &segmentVectors,
+        calculateDistances(const Array3 &computationPoint, const Polyhedron &polyhedron,
+                           const std::vector<Array3Triplet> &segmentVectors,
                            const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment);
 
         /**
@@ -343,8 +352,8 @@ namespace polyhedralGravity {
          * @return P'' for this segment
          * @note If sigma_pq is zero then P'' == P', this is not checked by this method, but has to be assured first
          */
-        Array3 computeOrthogonalProjectionOnSegment(const Array3 &vertex1, const Array3 &vertex2,
-                                                    const Array3 &orthogonalProjectionPointOnPlane);
+        Array3 computeOrthogonalProjectionOnSegmentForSegment(const Array3 &vertex1, const Array3 &vertex2,
+                                                              const Array3 &orthogonalProjectionPointOnPlane);
 
         /**
          * Computes the segment distances h_pq between P' for a given plane p and P'' for a given segment q of plane p.
@@ -355,6 +364,21 @@ namespace polyhedralGravity {
         Array3 computeSegmentDistancesForPlane(
                 const Array3 &orthogonalProjectionPointOnPlane,
                 const Array3Triplet &orthogonalProjectionPointOnSegments);
+
+        /**
+         * Computes the 3D distances between l1_pq and l2_pq between the computation point P and the line
+         * segment endpoints of each polyhedral segment for one plane.
+         * Computes the 1D distances s1_pq and s2_pq between orthogonal projection of P on the line
+         * segment P''_pq and the line segment endpoints for each polyhedral segment for one plane
+         * @param segmentVectorsForPlane - the segment vectors G_pq for plane p
+         * @param orthogonalProjectionPointsOnSegmentForPlane - the orthogonal projection Points P'' for plane p
+         * @param face - the vertices of plane p
+         * @return distances l1_pq and l2_pq and s1_pq and s2_pq foreach segment q of plane p
+         */
+        std::array<Distance, 3> computeDistancesForPlane(
+                const Array3Triplet &segmentVectorsForPlane,
+                const Array3Triplet &orthogonalProjectionPointsOnSegmentForPlane,
+                const Array3Triplet &face);
 
 
         /**

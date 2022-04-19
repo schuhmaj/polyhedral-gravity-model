@@ -28,7 +28,7 @@ namespace polyhedralGravity {
 
         auto segmentDistances = calculateSegmentDistances(orthogonalProjectionOnPlane, orthogonalProjectionOnSegment);
 
-        auto distances = calculateDistances(polyhedron, gijVectors, orthogonalProjectionOnSegment);
+        auto distances = calculateDistances(computationPoint, polyhedron, gijVectors, orthogonalProjectionOnSegment);
 
         auto transcendentalExpressions =
                 calculateTranscendentalExpressions(polyhedron, distances, planeDistances, segmentDistances,
@@ -369,71 +369,24 @@ namespace polyhedralGravity {
     }
 
     std::vector<std::array<Distance, 3>> GravityModel::calculateDistances(
+            const Array3 &computationPoint,
             const Polyhedron &polyhedron,
             const std::vector<Array3Triplet> &segmentVectors,
             const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment) {
         std::vector<std::array<Distance, 3>> distances{segmentVectors.size()};
 
         //Zip the three required arguments together: G_ij for every segment, P'' for every segment
-        auto zip = util::zipPair(segmentVectors, orthogonalProjectionPointsOnSegment, polyhedron.getFaces());
+        auto transformedPolyhedronIt = transformPolyhedron(polyhedron, computationPoint);
+        auto first = util::zip(segmentVectors.begin(), orthogonalProjectionPointsOnSegment.begin(),
+                                 transformedPolyhedronIt.first);
+        auto last = util::zip(segmentVectors.end(), orthogonalProjectionPointsOnSegment.end(),
+                                 transformedPolyhedronIt.second);
 
-        thrust::transform(zip.first, zip.second, distances.begin(), [&polyhedron](const auto &tuple) {
-            const auto &gi = thrust::get<0>(tuple);
-            const auto &pDoublePrimePerPlane = thrust::get<1>(tuple);
-            const auto &face = thrust::get<2>(tuple);
-
-            std::array<Distance, 3> distancesArray{};
-            auto counterJ = thrust::counting_iterator<unsigned int>(0);
-            auto innerZip = util::zipPair(gi, pDoublePrimePerPlane);
-
-            thrust::transform(innerZip.first, innerZip.second, counterJ,
-                              distancesArray.begin(), [&](const auto &tuple, unsigned int j) {
-                        using namespace util;
-                        Distance distance{};
-                        const Array3 &gijVector = thrust::get<0>(tuple);
-                        const Array3 &pDoublePrime = thrust::get<1>(tuple);
-
-                        //Get the vertices (endpoints) of this segment
-                        const auto &v1 = polyhedron.getVertex(face[j]);
-                        const auto &v2 = polyhedron.getVertex(face[(j + 1) % 3]);
-
-                        //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints v1 and v2
-                        distance.l1 = euclideanNorm(v1);
-                        distance.l2 = euclideanNorm(v2);
-                        //Calculate the 1D distances between P'' (every segment has its own) and the segment endpoints v1 and v2
-                        distance.s1 = euclideanNorm(pDoublePrime - v1);
-                        distance.s2 = euclideanNorm(pDoublePrime - v2);
-
-                        //Change the sign depending on certain conditions
-                        //1D and 3D distance are small
-                        if (std::abs(distance.s1 - distance.l1) < 1e-10 &&
-                            std::abs(distance.s2 - distance.l2) < 1e-10) {
-                            if (distance.s2 < distance.s1) {
-                                distance.s1 *= -1.0;
-                                distance.s2 *= -1.0;
-                                distance.l1 *= -1.0;
-                                distance.l2 *= -1.0;
-                                return distance;
-                            } else if (distance.s2 == distance.s1) {
-                                distance.s1 *= -1.0;
-                                distance.l1 *= -1.0;
-                                return distance;
-                            }
-                        } else {
-                            //condition: P'' lies on the segment described by G_ij
-                            const double norm = euclideanNorm(gijVector);
-                            if (distance.s1 < norm && distance.s2 < norm) {
-                                distance.s1 *= -1.0;
-                                return distance;
-                            } else if (distance.s2 < distance.s1) {
-                                distance.s1 *= -1.0;
-                                distance.s2 *= -1.0;
-                                return distance;
-                            }
-                        }
-                        return distance;
-                    });
-            return distancesArray;
+        thrust::transform(first, last, distances.begin(), [](const auto &tuple) {
+            const Array3Triplet &segmentVectorsForPlane = thrust::get<0>(tuple);
+            const Array3Triplet &orthogonalProjectionPointsOnSegmentForPlane = thrust::get<1>(tuple);
+            const Array3Triplet &face = thrust::get<2>(tuple);
+            return computeDistancesForPlane(segmentVectorsForPlane, orthogonalProjectionPointsOnSegmentForPlane, face);
         });
         return distances;
     }
@@ -739,14 +692,15 @@ namespace polyhedralGravity {
                                   //with the endpoints v1 and v2
                                   const auto &vertex1 = face[j];
                                   const auto &vertex2 = face[(j + 1) % 3];
-                                  return computeOrthogonalProjectionOnSegment(vertex1, vertex2, projectionPointOnPlane);
+                                  return computeOrthogonalProjectionOnSegmentForSegment(vertex1, vertex2,
+                                                                                        projectionPointOnPlane);
                               }
                           });
         return orthogonalProjectionPointOnSegmentPerPlane;
     }
 
-    Array3 GravityModel::computeOrthogonalProjectionOnSegment(const Array3 &vertex1, const Array3 &vertex2,
-                                                              const Array3 &orthogonalProjectionPointOnPlane) {
+    Array3 GravityModel::computeOrthogonalProjectionOnSegmentForSegment(const Array3 &vertex1, const Array3 &vertex2,
+                                                                        const Array3 &orthogonalProjectionPointOnPlane) {
         using namespace util;
         //Preparing our the planes/ equations in matrix form
         const Array3 matrixRow1 = vertex2 - vertex1;
@@ -776,6 +730,63 @@ namespace polyhedralGravity {
                     return euclideanNorm(orthogonalProjectionPointOnSegment - orthogonalProjectionPointOnPlane);
                 });
         return segmentDistances;
+    }
+
+    std::array<Distance, 3> GravityModel::computeDistancesForPlane(
+            const Array3Triplet &segmentVectorsForPlane,
+            const Array3Triplet &orthogonalProjectionPointsOnSegmentForPlane,
+            const Array3Triplet &face) {
+        std::array<Distance, 3> distancesForPlane{};
+        auto counter = thrust::counting_iterator<unsigned int>(0);
+        auto zip = util::zipPair(segmentVectorsForPlane, orthogonalProjectionPointsOnSegmentForPlane);
+
+        thrust::transform(zip.first, zip.second, counter,
+                          distancesForPlane.begin(), [&face](const auto &tuple, unsigned int j) {
+                    using namespace util;
+                    Distance distance{};
+                    //segment vector G_pq
+                    const Array3 &segmentVector = thrust::get<0>(tuple);
+                    //orthogonal projection point on segment P'' for plane p and segment q
+                    const Array3 &orthogonalProjectionPointsOnSegment = thrust::get<1>(tuple);
+
+                    //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints face[j] and face[(j + 1) % 3])
+                    distance.l1 = euclideanNorm(face[j]);
+                    distance.l2 = euclideanNorm(face[(j + 1) % 3]);
+                    //Calculate the 1D distances between P'' (every segment has its own) and the segment endpoints
+                    // face[j] and face[(j + 1) % 3])
+                    distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
+                    distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
+
+                    //Change the sign depending on certain conditions
+                    //1D and 3D distance are small
+                    if (std::abs(distance.s1 - distance.l1) < 1e-10 &&
+                        std::abs(distance.s2 - distance.l2) < 1e-10) {
+                        if (distance.s2 < distance.s1) {
+                            distance.s1 *= -1.0;
+                            distance.s2 *= -1.0;
+                            distance.l1 *= -1.0;
+                            distance.l2 *= -1.0;
+                            return distance;
+                        } else if (distance.s2 == distance.s1) {
+                            distance.s1 *= -1.0;
+                            distance.l1 *= -1.0;
+                            return distance;
+                        }
+                    } else {
+                        //condition: P'' lies on the segment described by G_ij
+                        const double norm = euclideanNorm(segmentVector);
+                        if (distance.s1 < norm && distance.s2 < norm) {
+                            distance.s1 *= -1.0;
+                            return distance;
+                        } else if (distance.s2 < distance.s1) {
+                            distance.s1 *= -1.0;
+                            distance.s2 *= -1.0;
+                            return distance;
+                        }
+                    }
+                    return distance;
+                });
+        return distancesForPlane;
     }
 
 
