@@ -13,7 +13,7 @@ namespace polyhedralGravity {
         GravityModelResult result{};
         //TODO thrust::reduce or std::accumulate?
         result = thrust::reduce(polyhedronIterator.first, polyhedronIterator.second,
-                                result, [](GravityModelResult acc, const Array3Triplet &face) {
+                                result, [](const GravityModelResult &acc, const Array3Triplet &face) {
                     using namespace util;
                     Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0], face[1], face[2]);
                     Array3 planeUnitNormal = computePlaneUnitNormalForPlane(segmentVectors[0], segmentVectors[1]);
