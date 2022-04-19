@@ -427,9 +427,10 @@ TEST_F(GravityModelTest, OrthogonalProjectionPointsOnSegment) {
     using namespace testing;
 
     auto actualOrthogonalProjectionPointsOnSegment =
-            polyhedralGravity::GravityModel::calculateOrthogonalProjectionPointsOnSegments(_polyhedron,
-                                                                                           expectedOrthogonalProjectionPointsOnPlane,
-                                                                                           expectedSegmentNormalOrientations);
+            polyhedralGravity::GravityModel::calculateOrthogonalProjectionPointsOnSegments(
+                    _computationPoint, _polyhedron,
+                    expectedOrthogonalProjectionPointsOnPlane,
+                    expectedSegmentNormalOrientations);
 
     ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }

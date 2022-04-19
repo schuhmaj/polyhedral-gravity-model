@@ -168,21 +168,10 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the P' for every plane
          * @return the P'' for every line segment of the polyhedron
          */
-        std::vector<Array3Triplet> calculateOrthogonalProjectionPointsOnSegments(const Polyhedron &polyhedron,
+        std::vector<Array3Triplet> calculateOrthogonalProjectionPointsOnSegments(const Array3 &computationPoint,
+                                                                                 const Polyhedron &polyhedron,
                                                                                  const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
                                                                                  const std::vector<Array3> &segmentNormalOrientation);
-
-        /**
-         * Calculates the point P'' for a given Segment consisting of vertices v1 and v2 and the orthogonal projection
-         * point P' for the plane consisting of those vertices. Solves the three equations given in (24), (25) and (26).
-         * @param v1 - first endpoint of segment
-         * @param v2 - second endpoint of segment
-         * @param pPrime - the orthogonal projection P' of P on this plane
-         * @return P'' for this segment
-         * @note If sigma_pq is zero then P'' == P', this is not checked by this method, but has to be assured first
-         */
-        Array3 calculateOrthogonalProjectionOnSegment(const Array3 &v1, const Array3 &v2,
-                                                      const Array3 &pPrime);
 
         /**
          * Calculates the distance h_pg between the orthogonal projection P' of the computation point P
@@ -258,7 +247,6 @@ namespace polyhedralGravity {
         Array3Triplet
         computeSegmentVectorsForPlane(const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2);
 
-
         /**
          * Computes the plane unit normal N_p for one plane p of the polyhedron according to Tsoulis (19).
          * The plane unit normal is the outward pointing normal of the face from the polyhedron.
@@ -267,6 +255,7 @@ namespace polyhedralGravity {
          * @return plane unit normal
          */
         Array3 computePlaneUnitNormalForPlane(const Array3 &segmentVector1, const Array3 &segmentVector2);
+
 
         /**
          * Computes the segment unit normals n_pq for one plane p of the polyhedron according to Tsoulis (20).
@@ -330,6 +319,18 @@ namespace polyhedralGravity {
                 const Array3 &projectionPointOnPlane,
                 const Array3 &segmentNormalOrientations,
                 const Array3Triplet &face);
+
+        /**
+         * Calculates the point P'' for a given Segment consisting of vertices v1 and v2 and the orthogonal projection
+         * point P' for the plane consisting of those vertices. Solves the three equations given in (24), (25) and (26).
+         * @param vertex1 - first endpoint of segment
+         * @param vertex2 - second endpoint of segment
+         * @param orthogonalProjectionPointOnPlane - the orthogonal projection P' of P on this plane
+         * @return P'' for this segment
+         * @note If sigma_pq is zero then P'' == P', this is not checked by this method, but has to be assured first
+         */
+        Array3 computeOrthogonalProjectionOnSegment(const Array3 &vertex1, const Array3 &vertex2,
+                                                    const Array3 &orthogonalProjectionPointOnPlane);
 
 
         /**

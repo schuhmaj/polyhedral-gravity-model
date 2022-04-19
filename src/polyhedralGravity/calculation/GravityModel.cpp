@@ -23,7 +23,7 @@ namespace polyhedralGravity {
                                                    orthogonalProjectionOnPlane);
 
         auto orthogonalProjectionOnSegment =
-                calculateOrthogonalProjectionPointsOnSegments(polyhedron, orthogonalProjectionOnPlane,
+                calculateOrthogonalProjectionPointsOnSegments(computationPoint, polyhedron, orthogonalProjectionOnPlane,
                                                               segmentNormalOrientation);
 
         auto segmentDistances = calculateSegmentDistances(orthogonalProjectionOnPlane, orthogonalProjectionOnSegment);
@@ -317,7 +317,7 @@ namespace polyhedralGravity {
                               orthogonalProjectionPointsOnPlane.end(), segmentUnitNormals.end());
 
         //Calculates the segment normal orientation sigma_pq for every plane p
-        thrust::transform(first, last, segmentNormalOrientations.begin(), [&](const auto &tuple) {
+        thrust::transform(first, last, segmentNormalOrientations.begin(), [](const auto &tuple) {
             const Array3Triplet &face = thrust::get<0>(tuple);
             const Array3 &projectionPointOnPlaneForPlane = thrust::get<1>(tuple);
             const Array3Triplet &segmentUnitNormalsForPlane = thrust::get<2>(tuple);
@@ -329,61 +329,30 @@ namespace polyhedralGravity {
     }
 
     std::vector<Array3Triplet> GravityModel::calculateOrthogonalProjectionPointsOnSegments(
+            const Array3 &computationPoint,
             const Polyhedron &polyhedron,
             const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
             const std::vector<Array3> &segmentNormalOrientation) {
-        std::vector<Array3Triplet> orthogonalProjectionPointsOfPPrime{orthogonalProjectionPointsOnPlane.size()};
+        std::vector<Array3Triplet> orthogonalProjectionPointsOnSegments{orthogonalProjectionPointsOnPlane.size()};
 
         //Zip the three required arguments together: P' for every plane, sigma_pq for every segment, the faces
-        auto zip = util::zipPair(orthogonalProjectionPointsOnPlane, segmentNormalOrientation, polyhedron.getFaces());
+        auto transformedPolyhedronIt = transformPolyhedron(polyhedron, computationPoint);
+        auto first = util::zip(orthogonalProjectionPointsOnPlane.begin(), segmentNormalOrientation.begin(),
+                               transformedPolyhedronIt.first);
+        auto last = util::zip(orthogonalProjectionPointsOnPlane.end(), segmentNormalOrientation.end(),
+                              transformedPolyhedronIt.second);
 
         //The outer loop with the running i --> the planes
-        thrust::transform(zip.first, zip.second, orthogonalProjectionPointsOfPPrime.begin(), [&](const auto &tuple) {
+        thrust::transform(first, last, orthogonalProjectionPointsOnSegments.begin(), [](const auto &tuple) {
             //P' for plane i, sigma_pq[i] with fixed i, the nodes making up plane i
-            const auto &pPrime = thrust::get<0>(tuple);
-            const auto &sigmaP = thrust::get<1>(tuple);
-            const auto &face = thrust::get<2>(tuple);
-
-            auto counterJ = thrust::counting_iterator<unsigned int>(0);
-            Array3Triplet pDoublePrime{};
-
-            //The inner loop with fixed i, running over the j --> the segments of a plane
-            thrust::transform(sigmaP.begin(), sigmaP.end(), counterJ, pDoublePrime.begin(),
-                              [&](const auto &sigmaPQ, unsigned int j) {
-                                  //We actually only accept +0.0 or -0.0, so the equal comparison is ok
-                                  if (sigmaPQ == 0.0) {
-                                      //Geometrically trivial case, in neither of the half space --> already on segment
-                                      return pPrime;
-                                  } else {
-                                      //In one of the half space, evaluate the projection point P'' for the segment
-                                      //with the endpoints v1 and v2
-                                      const auto &v1 = polyhedron.getVertex(face[j]);
-                                      const auto &v2 = polyhedron.getVertex(face[(j + 1) % 3]);
-                                      return calculateOrthogonalProjectionOnSegment(v1, v2, pPrime);
-                                  }
-                              });
-            return pDoublePrime;
+            const Array3 &orthogonalProjectionPointOnPlane = thrust::get<0>(tuple);
+            const Array3 &segmentNormalOrientationsForPlane = thrust::get<1>(tuple);
+            const Array3Triplet &face = thrust::get<2>(tuple);
+            return computeOrthogonalProjectionPointsOnSegmentsPerPlane(
+                    orthogonalProjectionPointOnPlane, segmentNormalOrientationsForPlane, face);
         });
 
-        return orthogonalProjectionPointsOfPPrime;
-    }
-
-    Array3 GravityModel::calculateOrthogonalProjectionOnSegment(const Array3 &v1, const Array3 &v2,
-                                                                const Array3 &pPrime) {
-        using namespace util;
-        //Preparing our the planes/ equations in matrix form
-        const Array3 matrixRow1 = v2 - v1;
-        const Array3 matrixRow2 = cross(v1 - pPrime, matrixRow1);
-        const Array3 matrixRow3 = cross(matrixRow2, matrixRow1);
-        const Array3 d = {dot(matrixRow1, pPrime), dot(matrixRow2, pPrime), dot(matrixRow3, v1)};
-        Matrix<double, 3, 3> columnMatrix = transpose(Matrix<double, 3, 3>{matrixRow1, matrixRow2, matrixRow3});
-        //Calculation and solving the equations of above
-        const double determinant = det(columnMatrix);
-        return Array3{
-                det(Matrix<double, 3, 3>{d, columnMatrix[1], columnMatrix[2]}),
-                det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]}),
-                det(Matrix<double, 3, 3>{columnMatrix[0], columnMatrix[1], d})
-        } / determinant;
+        return orthogonalProjectionPointsOnSegments;
     }
 
     std::vector<Array3> GravityModel::calculateSegmentDistances(
@@ -755,6 +724,52 @@ namespace polyhedralGravity {
                     return sgn((dot(segmentNormalOrientation, projectionPointOnPlane - vertex)), util::EPSILON) * -1.0;
                 });
         return segmentNormalOrientations;
+    }
+
+    Array3Triplet GravityModel::computeOrthogonalProjectionPointsOnSegmentsPerPlane(
+            const Array3 &projectionPointOnPlane,
+            const Array3 &segmentNormalOrientations,
+            const Array3Triplet &face) {
+        auto counterJ = thrust::counting_iterator<unsigned int>(0);
+        Array3Triplet orthogonalProjectionPointOnSegmentPerPlane{};
+
+        //The inner loop with fixed i, running over the j --> the segments of a plane
+        thrust::transform(segmentNormalOrientations.begin(), segmentNormalOrientations.end(),
+                          counterJ, orthogonalProjectionPointOnSegmentPerPlane.begin(),
+                          [&](const double &segmentNormalOrientation, const unsigned int j) {
+                              //We actually only accept +0.0 or -0.0, so the equal comparison is ok
+                              if (segmentNormalOrientation == 0.0) {
+                                  //Geometrically trivial case, in neither of the half space --> already on segment
+                                  return projectionPointOnPlane;
+                              } else {
+                                  //In one of the half space, evaluate the projection point P'' for the segment
+                                  //with the endpoints v1 and v2
+                                  const auto &vertex1 = face[j];
+                                  const auto &vertex2 = face[(j + 1) % 3];
+                                  return computeOrthogonalProjectionOnSegment(vertex1, vertex2, projectionPointOnPlane);
+                              }
+                          });
+        return orthogonalProjectionPointOnSegmentPerPlane;
+    }
+
+    Array3 GravityModel::computeOrthogonalProjectionOnSegment(const Array3 &vertex1, const Array3 &vertex2,
+                                                              const Array3 &orthogonalProjectionPointOnPlane) {
+        using namespace util;
+        //Preparing our the planes/ equations in matrix form
+        const Array3 matrixRow1 = vertex2 - vertex1;
+        const Array3 matrixRow2 = cross(vertex1 - orthogonalProjectionPointOnPlane, matrixRow1);
+        const Array3 matrixRow3 = cross(matrixRow2, matrixRow1);
+        const Array3 d = {dot(matrixRow1, orthogonalProjectionPointOnPlane),
+                          dot(matrixRow2, orthogonalProjectionPointOnPlane),
+                          dot(matrixRow3, vertex1)};
+        Matrix<double, 3, 3> columnMatrix = transpose(Matrix<double, 3, 3>{matrixRow1, matrixRow2, matrixRow3});
+        //Calculation and solving the equations of above
+        const double determinant = det(columnMatrix);
+        return Array3{
+                det(Matrix<double, 3, 3>{d, columnMatrix[1], columnMatrix[2]}),
+                det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]}),
+                det(Matrix<double, 3, 3>{columnMatrix[0], columnMatrix[1], d})
+        } / determinant;
     }
 
 
