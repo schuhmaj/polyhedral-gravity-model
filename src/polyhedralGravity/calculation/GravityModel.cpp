@@ -5,6 +5,8 @@ namespace polyhedralGravity {
     GravityModelResult GravityModel::evaluate(
             const Polyhedron &polyhedron, double density, const Array3 &computationPoint) {
         using namespace util;
+        GravityModelResult result{};
+
         auto gijVectors = calculateSegmentVectors(polyhedron);
         auto planeUnitNormals = calculatePlaneUnitNormals(gijVectors);
         auto segmentUnitNormals = calculateSegmentUnitNormals(gijVectors, planeUnitNormals);
@@ -41,111 +43,83 @@ namespace polyhedralGravity {
                                           planeDistances, planeNormalOrientation, planeUnitNormals);
 
         /*
-         * Calculate V
+         * Calculate V and Vx, Vy, Vz
          */
 
-        auto zipIteratorV = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
-                                          segmentDistances, transcendentalExpressions, singularities);
+        auto zipIterator1 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
+                                          segmentDistances, transcendentalExpressions, singularities,
+                                          planeUnitNormals);
 
-        double V = std::accumulate(zipIteratorV.first, zipIteratorV.second, 0.0, [](double acc, const auto &tuple) {
-            const double sigma_p = thrust::get<0>(tuple);
-            const double h_p = thrust::get<1>(tuple);
-            const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
-            const auto &segmentDistancePerPlane = thrust::get<3>(tuple);
-            const auto &transcendentalExpressionsPerPlane = thrust::get<4>(tuple);
-            const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(tuple);
+        std::pair<double, Array3> potentialAndAcceleration = std::make_pair(0.0, Array3{0.0, 0.0, 0.0});
+        potentialAndAcceleration =
+                std::accumulate(zipIterator1.first, zipIterator1.second,
+                                potentialAndAcceleration, [](std::pair<double, Array3> acc, const auto &tuple) {
+                            const double sigma_p = thrust::get<0>(tuple);
+                            const double h_p = thrust::get<1>(tuple);
+                            const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
+                            const auto &segmentDistancePerPlane = thrust::get<3>(tuple);
+                            const auto &transcendentalExpressionsPerPlane = thrust::get<4>(
+                                    tuple);
+                            const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(
+                                    tuple);
+                            const Array3 &Np = thrust::get<6>(tuple);
 
-            //Sum 1
-            auto zipIteratorSum1 = util::zipPair(sigmaPQPerPlane, segmentDistancePerPlane,
-                                                 transcendentalExpressionsPerPlane);
-            const double sum1 = std::accumulate(zipIteratorSum1.first, zipIteratorSum1.second,
-                                                0.0, [](double acc, const auto &tuple) {
-                        const double &sigma_pq = thrust::get<0>(tuple);
-                        const double &h_pq = thrust::get<1>(tuple);
-                        const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(tuple);
-                        return acc + sigma_pq * h_pq * transcendentalExpressions.ln;
-                    });
+                            //Sum 1
+                            auto zipIteratorSum1 = util::zipPair(sigmaPQPerPlane,
+                                                                 segmentDistancePerPlane,
+                                                                 transcendentalExpressionsPerPlane);
+                            const double sum1 = std::accumulate(zipIteratorSum1.first,
+                                                                zipIteratorSum1.second,
+                                                                0.0, [](double acc,
+                                                                        const auto &tuple) {
+                                        const double &sigma_pq = thrust::get<0>(tuple);
+                                        const double &h_pq = thrust::get<1>(tuple);
+                                        const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(
+                                                tuple);
+                                        return acc + sigma_pq * h_pq *
+                                                     transcendentalExpressions.ln;
+                                    });
 
-            //Sum 2
-            auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane, transcendentalExpressionsPerPlane);
-            const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
-                                                0.0, [](double acc, const auto &tuple) {
-                        const double &sigma_pq = thrust::get<0>(tuple);
-                        const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
-                        return acc + sigma_pq * transcendentalExpressions.an;
-                    });
+                            //Sum 2
+                            auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane,
+                                                                 transcendentalExpressionsPerPlane);
+                            const double sum2 = std::accumulate(zipIteratorSum2.first,
+                                                   zipIteratorSum2.second,
+                                                   0.0, [](double acc, const auto &tuple) {
+                                        const double &sigma_pq = thrust::get<0>(tuple);
+                                        const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
+                                                tuple);
+                                        return acc + sigma_pq * transcendentalExpressions.an;
+                                    });
 
-            //Sum up everything
-            return acc + sigma_p * h_p * (sum1 + h_p * sum2 + singularitiesPerPlane.first);
-        });
+                            //Sum up everything
+                            const double planeSum =
+                                    sum1 + h_p * sum2 + singularitiesPerPlane.first;
+                            return std::make_pair(
+                                    acc.first + sigma_p * h_p * planeSum,
+                                    acc.second + Np * planeSum
+                            );
+                        });
 
-        V = (V * util::GRAVITATIONAL_CONSTANT * density) / 2.0;
-        SPDLOG_INFO("V= {}", V);
+        const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
-
-        /*
-         * Calculate Vx, Vy, Vz
-         * TODO This code cries because it is a code clone and very unhappy about this circumstance
-         */
-
-        auto zipIteratorV2 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
-                                           segmentDistances, transcendentalExpressions, singularities,
-                                           planeUnitNormals);
-
-        Array3 V2 = std::accumulate(
-                zipIteratorV2.first, zipIteratorV2.second, Array3{0.0, 0.0, 0.0},
-                [](const Array3 &acc, const auto &tuple) {
-                    using namespace util;
-                    const double sigma_p = thrust::get<0>(tuple);
-                    const double h_p = thrust::get<1>(tuple);
-                    const auto &sigmaPQPerPlane = thrust::get<2>(tuple);
-                    const auto &segmentDistancePerPlane = thrust::get<3>(tuple);
-                    const auto &transcendentalExpressionsPerPlane = thrust::get<4>(tuple);
-                    const std::pair<double, std::array<double, 3>> &singularitiesPerPlane = thrust::get<5>(
-                            tuple);
-                    const Array3 &Np = thrust::get<6>(tuple);
-
-                    //Sum 1
-                    auto zipIteratorSum1 = util::zipPair(sigmaPQPerPlane, segmentDistancePerPlane,
-                                                         transcendentalExpressionsPerPlane);
-                    const double sum1 = std::accumulate(
-                            zipIteratorSum1.first, zipIteratorSum1.second, 0.0,
-                            [](double acc, const auto &tuple) {
-                                const double &sigma_pq = thrust::get<0>(tuple);
-                                const double &h_pq = thrust::get<1>(tuple);
-                                const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(tuple);
-                                return acc + sigma_pq * h_pq * transcendentalExpressions.ln;
-                            });
-
-                    //Sum 2
-                    auto zipIteratorSum2 = util::zipPair(sigmaPQPerPlane, transcendentalExpressionsPerPlane);
-                    const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
-                                                        0.0, [](double acc, const auto &tuple) {
-                                const double &sigma_pq = thrust::get<0>(tuple);
-                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
-                                return acc + sigma_pq * transcendentalExpressions.an;
-                            });
-
-                    //Sum up everything
-                    return acc + (Np * (sum1 + h_p * sum2 + singularitiesPerPlane.first));
-                });
-
-        V2 = abs(V2 * (util::GRAVITATIONAL_CONSTANT * density));
-
-        SPDLOG_INFO("Vx= {}", V2[0]);
-        SPDLOG_INFO("Vy= {}", V2[1]);
-        SPDLOG_INFO("Vz= {}", V2[2]);
+        result.gravitationalPotential = (potentialAndAcceleration.first * prefix) / 2.0;
+        result.gravitationalPotentialDerivative = abs(potentialAndAcceleration.second * prefix);
+        SPDLOG_INFO("V= {}", result.gravitationalPotential);
+        SPDLOG_INFO("Vx= {}", result.gravitationalPotentialDerivative[0]);
+        SPDLOG_INFO("Vy= {}", result.gravitationalPotentialDerivative[1]);
+        SPDLOG_INFO("Vz= {}", result.gravitationalPotentialDerivative[2]);
 
         /*
          * Calculation of Vxx, Vyy, Vzz, Vxy, Vxz, Vyz
          */
 
-        auto zipIteratorV3 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
+        auto zipIterator2 = util::zipPair(planeNormalOrientation, planeDistances, segmentNormalOrientation,
                                            segmentDistances, transcendentalExpressions, singularities,
                                            planeUnitNormals, segmentUnitNormals);
 
         std::array<double, 6> V3 = std::accumulate(
-                zipIteratorV3.first, zipIteratorV3.second, std::array<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                zipIterator2.first, zipIterator2.second, std::array<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
                 [](const std::array<double, 6> &acc, const auto &tuple) {
                     using namespace util;
                     const double sigma_p = thrust::get<0>(tuple);
@@ -197,16 +171,16 @@ namespace polyhedralGravity {
                     return acc + concat(first, second);
                 });
 
-        V3 = V3 * (util::GRAVITATIONAL_CONSTANT * density);
+        result.gradiometricTensor = V3 * prefix;
 
-        SPDLOG_INFO("Vxx= {}", V3[0]);
-        SPDLOG_INFO("Vyy= {}", V3[1]);
-        SPDLOG_INFO("Vzz= {}", V3[2]);
-        SPDLOG_INFO("Vxy= {}", V3[3]);
-        SPDLOG_INFO("Vxz= {}", V3[4]);
-        SPDLOG_INFO("Vyz= {}", V3[5]);
+        SPDLOG_INFO("Vxx= {}", result.gradiometricTensor[0]);
+        SPDLOG_INFO("Vyy= {}", result.gradiometricTensor[1]);
+        SPDLOG_INFO("Vzz= {}", result.gradiometricTensor[2]);
+        SPDLOG_INFO("Vxy= {}", result.gradiometricTensor[3]);
+        SPDLOG_INFO("Vxz= {}", result.gradiometricTensor[4]);
+        SPDLOG_INFO("Vyz= {}", result.gradiometricTensor[5]);
 
-        return {};
+        return result;
     }
 
     std::vector<Array3Triplet> GravityModel::calculateSegmentVectors(const Polyhedron &polyhedron) {
