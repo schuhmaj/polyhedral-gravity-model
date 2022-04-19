@@ -13,7 +13,7 @@
 #include "thrust/iterator/transform_iterator.h"
 #include "thrust/iterator/counting_iterator.h"
 #include "thrust/transform.h"
-#include "thrust/reduce.h"
+#include "thrust/transform_reduce.h"
 #include "polyhedralGravity/util/UtilityThrust.h"
 
 namespace polyhedralGravity {

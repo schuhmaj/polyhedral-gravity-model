@@ -11,16 +11,21 @@ namespace polyhedralGravity {
         auto polyhedronIterator = transformPolyhedron(polyhedron, computationPoint);
 
         GravityModelResult result{};
-        //TODO thrust::reduce or std::accumulate?
-        result = thrust::reduce(polyhedronIterator.first, polyhedronIterator.second,
-                                result, [](const GravityModelResult &acc, const Array3Triplet &face) {
+        result = thrust::transform_reduce(
+                polyhedronIterator.first, polyhedronIterator.second, [](const Array3Triplet &face) {
                     using namespace util;
-                    Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0], face[1], face[2]);
-                    Array3 planeUnitNormal = computePlaneUnitNormalForPlane(segmentVectors[0], segmentVectors[1]);
-                    Array3Triplet segmentUnitNormals = computeSegmentUnitNormalForPlane(segmentVectors,
-                                                                                        planeUnitNormal);
-                    double planeNormalOrientation = computePlaneNormalOrientationForPlane(planeUnitNormal, face[0]);
-                    HessianPlane hessianPlane = computeHessianPlane(face[0], face[1], face[2]);
+                    Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0],
+                                                                                 face[1],
+                                                                                 face[2]);
+                    Array3 planeUnitNormal = computePlaneUnitNormalForPlane(segmentVectors[0],
+                                                                            segmentVectors[1]);
+                    Array3Triplet segmentUnitNormals = computeSegmentUnitNormalForPlane(
+                            segmentVectors,
+                            planeUnitNormal);
+                    double planeNormalOrientation = computePlaneNormalOrientationForPlane(
+                            planeUnitNormal, face[0]);
+                    HessianPlane hessianPlane = computeHessianPlane(face[0], face[1],
+                                                                    face[2]);
                     double planeDistance = computePlaneDistanceForPlane(hessianPlane);
                     Array3 orthogonalProjectionPointOnPlane =
                             computeOrthogonalProjectionPointsOnPlaneForPlane(
@@ -29,17 +34,23 @@ namespace polyhedralGravity {
                             face, orthogonalProjectionPointOnPlane, segmentUnitNormals);
                     Array3Triplet orthogonalProjectionPointsOnSegmentsForPlane =
                             computeOrthogonalProjectionPointsOnSegmentsForPlane(
-                                    orthogonalProjectionPointOnPlane, segmentNormalOrientations, face);
+                                    orthogonalProjectionPointOnPlane,
+                                    segmentNormalOrientations, face);
                     Array3 segmentDistances = computeSegmentDistancesForPlane(
-                            orthogonalProjectionPointOnPlane, orthogonalProjectionPointsOnSegmentsForPlane);
+                            orthogonalProjectionPointOnPlane,
+                            orthogonalProjectionPointsOnSegmentsForPlane);
                     std::array<Distance, 3> distances = computeDistancesForPlane(
-                            segmentVectors, orthogonalProjectionPointsOnSegmentsForPlane, face);
+                            segmentVectors, orthogonalProjectionPointsOnSegmentsForPlane,
+                            face);
                     std::array<TranscendentalExpression, 3> transcendentalExpressions =
-                            computeTranscendentalExpressionsForPlane(distances, planeDistance, segmentDistances,
+                            computeTranscendentalExpressionsForPlane(distances, planeDistance,
+                                                                     segmentDistances,
                                                                      segmentNormalOrientations,
-                                                                     orthogonalProjectionPointOnPlane, face);
+                                                                     orthogonalProjectionPointOnPlane,
+                                                                     face);
                     std::pair<double, Array3> singularities =
-                            computeSingularityTermsForPlane(segmentVectors, segmentNormalOrientations,
+                            computeSingularityTermsForPlane(segmentVectors,
+                                                            segmentNormalOrientations,
                                                             orthogonalProjectionPointOnPlane,
                                                             planeUnitNormal, planeDistance,
                                                             planeNormalOrientation, face);
@@ -63,10 +74,12 @@ namespace polyhedralGravity {
                     auto zipIteratorSum1T = util::zipPair(segmentUnitNormals,
                                                           transcendentalExpressions);
                     const Array3 sum1T = std::accumulate(
-                            zipIteratorSum1T.first, zipIteratorSum1T.second, Array3{0.0, 0.0, 0.0},
+                            zipIteratorSum1T.first, zipIteratorSum1T.second,
+                            Array3{0.0, 0.0, 0.0},
                             [](const Array3 &acc, const auto &tuple) {
                                 const Array3 &npq = thrust::get<0>(tuple);
-                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
+                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
+                                        tuple);
                                 return acc + (npq * transcendentalExpressions.ln);
                             });
 
@@ -75,29 +88,41 @@ namespace polyhedralGravity {
                                                          transcendentalExpressions);
                     const double sum2 = std::accumulate(zipIteratorSum2.first,
                                                         zipIteratorSum2.second,
-                                                        0.0, [](double acc, const auto &tuple) {
-                                const double &sigma_pq = thrust::get<0>(tuple);
-                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
-                                        tuple);
-                                return acc + sigma_pq * transcendentalExpressions.an;
-                            });
+                                                        0.0,
+                                                        [](double acc, const auto &tuple) {
+                                                            const double &sigma_pq = thrust::get<0>(
+                                                                    tuple);
+                                                            const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
+                                                                    tuple);
+                                                            return acc + sigma_pq *
+                                                                         transcendentalExpressions.an;
+                                                        });
 
                     //Sum up everything (potential and acceleration)
-                    const double planeSumPA = sum1PA + planeDistance * sum2 + singularities.first;
+                    const double planeSumPA =
+                            sum1PA + planeDistance * sum2 + singularities.first;
 
                     //Sum up everything (tensor)
                     const Array3 subSum =
-                            (sum1T + (planeUnitNormal * (planeNormalOrientation * sum2))) + singularities.second;
+                            (sum1T + (planeUnitNormal * (planeNormalOrientation * sum2))) +
+                            singularities.second;
                     const Array3 first = planeUnitNormal * subSum;
-                    const Array3 reorderedNp = {planeUnitNormal[0], planeUnitNormal[0], planeUnitNormal[1]};
+                    const Array3 reorderedNp = {planeUnitNormal[0], planeUnitNormal[0],
+                                                planeUnitNormal[1]};
                     const Array3 reorderedSubSum = {subSum[1], subSum[2], subSum[2]};
                     const Array3 second = reorderedNp * reorderedSubSum;
 
                     //Accumulate and return
                     return GravityModelResult{
-                            acc.gravitationalPotential + planeNormalOrientation * planeDistance * planeSumPA,
-                            acc.gravitationalPotentialDerivative + planeUnitNormal * planeSumPA,
-                            acc.gradiometricTensor + concat(first, second)
+                            planeNormalOrientation * planeDistance * planeSumPA,
+                            planeUnitNormal * planeSumPA,
+                            concat(first, second)
+                    };
+                }, result, [](const GravityModelResult &a, const GravityModelResult &b) {
+                    return GravityModelResult {
+                        a.gravitationalPotential + b.gravitationalPotential,
+                        a.gravitationalPotentialDerivative + b.gravitationalPotentialDerivative,
+                        a.gradiometricTensor + b.gradiometricTensor
                     };
                 });
 
