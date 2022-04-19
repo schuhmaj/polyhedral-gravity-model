@@ -31,6 +31,8 @@ protected:
             polyhedralGravity::TetgenAdapter{
                     {"resources/GravityModelBigTest.node", "resources/GravityModelBigTest.face"}}.getPolyhedron()};
 
+    std::array<double, 3> _computationPoint{0.0, 0.0, 0.0};
+
     std::vector<std::array<std::array<double, 3>, 3>> expectedGij;
 
     std::vector<std::array<double, 3>> expectedPlaneUnitNormals;
@@ -273,8 +275,8 @@ TEST_F(GravityModelBigTest, SegmentUnitNormals) {
 TEST_F(GravityModelBigTest, PlaneNormalOrientations) {
     using namespace testing;
 
-    auto actualPlaneNormalOrientations = polyhedralGravity::GravityModel::calculatePlaneNormalOrientations(_polyhedron,
-                                                                                                           expectedPlaneUnitNormals);
+    auto actualPlaneNormalOrientations = polyhedralGravity::GravityModel::calculatePlaneNormalOrientations(
+            _computationPoint, _polyhedron, expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualPlaneNormalOrientations, ContainerEq(expectedPlaneNormalOrientations));
 }
@@ -283,7 +285,8 @@ TEST_F(GravityModelBigTest, HessianPlane) {
     using namespace testing;
     using namespace polyhedralGravity;
 
-    auto actualHessianPlane = polyhedralGravity::GravityModel::calculateFacesToHessianPlanes(_polyhedron);
+    auto actualHessianPlane =
+            polyhedralGravity::GravityModel::calculateFacesToHessianPlanes(_computationPoint, _polyhedron);
 
     ASSERT_EQ(actualHessianPlane, expectedHessianPlanes);
 }
@@ -318,7 +321,8 @@ TEST_F(GravityModelBigTest, SegmentNormalOrientations) {
     using namespace testing;
 
     auto actualSegmentNormalOrientations =
-            polyhedralGravity::GravityModel::calculateSegmentNormalOrientations(_polyhedron, expectedSegmentUnitNormals,
+            polyhedralGravity::GravityModel::calculateSegmentNormalOrientations(_computationPoint, _polyhedron,
+                                                                                expectedSegmentUnitNormals,
                                                                                 expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualSegmentNormalOrientations, ContainerEq(expectedSegmentNormalOrientations));

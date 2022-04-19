@@ -100,21 +100,21 @@ namespace polyhedralGravity {
          *
          * In equation (21), the used -G_i1 corresponds to opposite position vector of the first vertices building
          * the plane i.
-         * @param face - the plane unit normals
+         * @param planeUnitNormals - the plane unit normals
          * @return sigma_p
          */
-        std::vector<double> calculatePlaneNormalOrientations(const Polyhedron &planeUnitNormal,
-                                                             const std::vector<Array3> &face);
+        std::vector<double>
+        calculatePlaneNormalOrientations(const Array3 &computationPoint, const Polyhedron &polyhedron,
+                                         const std::vector<Array3> &planeUnitNormals);
 
 
         /**
          * Transforms the edges of the polyhedron to the Hessian Plane form.
-         * @param p - the reference point for which the transformation should be executed (default origin {0, 0, 0})
+         * The reference point is the origin {0, 0, 0}, which equals the computation Point P.
          * @return vector of Hessian Normal Planes
          */
-        std::vector<HessianPlane> calculateFacesToHessianPlanes(
-                const Polyhedron &polyhedron,
-                const Array3 &p = {0.0, 0.0, 0.0});
+        std::vector<HessianPlane>
+        calculateFacesToHessianPlanes(const Array3 &computationPoint, const Polyhedron &polyhedron);
 
         /**
          * Calculates the plane distances h_p of computation point P from each plane S_p
@@ -155,9 +155,10 @@ namespace polyhedralGravity {
          * @param orthogonalProjectionPointsOnPlane - the orthogonal projection points P'_i of P on each plane i
          * @return sigma_pq
          */
-        std::vector<Array3> calculateSegmentNormalOrientations(const Polyhedron &polyhedron,
-                                                               const std::vector<Array3Triplet> &segmentUnitNormals,
-                                                               const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
+        std::vector<Array3>
+        calculateSegmentNormalOrientations(const Array3 &computationPoint, const Polyhedron &polyhedron,
+                                           const std::vector<Array3Triplet> &segmentUnitNormals,
+                                           const std::vector<Array3> &orthogonalProjectionPointsOnPlane);
 
 
         /**
@@ -274,7 +275,8 @@ namespace polyhedralGravity {
          * @param planeUnitNormal - the plane unit normal N_p
          * @return segment unit normals n_pq for plane p with q = {0, 1, 2}
          */
-        Array3Triplet computeSegmentUnitNormalForPlane(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
+        Array3Triplet
+        computeSegmentUnitNormalForPlane(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
 
         /**
          * Computes the plane unit normal orientation sigma_p for one plane p of the polyhedron
@@ -293,12 +295,10 @@ namespace polyhedralGravity {
          * @param p - first point on the plane
          * @param q - second point on the plane
          * @param r - third point on the plane
-         * @param origin - default {0, 0, 0}, but reference for the Hessian Plane form can be adapted
          * @return HessianPlane
          * @related Cross-Product method https://tutorial.math.lamar.edu/classes/calciii/eqnsofplanes.aspx
          */
-        HessianPlane computeHessianPlane(const Array3 &p, const Array3 &q,
-                                         const Array3 &r, const Array3 &origin = {0.0, 0.0, 0.0});
+        HessianPlane computeHessianPlane(const Array3 &p, const Array3 &q, const Array3 &r);
 
         /**
          * Calculates the plane distances h_p of computation point P to the plane S_p given in Hessian Form
@@ -322,10 +322,36 @@ namespace polyhedralGravity {
                 double planeDistance,
                 const HessianPlane &hessianPlane);
 
-        Array3 computeSegmentNormalOrientationsForPlane(
-                const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2,
+        Array3 computeSegmentNormalOrientationsForPlane(const Array3Triplet &vertices,
+                                                        const Array3 &projectionPointOnPlane,
+                                                        const Array3Triplet &segmentUnitNormalsForPlane);
+
+        Array3Triplet computeOrthogonalProjectionPointsOnSegmentsPerPlane(
                 const Array3 &projectionPointOnPlane,
-                const Array3Triplet &segmentUnitNormalsForPlane);
+                const Array3 &segmentNormalOrientations,
+                const Array3Triplet &face);
+
+
+        /**
+         * An iterator transforming the polyhedron's coordinates on demand by a given offset.
+         * This function returns a pair of transform iterators (first --> begin(), second --> end()).
+         * @param polyhedron - reference to the polyhedron
+         * @param offset - the offset to apply
+         * @return pair of transform iterators
+         */
+        inline auto transformPolyhedron(const Polyhedron &polyhedron, const Array3 &offset) {
+            //The offset is captured by value to ensure its lifetime!
+            const auto lambdaOffsetApplication = [&polyhedron, offset](
+                    const std::array<size_t, 3> &face) -> Array3Triplet {
+                using namespace util;
+                return {polyhedron.getVertex(face[0]) - offset,
+                        polyhedron.getVertex(face[1]) - offset,
+                        polyhedron.getVertex(face[2]) - offset};
+            };
+            auto first = thrust::make_transform_iterator(polyhedron.getFaces().begin(), lambdaOffsetApplication);
+            auto last = thrust::make_transform_iterator(polyhedron.getFaces().end(), lambdaOffsetApplication);
+            return std::make_pair(first, last);
+        }
 
     };
 
