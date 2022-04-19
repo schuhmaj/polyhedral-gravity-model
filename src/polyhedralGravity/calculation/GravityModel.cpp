@@ -13,7 +13,8 @@ namespace polyhedralGravity {
         GravityModelResult result{};
         //TODO thrust::reduce or std::accumulate?
         result = thrust::reduce(polyhedronIterator.first, polyhedronIterator.second,
-                                    result, [](GravityModelResult acc, const Array3Triplet &face) {
+                                result, [](GravityModelResult acc, const Array3Triplet &face) {
+                    using namespace util;
                     Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0], face[1], face[2]);
                     Array3 planeUnitNormal = computePlaneUnitNormalForPlane(segmentVectors[0], segmentVectors[1]);
                     Array3Triplet segmentUnitNormals = computeSegmentUnitNormalForPlane(segmentVectors,
@@ -44,12 +45,12 @@ namespace polyhedralGravity {
                                                             planeNormalOrientation, face);
                     //Sum 1 - potential and acceleration
                     auto zipIteratorSum1PA = util::zipPair(segmentNormalOrientations,
-                                                         segmentDistances,
-                                                         transcendentalExpressions);
+                                                           segmentDistances,
+                                                           transcendentalExpressions);
                     const double sum1PA = std::accumulate(zipIteratorSum1PA.first,
                                                           zipIteratorSum1PA.second,
-                                                        0.0, [](double acc,
-                                                                const auto &tuple) {
+                                                          0.0, [](double acc,
+                                                                  const auto &tuple) {
                                 const double &sigma_pq = thrust::get<0>(tuple);
                                 const double &h_pq = thrust::get<1>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(
@@ -60,7 +61,7 @@ namespace polyhedralGravity {
 
                     //Sum 1 - tensor
                     auto zipIteratorSum1T = util::zipPair(segmentUnitNormals,
-                                                         transcendentalExpressions);
+                                                          transcendentalExpressions);
                     const Array3 sum1T = std::accumulate(
                             zipIteratorSum1T.first, zipIteratorSum1T.second, Array3{0.0, 0.0, 0.0},
                             [](const Array3 &acc, const auto &tuple) {
@@ -85,17 +86,18 @@ namespace polyhedralGravity {
                     const double planeSumPA = sum1PA + planeDistance * sum2 + singularities.first;
 
                     //Sum up everything (tensor)
-                    const Array3 subSum = (sum1T + (planeUnitNormal * (planeNormalOrientation * sum2))) + singularities.second;
+                    const Array3 subSum =
+                            (sum1T + (planeUnitNormal * (planeNormalOrientation * sum2))) + singularities.second;
                     const Array3 first = planeUnitNormal * subSum;
                     const Array3 reorderedNp = {planeUnitNormal[0], planeUnitNormal[0], planeUnitNormal[1]};
                     const Array3 reorderedSubSum = {subSum[1], subSum[2], subSum[2]};
                     const Array3 second = reorderedNp * reorderedSubSum;
 
                     //Accumulate and return
-                    return GravityModelResult {
-                        acc.gravitationalPotential + planeNormalOrientation * planeDistance * planeSumPA,
-                        acc.gravitationalPotentialDerivative + planeUnitNormal * planeSumPA,
-                        acc.gradiometricTensor + concat(first, second)
+                    return GravityModelResult{
+                            acc.gravitationalPotential + planeNormalOrientation * planeDistance * planeSumPA,
+                            acc.gravitationalPotentialDerivative + planeUnitNormal * planeSumPA,
+                            acc.gradiometricTensor + concat(first, second)
                     };
                 });
 
