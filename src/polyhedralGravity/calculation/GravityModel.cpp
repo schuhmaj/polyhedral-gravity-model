@@ -11,7 +11,7 @@ namespace polyhedralGravity {
 
         auto planeNormalOrientation = calculatePlaneNormalOrientations(computationPoint, polyhedron, planeUnitNormals);
 
-        auto hessianPlanes = calculateFacesToHessianPlanes(computationPoint ,polyhedron);
+        auto hessianPlanes = calculateFacesToHessianPlanes(computationPoint, polyhedron);
 
         auto planeDistances = calculatePlaneDistances(hessianPlanes);
 
@@ -359,19 +359,11 @@ namespace polyhedralGravity {
             const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
             const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment) {
         std::vector<Array3> segmentDistances{orthogonalProjectionPointsOnPlane.size()};
-        //The outer loop with the running i --> iterating over planes (P'_i and P''_i are the parameters of the lambda)
+        //Iterating over planes (P'_i and P''_i are the parameters of the lambda)
         std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
                        orthogonalProjectionPointsOnSegment.cbegin(), segmentDistances.begin(),
-                       [](const Array3 pPrime, const Array3Triplet &pDoublePrimes) {
-                           std::array<double, 3> hp{};
-                           //The inner loop with the running j --> iterating over the segments
-                           //Using the values P'_i and P''_ij for the calculation of the distance
-                           std::transform(pDoublePrimes.cbegin(), pDoublePrimes.cend(), hp.begin(),
-                                          [&pPrime](const Array3 &pDoublePrime) {
-                                              using namespace util;
-                                              return euclideanNorm(pDoublePrime - pPrime);
-                                          });
-                           return hp;
+                       [](const Array3 projectionPointOnPlane, const Array3Triplet &projectionPointOnSegments) {
+                           return computeSegmentDistancesForPlane(projectionPointOnPlane, projectionPointOnSegments);
                        });
         return segmentDistances;
     }
@@ -661,7 +653,7 @@ namespace polyhedralGravity {
 
     HessianPlane GravityModel::computeHessianPlane(const Array3 &p, const Array3 &q, const Array3 &r) {
         using namespace util;
-        constexpr Array3 origin {0.0, 0.0, 0.0};
+        constexpr Array3 origin{0.0, 0.0, 0.0};
         const auto crossProduct = cross(p - q, p - r);
         const auto res = (origin - p) * crossProduct;
         const double d = res[0] + res[1] + res[2];
@@ -720,9 +712,10 @@ namespace polyhedralGravity {
         std::transform(segmentUnitNormalsForPlane.cbegin(), segmentUnitNormalsForPlane.cend(),
                        vertices.cbegin(), segmentNormalOrientations.begin(),
                        [&projectionPointOnPlane](const Array3 &segmentNormalOrientation, const Array3 &vertex) {
-                    using namespace util;
-                    return sgn((dot(segmentNormalOrientation, projectionPointOnPlane - vertex)), util::EPSILON) * -1.0;
-                });
+                           using namespace util;
+                           return sgn((dot(segmentNormalOrientation, projectionPointOnPlane - vertex)), util::EPSILON) *
+                                  -1.0;
+                       });
         return segmentNormalOrientations;
     }
 
@@ -770,6 +763,19 @@ namespace polyhedralGravity {
                 det(Matrix<double, 3, 3>{columnMatrix[0], d, columnMatrix[2]}),
                 det(Matrix<double, 3, 3>{columnMatrix[0], columnMatrix[1], d})
         } / determinant;
+    }
+
+    Array3 GravityModel::computeSegmentDistancesForPlane(const Array3 &orthogonalProjectionPointOnPlane,
+                                                         const Array3Triplet &orthogonalProjectionPointOnSegments) {
+        std::array<double, 3> segmentDistances{};
+        //The inner loop with the running j --> iterating over the segments
+        //Using the values P'_i and P''_ij for the calculation of the distance
+        std::transform(orthogonalProjectionPointOnSegments.cbegin(), orthogonalProjectionPointOnSegments.cend(),
+                       segmentDistances.begin(), [&](const Array3 &orthogonalProjectionPointOnSegment) {
+                    using namespace util;
+                    return euclideanNorm(orthogonalProjectionPointOnSegment - orthogonalProjectionPointOnPlane);
+                });
+        return segmentDistances;
     }
 
 

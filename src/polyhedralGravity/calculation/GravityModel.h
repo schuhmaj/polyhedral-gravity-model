@@ -176,13 +176,13 @@ namespace polyhedralGravity {
         /**
          * Calculates the distance h_pg between the orthogonal projection P' of the computation point P
          * for a given plane and the orthogonal projection P'' of P' for a line segment.
-         * @param orthogonalProjectionPointsOnPlane - the P' for every plane
-         * @param orthogonalProjectionPointsOnSegment - the P'' for every segment
+         * @param projectionPointOnPlane - the P' for every plane
+         * @param projectionPointOnSegments - the P'' for every segment
          * @return a two-dimensional vector of the distances h_pq
          */
         std::vector<Array3> calculateSegmentDistances(
-                const std::vector<Array3> &orthogonalProjectionPointsOnPlane,
-                const std::vector<Array3Triplet> &orthogonalProjectionPointsOnSegment);
+                const std::vector<Array3> &projectionPointOnPlane,
+                const std::vector<Array3Triplet> &projectionPointOnSegments);
 
         /**
          * Calculates the 3D distances between l1_pq and l2_pq between the computation point P and the line
@@ -345,6 +345,16 @@ namespace polyhedralGravity {
          */
         Array3 computeOrthogonalProjectionOnSegment(const Array3 &vertex1, const Array3 &vertex2,
                                                     const Array3 &orthogonalProjectionPointOnPlane);
+
+        /**
+         * Computes the segment distances h_pq between P' for a given plane p and P'' for a given segment q of plane p.
+         * @param orthogonalProjectionPointOnPlane - the orthogonal projection point P' for p
+         * @param orthogonalProjectionPointOnSegments - the orthogonal projection points P'' for each segment q of p
+         * @return distances h_pq for plane p
+         */
+        Array3 computeSegmentDistancesForPlane(
+                const Array3 &orthogonalProjectionPointOnPlane,
+                const Array3Triplet &orthogonalProjectionPointOnSegments);
 
 
         /**
