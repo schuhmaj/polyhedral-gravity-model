@@ -18,8 +18,8 @@
  * Contains Tests based on the Eros mesh taken from
  * https://github.com/darioizzo/geodesyNets/tree/master/3dmeshes (last accessed: 07.04.2022)
  *
- * The values are in the corresponding files in test/resources which are used to check the C++
- * implementation are calculated by the Tsoulis reference implementation in FORTRAN.
+ * The values which are used to check the C++ implementation are calculated by the
+ * Tsoulis reference implementation in FORTRAN and saved in the files in test/resources.
  *
  */
 class GravityModelBigTest : public ::testing::Test {
@@ -315,8 +315,6 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnPlane) {
                                 << "Difference for P' of plane=" << i << " and coordinate-Nr.=" << j;
         }
     }
-
-    //ASSERT_THAT(actualOrthogonalProjectionPointsOnPlane, ContainerEq(expectedOrthogonalProjectionPointsOnPlane));
 }
 
 TEST_F(GravityModelBigTest, SegmentNormalOrientations) {
@@ -350,8 +348,6 @@ TEST_F(GravityModelBigTest, OrthogonalProjectionPointsOnSegment) {
             }
         }
     }
-
-    //ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }
 
 TEST_F(GravityModelBigTest, SegmentDistances) {
