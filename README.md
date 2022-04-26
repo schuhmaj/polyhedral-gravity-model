@@ -41,7 +41,7 @@ found in this repository in the folder `/example-config/`.
 ### Config File
 
 The configuration should look similar to the given example below.
-It is required to specify the source-files of the polyhedron's mesh (more infos
+It is required to specify the source-files of the polyhedron's mesh (more info
 about the supported file in the next paragraph), the density
 of the polyhedron, and the wished computation points where the
 gravity tensor shall be computed.
