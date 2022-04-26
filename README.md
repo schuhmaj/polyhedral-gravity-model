@@ -71,7 +71,7 @@ the polyhedral source. These include:
 |       `.off`        |                 Object File Format                 | Single file containing every needed mesh information.                      |
 |       `.stl`        |              Stereolithography format              | Single file containing every needed mesh information. Blender File Format. |                                         
 
-**Notice!** Only the ASCII versions of those respective files are supported! These is especially
+**Notice!** Only the ASCII versions of those respective files are supported! This is especially
 important for e. g. the `.ply` files which also can be in binary format.
 
 Good tools to convert your Polyhedron in a supported format (also for interchanging
