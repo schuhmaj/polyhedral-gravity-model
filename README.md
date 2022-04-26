@@ -53,7 +53,7 @@ gravityModel:
       - "../example-config/data/tsoulis.node"   #.node contains the vertices
       - "../example-config/data/tsoulis.face"   #.face contains the triangular faces
     density: 2670.0                             #constant density in [kg/m^3]
-    points:                                     #Location of the Computation Point(s) P
+    points:                                     #Location of the computation point(s) P
       - [0, 0, 0]                               #Here it is situated at the origin
 
 ````
