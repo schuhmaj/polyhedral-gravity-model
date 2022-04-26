@@ -122,6 +122,7 @@ def write_other(path, name, nodes, faces):
 
 
 def main():
+    # TODO Pass file names via terminal?
     # Read the input .pk file
     print("Reading file...")
     mesh_points, mesh_triangles = read_pk_file("../mesh/input/Eros.pk")
