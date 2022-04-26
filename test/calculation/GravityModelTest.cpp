@@ -7,6 +7,8 @@
 #include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/model/Polyhedron.h"
 
+#include "GravityModelVectorUtility.h"
+
 /**
  * Contains Tests based on the example from Tsoulis FORTRAN implementation.
  * Hardcoded values taken from his implementation's results.

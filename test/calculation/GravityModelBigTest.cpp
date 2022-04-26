@@ -11,6 +11,8 @@
 #include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/model/Polyhedron.h"
 
+#include "GravityModelVectorUtility.h"
+
 
 /**
  * Contains Tests based on the Eros mesh taken from
