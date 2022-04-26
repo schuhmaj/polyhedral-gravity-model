@@ -274,10 +274,10 @@ namespace polyhedralGravity::util {
     std::array<T, M+N> concat(const std::array<T, M> &first, const std::array<T, N> &second) {
         std::array<T, M+N> result{};
         size_t index = 0;
-        for (auto &el : first) {
+        for (const auto &el : first) {
             result[index++] = el;
         }
-        for (auto &el : second) {
+        for (const auto &el : second) {
             result[index++] = el;
         }
         return result;

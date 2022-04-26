@@ -41,8 +41,8 @@ found in this repository in the folder `/example-config/`.
 ### Config File
 
 The configuration should look similar to the given example below.
-It is required to specify the source-files of the polyhedron's mesh (more infos
-about the supported file in the next paragraph), the density
+It is required to specify the source-files of the polyhedron's mesh (more info
+about the supported file in the [next paragraph](#polyhedron-source-files)), the density
 of the polyhedron, and the wished computation points where the
 gravity tensor shall be computed.
 ````yaml
@@ -53,7 +53,7 @@ gravityModel:
       - "../example-config/data/tsoulis.node"   #.node contains the vertices
       - "../example-config/data/tsoulis.face"   #.face contains the triangular faces
     density: 2670.0                             #constant density in [kg/m^3]
-    points:                                     #Location of the Computation Point(s) P
+    points:                                     #Location of the computation point(s) P
       - [0, 0, 0]                               #Here it is situated at the origin
 
 ````
@@ -71,10 +71,10 @@ the polyhedral source. These include:
 |       `.off`        |                 Object File Format                 | Single file containing every needed mesh information.                      |
 |       `.stl`        |              Stereolithography format              | Single file containing every needed mesh information. Blender File Format. |                                         
 
-**Notice!** Only the ASCII versions of those respective files are supported! These is especially
-important for e. g. the `.ply` files which also can be in binary format.
+**Notice!** Only the ASCII versions of those respective files are supported! This is especially
+important for e.g. the `.ply` files which also can be in binary format.
 
-Good tools to convert your Polyhedron in a supported format (also for interchanging
+Good tools to convert your Polyhedron to a supported format (also for interchanging
 ASCII and binary format) are e.g.:
 
 - [Meshio](https://github.com/nschloe/meshio) for Python
@@ -88,7 +88,7 @@ The calculation outputs the following parameters for every Computation Point _P_
 |:----------------------------:|:---------------:|:-----------------------------------------------------------------:|
 |              V               | m^2/s^2 or J/kg |           The potential or also called specific energy            |
 |          Vx, Vy, Vz          |      m/s^2      | The gravitational accerleration in the three cartesian directions |
-| Vxx, Vyy, Vzz, Vxy, Vxz, Vyz |      1/s^2      |   The spatial rate of change of the gravitational acclereation    |
+| Vxx, Vyy, Vzz, Vxy, Vxz, Vyz |      1/s^2      |   The spatial rate of change of the gravitational accleration    |
 
 ## Testing
 The project uses GoogleTest for testing. In oder to execute those
