@@ -74,7 +74,7 @@ the polyhedral source. These include:
 **Notice!** Only the ASCII versions of those respective files are supported! This is especially
 important for e.g. the `.ply` files which also can be in binary format.
 
-Good tools to convert your Polyhedron in a supported format (also for interchanging
+Good tools to convert your Polyhedron to a supported format (also for interchanging
 ASCII and binary format) are e.g.:
 
 - [Meshio](https://github.com/nschloe/meshio) for Python
