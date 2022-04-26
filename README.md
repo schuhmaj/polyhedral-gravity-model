@@ -42,7 +42,7 @@ found in this repository in the folder `/example-config/`.
 
 The configuration should look similar to the given example below.
 It is required to specify the source-files of the polyhedron's mesh (more info
-about the supported file in the next paragraph), the density
+about the supported file in the [next paragraph](#polyhedron-source-files)), the density
 of the polyhedron, and the wished computation points where the
 gravity tensor shall be computed.
 ````yaml
