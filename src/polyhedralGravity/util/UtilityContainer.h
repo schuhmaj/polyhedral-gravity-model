@@ -2,6 +2,7 @@
 
 #include <array>
 #include <numeric>
+#include <algorithm>
 #include <functional>
 #include <cmath>
 #include <string>
@@ -249,15 +250,37 @@ namespace polyhedralGravity::util {
     }
 
     /**
-     * Implements the signum function
-     * @tparam T - a numerical type
+     * Implements the signum function with a certain EPSILON to absorb rounding errors.
+     * @tparam T - a numerical (floating point) value
      * @param val - the value itself
-     * @return -1, 0, 1 depending on the sign
-     * @related https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
+     * @param cutoffEpsilon - the cut-off radius around zero to return 0
+     * @return -1, 0, 1 depending on the sign an the given EPSILON
      */
     template<typename T>
-    int sgn(T val) {
-        return (T(0) < val) - (val < T(0));
+    int sgn(T val, double cutoffEpsilon) {
+        return val < -cutoffEpsilon ? -1 : val > cutoffEpsilon ? 1 : 0;
+    }
+
+    /**
+     * Concatenates two std::array of different sizes to one array.
+     * @tparam T - the shared type of the arrays
+     * @tparam M - the size of the first container
+     * @tparam N  - the size of the second container
+     * @param first - the first array
+     * @param second - the second array
+     * @return a new array of size M+N with type T
+     */
+    template<typename T, size_t M, size_t N>
+    std::array<T, M+N> concat(const std::array<T, M> &first, const std::array<T, N> &second) {
+        std::array<T, M+N> result{};
+        size_t index = 0;
+        for (const auto &el : first) {
+            result[index++] = el;
+        }
+        for (const auto &el : second) {
+            result[index++] = el;
+        }
+        return result;
     }
 
     /**

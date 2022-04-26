@@ -3,11 +3,14 @@
 #include "DataSource.h"
 #include "tetgen.h"
 #include <map>
+#include <array>
+#include <vector>
 #include <string>
 #include <functional>
 #include <utility>
 #include <exception>
 #include <stdexcept>
+#include "polyhedralGravity/util/UtilityContainer.h"
 
 namespace polyhedralGravity {
 
@@ -30,11 +33,23 @@ namespace polyhedralGravity {
          */
         const std::vector<std::string> _fileNames;
 
+        /**
+         * The vertices of the polyhedron to be build
+         */
+        std::vector<std::array<double, 3>> _vertices;
+
+        /**
+         * The triangular faces of the polyhedron to be build
+         */
+        std::vector<std::array<size_t, 3>> _faces;
+
     public:
 
         explicit TetgenAdapter(std::vector<std::string> fileNames)
-                : _tetgenio(),
-                  _fileNames(std::move(fileNames)) {}
+                : _tetgenio{},
+                  _fileNames{std::move(fileNames)},
+                  _vertices{},
+                  _faces{} {};
 
         /**
          * Use this function to get a Polyhedron.
@@ -60,11 +75,33 @@ namespace polyhedralGravity {
         void readFace(const std::string &filename);
 
         /**
-         * Reads elements from a .ele file
+         * Reads elements from a .off file (Geomview’s polyhedral file format)
          * @param filename of the input source without suffix
          * @throws an exception if the elements already have been defined
          */
-        void readElements(const std::string &filename);
+        void readOff(const std::string &filename);
+
+        /**
+         * Reads elements from a .ply file (Polyhedral file format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readPly(const std::string &filename);
+
+        /**
+         * Reads elements from a .stl file (Stereolithography format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readStl(const std::string &filename);
+
+        /**
+         * Reads elements from a .mesh file (Medit’s mesh file format)
+         * @param filename of the input source without suffix
+         * @throws an exception if the elements already have been defined
+         */
+        void readMesh(const std::string &filename);
+
 
     private:
 
@@ -75,29 +112,36 @@ namespace polyhedralGravity {
         const std::map<std::string, std::function<void(const std::string &name)>> _suffixToOperation{
                 {"node", [this](const std::string &name) { this->readNode(name); }},
                 {"face", [this](const std::string &name) { this->readFace(name); }},
-                {"ele",  [this](const std::string &name) { this->readElements(name); }}
+                {"off",  [this](const std::string &name) { this->readOff(name); }},
+                {"ply",  [this](const std::string &name) { this->readPly(name); }},
+                {"stl",  [this](const std::string &name) { this->readStl(name); }},
+                {"mesh", [this](const std::string &name) { this->readMesh(name); }}
         };
 
         /**
-         * Does the polyhedron have nodes?
+         * Checks if the polyhedron is integer and not already defined by other properties
+         * @param filename - string with the current read file, for more detailed exceptions
+         * @param what - what to check: f = faces, v = vertices, a = all
+         * @return true if everything is ok
+         * @throws an exception if not
          */
-        bool _hasNodes{false};
+        [[nodiscard]] bool checkIntegrity(const std::string &filename, char what) const;
 
         /**
-         * Does the polyhedron have faces?
+         * Adds the Vertices of the tetgenio structure to the resulting polyhedron's vertices.
          */
-        bool _hasFaces{false};
+        void addVertices();
 
         /**
-         * Does the polyhedron have elements?
+         * Adds the Trifaces of the tetgenio structure to the resulting polyhedron's faces.
          */
-        bool _hasElements{false};
+        void addFacesByTrifaces();
 
         /**
-         * Converts the tetgenio structure to a more slim Polyhedron used by this implementation.
-         * @return a Polyhedron
+         * Adds the faces of the tetgenio structure to the resulting polyhedron's faces.
          */
-        [[nodiscard]] Polyhedron convertTetgenToPolyhedron() const;
+        void addFacesByFacetList();
+
     };
 
 }
