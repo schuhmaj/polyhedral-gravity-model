@@ -88,7 +88,7 @@ The calculation outputs the following parameters for every Computation Point _P_
 |:----------------------------:|:---------------:|:-----------------------------------------------------------------:|
 |              V               | m^2/s^2 or J/kg |           The potential or also called specific energy            |
 |          Vx, Vy, Vz          |      m/s^2      | The gravitational accerleration in the three cartesian directions |
-| Vxx, Vyy, Vzz, Vxy, Vxz, Vyz |      1/s^2      |   The spatial rate of change of the gravitational acclereation    |
+| Vxx, Vyy, Vzz, Vxy, Vxz, Vyz |      1/s^2      |   The spatial rate of change of the gravitational accleration    |
 
 ## Testing
 The project uses GoogleTest for testing. In oder to execute those
