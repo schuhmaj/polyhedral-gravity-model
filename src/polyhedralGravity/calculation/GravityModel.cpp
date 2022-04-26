@@ -416,6 +416,7 @@ namespace polyhedralGravity {
 
                     //Compute AN_pq according to (15)
                     //If h_p or h_pq is zero then AN_pq is zero, too
+                    //TODO Comparison might be wrong!!!
                     if (planeDistance == 0 || segmentDistance == 0) {
                         transcendentalExpressionPerSegment.an = 0.0;
                     } else {
