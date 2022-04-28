@@ -244,9 +244,9 @@ namespace polyhedralGravity {
         //--> sgn((dot(segmentNormalOrientation, projectionPointOnPlane - vertex)), util::EPSILON) * -1.0
         std::transform(segmentUnitNormalsForPlane.cbegin(), segmentUnitNormalsForPlane.cend(),
                        vertices.cbegin(), segmentNormalOrientations.begin(),
-                       [&projectionPointOnPlane](const Array3 &segmentNormalOrientation, const Array3 &vertex) {
+                       [&projectionPointOnPlane](const Array3 &segmentUnitNormal, const Array3 &vertex) {
                            using namespace util;
-                           return sgn((dot(segmentNormalOrientation, projectionPointOnPlane - vertex)), util::EPSILON) *
+                           return sgn((dot(segmentUnitNormal, projectionPointOnPlane - vertex)), util::EPSILON) *
                                   -1.0;
                        });
         return segmentNormalOrientations;
