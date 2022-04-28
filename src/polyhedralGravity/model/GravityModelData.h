@@ -2,6 +2,7 @@
 
 #include <array>
 #include <ostream>
+#include "polyhedralGravity/util/UtilityContainer.h"
 
 namespace polyhedralGravity {
 
@@ -131,6 +132,13 @@ namespace polyhedralGravity {
                 : gravitationalPotential(gravitationalPotential),
                   gravitationalPotentialDerivative(gravitationalPotentialDerivative),
                   gradiometricTensor(gradiometricTensor) {}
+
+        friend std::ostream &operator<<(std::ostream &os, const GravityModelResult &result) {
+            using util::operator<<;
+            os << "gravitationalPotential: " << result.gravitationalPotential << " gravitationalPotentialDerivative: "
+               << result.gravitationalPotentialDerivative << " gradiometricTensor: " << result.gradiometricTensor;
+            return os;
+        }
 
     };
 
