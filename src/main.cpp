@@ -15,10 +15,11 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
     auto poly = config->getDataSource()->getPolyhedron();
     auto density = config->getDensity();
+    auto point = config->getPointsOfInterest()[0];
 
     SPDLOG_INFO("The calculation started.");
     auto start = std::chrono::high_resolution_clock::now();
-    GravityModel::evaluate(poly, density, {0.0, 0.0, 0.0});
+    GravityModel::evaluate(poly, density, point);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = end - start;
     auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
