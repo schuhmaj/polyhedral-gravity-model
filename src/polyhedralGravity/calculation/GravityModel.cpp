@@ -336,40 +336,58 @@ namespace polyhedralGravity {
                     //orthogonal projection point on segment P'' for plane p and segment q
                     const Array3 &orthogonalProjectionPointsOnSegment = thrust::get<1>(tuple);
 
-                    //Calculate the 3D distances between P (0, 0, 0) and the segment endpoints face[j] and face[(j + 1) % 3])
+                    //Calculate the 3D distances between P (0, 0, 0) and
+                    // the segment endpoints face[j] and face[(j + 1) % 3])
                     distance.l1 = euclideanNorm(face[j]);
                     distance.l2 = euclideanNorm(face[(j + 1) % 3]);
-                    //Calculate the 1D distances between P'' (every segment has its own) and the segment endpoints
-                    // face[j] and face[(j + 1) % 3])
+                    //Calculate the 1D distances between P'' (every segment has its own) and
+                    // the segment endpoints face[j] and face[(j + 1) % 3])
                     distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
                     distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
 
-                    //Change the sign depending on certain conditions
-                    //1D and 3D distance are small
-                    if (std::abs(distance.s1 - distance.l1) < 1e-10 &&
-                        std::abs(distance.s2 - distance.l2) < 1e-10) {
+                    //Details on these conditions are in the second paper referenced in the README.md (Tsoulis, 2021)
+                    // The numbering of these conditions is equal to the numbering scheme of the paper
+                    // Assign a sign to those magnitudes depending on the relative position of P'' to the two
+                    // segment endpoints
+
+
+                    //4. Option: |s1 - l1| == 0 && |s2 - l2| == 0 Computation point P is located from the beginning on
+                    // the direction of a specific segment (P coincides with P' and P'')
+                    if (std::abs(distance.s1 - distance.l1) < EPSILON &&
+                        std::abs(distance.s2 - distance.l2) < EPSILON) {
+                        //4. Option - Case 2: P is located on the segment from its right side
+                        // s1 = -|s1|, s2 = -|s2|, l1 = -|l1|, l2 = -|l2|
                         if (distance.s2 < distance.s1) {
                             distance.s1 *= -1.0;
                             distance.s2 *= -1.0;
                             distance.l1 *= -1.0;
                             distance.l2 *= -1.0;
                             return distance;
-                        } else if (distance.s2 == distance.s1) {
+                        } else if (std::abs(distance.s2 - distance.s1) < EPSILON) {
+                            //4. Option - Case 1: P is located inside the segment (s2 == s1)
+                            // s1 = -|s1|, s2 = |s2|, l1 = -|l1|, l2 = |l2|
                             distance.s1 *= -1.0;
                             distance.l1 *= -1.0;
                             return distance;
                         }
+                        //4. Option - Case 3: P is located on the segment from its left side
+                        // s1 = |s1|, s2 = |s2|, l1 = |l1|, l2 = |l2| --> Nothing to do!
                     } else {
-                        //condition: P'' lies on the segment described by G_ij
                         const double norm = euclideanNorm(segmentVector);
                         if (distance.s1 < norm && distance.s2 < norm) {
+                            //1. Option: |s1| < |G_ij| && |s2| < |G_ij| Point P'' is situated inside the segment
+                            // s1 = -|s1|, s2 = |s2|, l1 = |l1|, l2 = |l2|
                             distance.s1 *= -1.0;
                             return distance;
                         } else if (distance.s2 < distance.s1) {
+                            //2. Option: |s2| < |s1| Point P'' is on the right side of the segment
+                            // s1 = -|s1|, s2 = -|s2|, l1 = |l1|, l2 = |l2|
                             distance.s1 *= -1.0;
                             distance.s2 *= -1.0;
                             return distance;
                         }
+                        //3. Option: |s1| < |s2| Point P'' is on the left side of the segment
+                        // s1 = |s1|, s2 = |s2|, l1 = |l1|, l2 = |l2| --> Nothing to do!
                     }
                     return distance;
                 });

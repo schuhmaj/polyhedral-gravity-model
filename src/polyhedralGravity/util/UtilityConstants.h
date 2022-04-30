@@ -4,6 +4,7 @@ namespace polyhedralGravity::util {
 
     /**
      * The EPSILON used in the polyhedral gravity model.
+     * @related Used to determine if a floating point number is equal to zero as threshold for rounding errors
      * @related Used for the sgn() function to determine the sign of a double value. Different compilers
      * produce different results if no EPSILON is applied for the comparison!
      */
@@ -24,7 +25,6 @@ namespace polyhedralGravity::util {
 
     /**
     * PI divided by 2 with enough precision
-     * TODO: FORTRAN uses 1.5707963705062866 as value --> Deviation!
     */
     constexpr double PI_2 = 1.5707963267948966192313216916397514420985846996875529104874722961;
 
