@@ -214,6 +214,7 @@ namespace polyhedralGravity {
         //Calculate alpha, beta and gamma as D/A, D/B and D/C (Notice that we "forget" the minus before those
         // divisions. In consequence, the conditions for signs are reversed below!!!)
         // These values represent the intersections of each polygonal plane with the axes
+        // Comparison x == 0.0 is ok, since we only want to avoid nan values
         Array3 intersections = {hessianPlane.a == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.a,
                                 hessianPlane.b == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.b,
                                 hessianPlane.c == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.c};
