@@ -423,19 +423,18 @@ namespace polyhedralGravity {
                     //Result for this segment
                     TranscendentalExpression transcendentalExpressionPerSegment{};
 
-                    //Aliases for the Vertices (endpoints) of this segment
-                    const Array3 &v1 = face[(j + 1) % 3];
-                    const Array3 &v2 = face[j];
+                    //Computation of the norm of P' and segment endpoints
+                    // If the one of the norms == 0 then P' lies on the corresponding vertex and coincides with P''
+                    const double r1Norm = euclideanNorm(orthogonalProjectionPointOnPlane - face[(j + 1) % 3]);
+                    const double r2Norm = euclideanNorm(orthogonalProjectionPointOnPlane - face[j]);
 
                     //Compute LN_pq according to (14)
-                    //If either sigmaPQ has no sign AND either of the distances of P' to the two
-                    //segment endpoints is zero OR the 1D and 3D distances are below some threshold
-                    //then LN_pq is zero, too
-                    //TODO (distance.s1 + distance.s2 < 1e-10 && distance.l1 + distance.l2 < 1e-10)?!
-                    if ((segmentNormalOrientation == 0.0 &&
-                         (euclideanNorm(orthogonalProjectionPointOnPlane - v1) == 0.0
-                          || euclideanNorm(orthogonalProjectionPointOnPlane - v2) == 0.0)) ||
-                        (distance.s1 + distance.s2 < 1e-10 && distance.l1 + distance.l2 < 1e-10)) {
+                    // If sigma_pq == 0 && either of the distances of P' to the two segment endpoints == 0 OR
+                    // the 1D and 3D distances are smaller than some EPSILON
+                    // then LN_pq can be set to zero
+                    if ((segmentNormalOrientation == 0.0 && (r1Norm < EPSILON || r2Norm < EPSILON)) ||
+                        (std::abs(distance.s1 + distance.s2) < EPSILON &&
+                        std::abs(distance.l1 + distance.l2) < EPSILON)) {
                         transcendentalExpressionPerSegment.ln = 0.0;
                     } else {
                         transcendentalExpressionPerSegment.ln =
@@ -443,9 +442,8 @@ namespace polyhedralGravity {
                     }
 
                     //Compute AN_pq according to (15)
-                    //If h_p or h_pq is zero then AN_pq is zero, too
-                    //TODO Comparison might be wrong!!!
-                    if (planeDistance == 0 || segmentDistance == 0) {
+                    // If h_p == 0 or h_pq == 0 then AN_pq is zero, too (distances are always positive!)
+                    if (planeDistance < EPSILON || segmentDistance < EPSILON) {
                         transcendentalExpressionPerSegment.an = 0.0;
                     } else {
                         transcendentalExpressionPerSegment.an =
