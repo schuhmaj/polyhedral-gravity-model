@@ -100,6 +100,7 @@ namespace polyhedralGravity {
          * The plane unit normal orientation values represents the relative position of computation point P
          * with respect to the pointing direction of N_p. E. g. if N_p points to the half-space containing P, the
          * inner product of N_p and -G_i1 will be positive, leading to a negative sigma_p.
+         * If sigma_p is zero than P and P' lie geometrically in the same plane --> P == P'.
          * @param planeUnitNormal - the plane unit normal N_p
          * @param vertex0 - the first vertex of the plane
          * @return plane normal orientation
@@ -199,7 +200,6 @@ namespace polyhedralGravity {
                 const Array3Triplet &face);
 
         /**
-         * TODO Contains enorm duplicate!
          * Calculates the Transcendental Expressions LN_pq and AN_pq for every line segment of the polyhedron for
          * a given plane p.
          * LN_pq is calculated according to (14) using the natural logarithm and AN_pq is calculated according
@@ -221,7 +221,6 @@ namespace polyhedralGravity {
                 const Array3Triplet &face);
 
         /**
-         * TODO Contains enorm duplicate!
          * Calculates the singularities (correction) terms according to the Flow text for a given plane p.
          * @param segmentVectorsForPlane - the segment vectors for a given plane
          * @param segmentNormalOrientationForPlane - the segment orientation sigma_pq

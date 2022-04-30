@@ -211,21 +211,28 @@ namespace polyhedralGravity {
         // norm(N_i) is always 1 since N_i is a "normed" vector --> we do not need this division
         Array3 orthogonalProjectionPoint = planeUnitNormal * planeDistance;
 
-        //Calculate the sign of the projections points x, y, z coordinates and apply it
-        //if -D/A > 0 --> D/A < 0 --> everything is fine, no change
-        //if -D/A < 0 --> D/A > 0 --> change sign if Ni is positive, else no change
+        //Calculate alpha, beta and gamma as D/A, D/B and D/C (Notice that we "forget" the minus before those
+        // divisions. In consequence, the conditions for signs are reversed below!!!)
+        // These values represent the intersections of each polygonal plane with the axes
         Array3 intersections = {hessianPlane.a == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.a,
                                 hessianPlane.b == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.b,
                                 hessianPlane.c == 0.0 ? 0.0 : hessianPlane.d / hessianPlane.c};
 
+        //Determine the signs of the coordinates of P' according to the intersection values alpha, beta, gamma
+        // denoted as __ below, i.e. -alpha, -beta, -gamma denoted -__
         for (unsigned int index = 0; index < 3; ++index) {
             if (intersections[index] < 0) {
+                //If -__ >= 0 --> __ < 0 then coordinates are positive, we calculate abs(orthogonalProjectionPoint[..])
                 orthogonalProjectionPoint[index] = std::abs(orthogonalProjectionPoint[index]);
             } else {
+                //The coordinates need to be controlled
                 if (planeUnitNormal[index] > 0) {
+                    //If -__ < 0 --> __ >= 0 then the coordinate is negative -orthogonalProjectionPoint[..]
                     orthogonalProjectionPoint[index] = -1.0 * orthogonalProjectionPoint[index];
+                } else {
+                    //Else the coordinate is positive orthogonalProjectionPoint[..]
+                    orthogonalProjectionPoint[index] = orthogonalProjectionPoint[index];
                 }
-                orthogonalProjectionPoint[index] = orthogonalProjectionPoint[index];
             }
         }
         return orthogonalProjectionPoint;
