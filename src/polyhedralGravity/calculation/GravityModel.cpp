@@ -345,11 +345,13 @@ namespace polyhedralGravity {
                     distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
                     distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
 
-                    //Details on these conditions are in the second paper referenced in the README.md (Tsoulis, 2021)
-                    // The numbering of these conditions is equal to the numbering scheme of the paper
-                    // Assign a sign to those magnitudes depending on the relative position of P'' to the two
-                    // segment endpoints
-
+                    /*
+                     * Additional remark:
+                     * Details on these conditions are in the second paper referenced in the README.md (Tsoulis, 2021)
+                     * The numbering of these conditions is equal to the numbering scheme of the paper
+                     * Assign a sign to those magnitudes depending on the relative position of P'' to the two
+                     * segment endpoints
+                     */
 
                     //4. Option: |s1 - l1| == 0 && |s2 - l2| == 0 Computation point P is located from the beginning on
                     // the direction of a specific segment (P coincides with P' and P'')
