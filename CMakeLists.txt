@@ -45,7 +45,7 @@ target_link_libraries(${PROJECT_NAME}_lib
         yaml-cpp
         )
 
-# CPP = Serial execution, We also set the DEVICE to CPP since the default CUDA should not be a dependency
+# Thrust set-up i.e. the parallelization library
 thrust_create_target(Thrust HOST ${PARALLELIZATION_HOST} DEVICE ${PARALLELIZATION_DEVICE})
 message(STATUS "Set Parallelization: HOST ${PARALLELIZATION_HOST} DEVICE ${PARALLELIZATION_DEVICE}")
 target_link_libraries(${PROJECT_NAME}_lib
