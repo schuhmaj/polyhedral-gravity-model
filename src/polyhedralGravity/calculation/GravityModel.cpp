@@ -462,15 +462,15 @@ namespace polyhedralGravity {
             const Array3 &planeUnitNormal,
             double planeDistance,
             double planeNormalOrientation) {
-        //1. case: If all sigma_pq for a given plane p are 1.0 then P' lies inside the plane S_p
+        //1. Case: If all sigma_pq for a given plane p are 1.0 then P' lies inside the plane S_p
         if (std::all_of(segmentNormalOrientationForPlane.cbegin(), segmentNormalOrientationForPlane.cend(),
                         [](const double sigma) { return sigma == 1.0; })) {
             using namespace util;
             return std::make_pair(
-                    -1.0 * util::PI2 * planeDistance,
-                    planeUnitNormal * (-1.0 * util::PI2 * planeNormalOrientation));
+                    -1.0 * util::PI2 * planeDistance,                               //sing alpha = -2pi*h_p
+                    planeUnitNormal * (-1.0 * util::PI2 * planeNormalOrientation)); //sing beta  = -2pi*sigma_p*N_p
         }
-        //2. case: If sigma_pq == 0 AND norm(P' - v1) < norm(G_ij) && norm(P' - v2) < norm(G_ij) with G_ij
+        //2. Case: If sigma_pq == 0 AND norm(P' - v1) < norm(G_ij) && norm(P' - v2) < norm(G_ij) with G_ij
         // as the vector of v1 and v2
         // then P' is located on one line segment G_p of plane p, but not on any of its vertices
         auto counter2 = thrust::counting_iterator<unsigned int>(0);
@@ -484,7 +484,8 @@ namespace polyhedralGravity {
             const double segmentNormalOrientation = thrust::get<1>(tuple);
             const unsigned int j = thrust::get<2>(tuple);
 
-            if (segmentNormalOrientation != 0.0) {
+            //segmentNormalOrientation != 0.0
+            if (std::abs(segmentNormalOrientation) > EPSILON) {
                 return false;
             }
 
@@ -494,42 +495,48 @@ namespace polyhedralGravity {
         })) {
             using namespace util;
             return std::make_pair(
-                    -1.0 * util::PI * planeDistance,
-                    planeUnitNormal * (-1.0 * util::PI * planeNormalOrientation));
+                    -1.0 * util::PI * planeDistance,                                //sing alpha = -pi*h_p
+                    planeUnitNormal * (-1.0 * util::PI * planeNormalOrientation));  //sing beta  = -pi*sigma_p*N_p
         }
-        //3. case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
+        //3. Case If sigma_pq == 0 AND norm(P' - v1) < 0 || norm(P' - v2) < 0
         // then P' is located at one of G_p's vertices
         auto counter3 = thrust::counting_iterator<int>(0);
         auto thirdCaseBegin = util::zip(segmentNormalOrientationForPlane.begin(), counter3);
         auto thirdCaseEnd = util::zip(segmentNormalOrientationForPlane.end(), counter3 + 3);
-        double e1;
-        double e2;
+        double r1Norm;
+        double r2Norm;
         unsigned int j;
         if (std::any_of(thirdCaseBegin, thirdCaseEnd, [&](const auto &tuple) {
             using namespace util;
             const double segmentNormalOrientation = thrust::get<0>(tuple);
             j = thrust::get<1>(tuple);
 
-            if (segmentNormalOrientation != 0.0) {
+            //segmentNormalOrientation != 0.0
+            if (std::abs(segmentNormalOrientation) > EPSILON) {
                 return false;
             }
 
-            e1 = projectionPointVertexNorms[(j + 1) % 3];
-            e2 = projectionPointVertexNorms[j];
-            return e1 == 0.0 || e2 == 0.0;
+            r1Norm = projectionPointVertexNorms[(j + 1) % 3];
+            r2Norm = projectionPointVertexNorms[j];
+            //r1Norm == 0.0 || r2Norm == 0.0
+            return r1Norm < EPSILON || r2Norm < EPSILON;
         })) {
             using namespace util;
-            const Array3 &g1 = e1 == 0.0 ? segmentVectorsForPlane[j] : segmentVectorsForPlane[(j - 1 + 3) % 3];
-            const Array3 &g2 = e1 == 0.0 ? segmentVectorsForPlane[(j + 1) % 3] : segmentVectorsForPlane[j];
+            //Two segment vectors G_1 and G_2 of this plane
+            const Array3 &g1 = r1Norm == 0.0 ? segmentVectorsForPlane[j] : segmentVectorsForPlane[(j - 1 + 3) % 3];
+            const Array3 &g2 = r1Norm == 0.0 ? segmentVectorsForPlane[(j + 1) % 3] : segmentVectorsForPlane[j];
+            // theta = arcos((G_2 * -G_1) / (|G_2| * |G_1|))
             const double gdot = dot(g1 * -1.0, g2);
             const double theta =
                     gdot == 0.0 ? util::PI_2 : std::acos(gdot / (euclideanNorm(g1) * euclideanNorm(g2)));
             return std::make_pair(
-                    -1.0 * theta * planeDistance,
-                    planeUnitNormal * (-1.0 * theta * planeNormalOrientation));
+                    -1.0 * theta * planeDistance,                               //sing alpha = -theta*h_p
+                    planeUnitNormal * (-1.0 * theta * planeNormalOrientation)); //sing beta  = -theta*sigma_p*N_p
         }
-        //4. case Otherwise P' is located outside the plane S_p and then the singularity equals zero
-        return std::make_pair(0.0, Array3{0, 0, 0});
+        //4. Case Otherwise P' is located outside the plane S_p and then the singularity equals zero
+        return std::make_pair(
+                0.0,                                                            //sing alpha = 0
+                Array3{0, 0, 0});                                               //sing beta  = 0
     }
 
     Array3 GravityModel::computeOrthogonalProjectionPointVertexNormForPlane(
