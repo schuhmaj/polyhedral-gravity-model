@@ -20,11 +20,6 @@
 namespace polyhedralGravity {
 
     /**
-     * Alias for an array of size 2
-     * @example for pair's of the same type
-     */
-    using Array2 = std::array<double, 2>;
-    /**
      * Alias for an array of size 3
      * @example for x, y, z coordinates.
      */
@@ -34,11 +29,6 @@ namespace polyhedralGravity {
      * @example for the segment of a triangular face
      */
     using Array3Triplet = std::array<Array3, 3>;
-    /**
-     * Alias for a triplet of arrays of size 2
-     * @example pair (segment endpoint) for each segment of a triangular face
-     */
-    using Array2Triplet = std::array<Array2 , 3>;
 
     /**
      * Namespace containing the methods used to evaluate the polyhedrale Gravity Model
