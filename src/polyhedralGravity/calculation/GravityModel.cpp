@@ -11,7 +11,10 @@ namespace polyhedralGravity {
         auto polyhedronIterator = transformPolyhedron(polyhedron, computationPoint);
 
         GravityModelResult result{};
-        result = thrust::transform_reduce(//TODO thrust::device,
+        result = thrust::transform_reduce(
+#ifdef DEVICE
+                thrust::device,
+#endif
                 polyhedronIterator.first, polyhedronIterator.second, [](const Array3Triplet &face) {
                     using namespace util;
                     //1. Step: Compute ingredients for current plane
