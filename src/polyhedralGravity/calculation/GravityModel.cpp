@@ -14,6 +14,7 @@ namespace polyhedralGravity {
         result = thrust::transform_reduce(//TODO thrust::device,
                 polyhedronIterator.first, polyhedronIterator.second, [](const Array3Triplet &face) {
                     using namespace util;
+                    //1. Step: Compute ingredients for current plane
                     Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0],
                                                                                  face[1],
                                                                                  face[2]);
@@ -54,7 +55,8 @@ namespace polyhedralGravity {
                                                             projectionPointVertexNorms,
                                                             planeUnitNormal, planeDistance,
                                                             planeNormalOrientation);
-                    //Sum 1 - potential and acceleration
+                    //2. Step: Compute Sum 1 used for potential and acceleration (first derivative)
+                    // sum over: sigma_pq * h_pq * LN_pq
                     auto zipIteratorSum1PA = util::zipPair(segmentNormalOrientations,
                                                            segmentDistances,
                                                            transcendentalExpressions);
@@ -62,63 +64,69 @@ namespace polyhedralGravity {
                                                           zipIteratorSum1PA.second,
                                                           0.0, [](double acc,
                                                                   const auto &tuple) {
-                                const double &sigma_pq = thrust::get<0>(tuple);
-                                const double &h_pq = thrust::get<1>(tuple);
+                                const double &segmentOrientation = thrust::get<0>(tuple);
+                                const double &segmentDistance = thrust::get<1>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<2>(
                                         tuple);
-                                return acc + sigma_pq * h_pq *
+                                return acc + segmentOrientation * segmentDistance *
                                              transcendentalExpressions.ln;
                             });
 
-                    //Sum 1 - tensor
+                    //3. Step: Compute Sum 1 used for the gradiometric tensor (second derivative)
+                    // sum over: n_pq * LN_pq
                     auto zipIteratorSum1T = util::zipPair(segmentUnitNormals,
                                                           transcendentalExpressions);
                     const Array3 sum1T = std::accumulate(
                             zipIteratorSum1T.first, zipIteratorSum1T.second,
                             Array3{0.0, 0.0, 0.0},
                             [](const Array3 &acc, const auto &tuple) {
-                                const Array3 &npq = thrust::get<0>(tuple);
+                                const Array3 &segmentNormal = thrust::get<0>(tuple);
                                 const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
                                         tuple);
-                                return acc + (npq * transcendentalExpressions.ln);
+                                return acc + (segmentNormal * transcendentalExpressions.ln);
                             });
 
-                    //Sum 2 - for both the same
+                    //4. Step: Compute Sum 2 which is the same for every result parameter
+                    // sum over: sigma_pq * AN_pq
                     auto zipIteratorSum2 = util::zipPair(segmentNormalOrientations,
                                                          transcendentalExpressions);
-                    const double sum2 = std::accumulate(zipIteratorSum2.first,
-                                                        zipIteratorSum2.second,
-                                                        0.0,
-                                                        [](double acc, const auto &tuple) {
-                                                            const double &sigma_pq = thrust::get<0>(
-                                                                    tuple);
-                                                            const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(
-                                                                    tuple);
-                                                            return acc + sigma_pq *
-                                                                         transcendentalExpressions.an;
-                                                        });
+                    const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
+                                                        0.0, [](double acc, const auto &tuple) {
+                                const double &segmentOrientation = thrust::get<0>(tuple);
+                                const TranscendentalExpression &transcendentalExpressions = thrust::get<1>(tuple);
+                                return acc + segmentOrientation * transcendentalExpressions.an;
+                            });
 
-                    //Sum up everything (potential and acceleration)
-                    const double planeSumPA =
-                            sum1PA + planeDistance * sum2 + singularities.first;
+                    //5. Step: Sum for potential and acceleration
+                    // consisting of: sum1 + h_p * sum2 + sing A
+                    const double planeSumPA = sum1PA + planeDistance * sum2 + singularities.first;
 
-                    //Sum up everything (tensor)
+                    //6. Step: Sum for tensor
+                    // consisting of: sum1 + sigma_p * N_p * sum2 + sing B
                     const Array3 subSum =
                             (sum1T + (planeUnitNormal * (planeNormalOrientation * sum2))) +
                             singularities.second;
+                    // first component: trivial case Vxx, Vyy, Vzz --> just N_p * subSum
+                    // 00, 11, 22 --> xx, yy, zz with x as 0, y as 1, z as 2
                     const Array3 first = planeUnitNormal * subSum;
+                    // second component: reordering required to build Vxy, Vxz, Vyz
+                    // 01, 02, 12 --> xy, xz, yz with x as 0, y as 1, z as 2
                     const Array3 reorderedNp = {planeUnitNormal[0], planeUnitNormal[0],
                                                 planeUnitNormal[1]};
                     const Array3 reorderedSubSum = {subSum[1], subSum[2], subSum[2]};
                     const Array3 second = reorderedNp * reorderedSubSum;
 
-                    //Accumulate and return
+                    //7. Step: Multiply with prefix
+                    // Equation (11): sigma_p * h_p * sum
+                    // Equation (12): N_p * sum
+                    // Equation (13): already done above, just concat the two components for later summation
                     return GravityModelResult{
                             planeNormalOrientation * planeDistance * planeSumPA,
                             planeUnitNormal * planeSumPA,
                             concat(first, second)
                     };
                 }, result, [](const GravityModelResult &a, const GravityModelResult &b) {
+                    //8. Step: Accumulate the partial sums
                     return GravityModelResult{
                             a.gravitationalPotential + b.gravitationalPotential,
                             a.gravitationalPotentialDerivative + b.gravitationalPotentialDerivative,
@@ -126,24 +134,15 @@ namespace polyhedralGravity {
                     };
                 });
 
+        //9. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
         const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
+        //10. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
         result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
         result.gravitationalPotentialDerivative = abs(result.gravitationalPotentialDerivative * prefix);
         result.gradiometricTensor = result.gradiometricTensor * prefix;
-        SPDLOG_INFO("V= {}", result.gravitationalPotential);
-        SPDLOG_INFO("Vx= {}", result.gravitationalPotentialDerivative[0]);
-        SPDLOG_INFO("Vy= {}", result.gravitationalPotentialDerivative[1]);
-        SPDLOG_INFO("Vz= {}", result.gravitationalPotentialDerivative[2]);
-        SPDLOG_INFO("Vxx= {}", result.gradiometricTensor[0]);
-        SPDLOG_INFO("Vyy= {}", result.gradiometricTensor[1]);
-        SPDLOG_INFO("Vzz= {}", result.gradiometricTensor[2]);
-        SPDLOG_INFO("Vxy= {}", result.gradiometricTensor[3]);
-        SPDLOG_INFO("Vxz= {}", result.gradiometricTensor[4]);
-        SPDLOG_INFO("Vyz= {}", result.gradiometricTensor[5]);
 
         result.p = computationPoint;
-
         return result;
     }
 
@@ -491,7 +490,7 @@ namespace polyhedralGravity {
 
             const double segmentVectorNorm = euclideanNorm(segmentVector);
             return projectionPointVertexNorms[(j + 1) % 3] < segmentVectorNorm &&
-                    projectionPointVertexNorms[j] < segmentVectorNorm;
+                   projectionPointVertexNorms[j] < segmentVectorNorm;
         })) {
             using namespace util;
             return std::make_pair(
