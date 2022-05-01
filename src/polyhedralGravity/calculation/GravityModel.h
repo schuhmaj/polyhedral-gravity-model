@@ -34,6 +34,11 @@ namespace polyhedralGravity {
      * @example for the segment of a triangular face
      */
     using Array3Triplet = std::array<Array3, 3>;
+    /**
+     * Alias for a triplet of arrays of size 2
+     * @example pair (segment endpoint) for each segment of a triangular face
+     */
+    using Array2Triplet = std::array<Array2 , 3>;
 
     /**
      * Namespace containing the methods used to evaluate the polyhedrale Gravity Model
@@ -212,32 +217,39 @@ namespace polyhedralGravity {
          * @param face - the vertices of plane p
          * @return LN_pq and AN_pq foreach segment q of plane p
          */
-        std::array<TranscendentalExpression, 3> computeTranscendentalExpressionsForPlane(
-                const std::array<Distance, 3> &distancesForPlane,
-                double planeDistance,
-                const Array3 &segmentDistancesForPlane,
-                const Array3 &segmentNormalOrientationsForPlane,
-                const Array3 &orthogonalProjectionPointOnPlane,
-                const Array3Triplet &face);
+        std::array<TranscendentalExpression, 3>
+        computeTranscendentalExpressionsForPlane(const std::array<Distance, 3> &distancesForPlane,
+                                                 double planeDistance, const Array3 &segmentDistancesForPlane,
+                                                 const Array3 &segmentNormalOrientationsForPlane,
+                                                 const Array3 &projectionPointVertexNorms);
 
         /**
          * Calculates the singularities (correction) terms according to the Flow text for a given plane p.
          * @param segmentVectorsForPlane - the segment vectors for a given plane
          * @param segmentNormalOrientationForPlane - the segment orientation sigma_pq
-         * @param orthogonalProjectionPointOnPlane - the projection point P'
+         * @param projectionPointVertexNorms - the projection point P'
          * @param planeUnitNormal - the plane unit normal N_p
          * @param planeDistance - the plane distance h_p
          * @param planeNormalOrientation - the plane normal orientation sigma_p
          * @param face - the vertices of plane p
          * @return the singularities for a plane p
          */
-        std::pair<double, Array3> computeSingularityTermsForPlane(
-                const Array3Triplet &segmentVectorsForPlane,
-                const Array3 &segmentNormalOrientationForPlane,
+        std::pair<double, Array3> computeSingularityTermsForPlane(const Array3Triplet &segmentVectorsForPlane,
+                                                                  const Array3 &segmentNormalOrientationForPlane,
+                                                                  const Array3 &projectionPointVertexNorms,
+                                                                  const Array3 &planeUnitNormal,
+                                                                  double planeDistance,
+                                                                  double planeNormalOrientation);
+
+        /**
+         * Computes the norms of the orthogonal projection point P' on a plane p with each vertex of that plane p.
+         * The values are later used to determine if P' is situated at a vertex.
+         * @param orthogonalProjectionPointOnPlane - the orthogonal projection point P'
+         * @param face - the vertices of plane p
+         * @return the norms of p and each vertex
+         */
+        Array3 computeOrthogonalProjectionPointVertexNormForPlane(
                 const Array3 &orthogonalProjectionPointOnPlane,
-                const Array3 &planeUnitNormal,
-                double planeDistance,
-                double planeNormalOrientation,
                 const Array3Triplet &face);
 
 

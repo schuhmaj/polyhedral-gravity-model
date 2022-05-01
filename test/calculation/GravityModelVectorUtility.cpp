@@ -212,9 +212,12 @@ namespace polyhedralGravity {
             const Array3 &projectionPointOnPlane = thrust::get<4>(tuple);
             const Array3Triplet &face = thrust::get<5>(tuple);
 
+            const Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNormForPlane(
+                    projectionPointOnPlane, face);
+
             return computeTranscendentalExpressionsForPlane(distancesForPlane, planeDistance, segmentDistancesForPlane,
-                                                            segmentNormalOrientationsForPlane, projectionPointOnPlane,
-                                                            face);
+                                                            segmentNormalOrientationsForPlane,
+                                                            projectionPointVertexNorms);
         });
         return transcendentalExpressions;
     }
@@ -249,9 +252,12 @@ namespace polyhedralGravity {
             const double planeNormalOrientation = thrust::get<5>(tuple);
             const Array3Triplet &face = thrust::get<6>(tuple);
 
+            const Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNormForPlane(
+                    orthogonalProjectionPointOnPlane, face);
+
             return computeSingularityTermsForPlane(segmentVectorsForPlane, segmentNormalOrientationForPlane,
-                                                   orthogonalProjectionPointOnPlane, planeUnitNormal, planeDistance,
-                                                   planeNormalOrientation, face);
+                                                   projectionPointVertexNorms, planeUnitNormal, planeDistance,
+                                                   planeNormalOrientation);
         });
         return singularities;
     }

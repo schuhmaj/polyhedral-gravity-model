@@ -42,18 +42,18 @@ namespace polyhedralGravity {
                     std::array<Distance, 3> distances = computeDistancesForPlane(
                             segmentVectors, orthogonalProjectionPointsOnSegmentsForPlane,
                             face);
+                    Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNormForPlane(
+                            orthogonalProjectionPointOnPlane, face);
                     std::array<TranscendentalExpression, 3> transcendentalExpressions =
                             computeTranscendentalExpressionsForPlane(distances, planeDistance,
-                                                                     segmentDistances,
-                                                                     segmentNormalOrientations,
-                                                                     orthogonalProjectionPointOnPlane,
-                                                                     face);
+                                                                     segmentDistances, segmentNormalOrientations,
+                                                                     projectionPointVertexNorms);
                     std::pair<double, Array3> singularities =
                             computeSingularityTermsForPlane(segmentVectors,
                                                             segmentNormalOrientations,
-                                                            orthogonalProjectionPointOnPlane,
+                                                            projectionPointVertexNorms,
                                                             planeUnitNormal, planeDistance,
-                                                            planeNormalOrientation, face);
+                                                            planeNormalOrientation);
                     //Sum 1 - potential and acceleration
                     auto zipIteratorSum1PA = util::zipPair(segmentNormalOrientations,
                                                            segmentDistances,
@@ -119,10 +119,10 @@ namespace polyhedralGravity {
                             concat(first, second)
                     };
                 }, result, [](const GravityModelResult &a, const GravityModelResult &b) {
-                    return GravityModelResult {
-                        a.gravitationalPotential + b.gravitationalPotential,
-                        a.gravitationalPotentialDerivative + b.gravitationalPotentialDerivative,
-                        a.gradiometricTensor + b.gradiometricTensor
+                    return GravityModelResult{
+                            a.gravitationalPotential + b.gravitationalPotential,
+                            a.gravitationalPotentialDerivative + b.gravitationalPotentialDerivative,
+                            a.gradiometricTensor + b.gradiometricTensor
                     };
                 });
 
@@ -397,13 +397,12 @@ namespace polyhedralGravity {
         return distancesForPlane;
     }
 
-    std::array<TranscendentalExpression, 3> GravityModel::computeTranscendentalExpressionsForPlane(
+    std::array<TranscendentalExpression, 3>
+    GravityModel::computeTranscendentalExpressionsForPlane(
             const std::array<Distance, 3> &distancesForPlane,
-            double planeDistance,
-            const Array3 &segmentDistancesForPlane,
+            double planeDistance, const Array3 &segmentDistancesForPlane,
             const Array3 &segmentNormalOrientationsForPlane,
-            const Array3 &orthogonalProjectionPointOnPlane,
-            const Array3Triplet &face) {
+            const Array3 &projectionPointVertexNorms) {
         std::array<TranscendentalExpression, 3> transcendentalExpressionsForPlane{};
 
         //Zip iterator consisting of 3D and 1D distances l1/l2 and s1/2 for this plane | h_pq | sigma_pq for this plane
@@ -425,8 +424,8 @@ namespace polyhedralGravity {
 
                     //Computation of the norm of P' and segment endpoints
                     // If the one of the norms == 0 then P' lies on the corresponding vertex and coincides with P''
-                    const double r1Norm = euclideanNorm(orthogonalProjectionPointOnPlane - face[(j + 1) % 3]);
-                    const double r2Norm = euclideanNorm(orthogonalProjectionPointOnPlane - face[j]);
+                    const double r1Norm = projectionPointVertexNorms[(j + 1) % 3];
+                    const double r2Norm = projectionPointVertexNorms[j];
 
                     //Compute LN_pq according to (14)
                     // If sigma_pq == 0 && either of the distances of P' to the two segment endpoints == 0 OR
@@ -434,7 +433,7 @@ namespace polyhedralGravity {
                     // then LN_pq can be set to zero
                     if ((segmentNormalOrientation == 0.0 && (r1Norm < EPSILON || r2Norm < EPSILON)) ||
                         (std::abs(distance.s1 + distance.s2) < EPSILON &&
-                        std::abs(distance.l1 + distance.l2) < EPSILON)) {
+                         std::abs(distance.l1 + distance.l2) < EPSILON)) {
                         transcendentalExpressionPerSegment.ln = 0.0;
                     } else {
                         transcendentalExpressionPerSegment.ln =
@@ -459,11 +458,10 @@ namespace polyhedralGravity {
     std::pair<double, Array3> GravityModel::computeSingularityTermsForPlane(
             const Array3Triplet &segmentVectorsForPlane,
             const Array3 &segmentNormalOrientationForPlane,
-            const Array3 &orthogonalProjectionPointOnPlane,
+            const Array3 &projectionPointVertexNorms,
             const Array3 &planeUnitNormal,
             double planeDistance,
-            double planeNormalOrientation,
-            const Array3Triplet &face) {
+            double planeNormalOrientation) {
         //1. case: If all sigma_pq for a given plane p are 1.0 then P' lies inside the plane S_p
         if (std::all_of(segmentNormalOrientationForPlane.cbegin(), segmentNormalOrientationForPlane.cend(),
                         [](const double sigma) { return sigma == 1.0; })) {
@@ -490,11 +488,9 @@ namespace polyhedralGravity {
                 return false;
             }
 
-            const Array3 &v1 = face[(j + 1) % 3];
-            const Array3 &v2 = face[j];
             const double segmentVectorNorm = euclideanNorm(segmentVector);
-            return euclideanNorm(orthogonalProjectionPointOnPlane - v1) < segmentVectorNorm &&
-                   euclideanNorm(orthogonalProjectionPointOnPlane - v2) < segmentVectorNorm;
+            return projectionPointVertexNorms[(j + 1) % 3] < segmentVectorNorm &&
+                    projectionPointVertexNorms[j] < segmentVectorNorm;
         })) {
             using namespace util;
             return std::make_pair(
@@ -518,10 +514,8 @@ namespace polyhedralGravity {
                 return false;
             }
 
-            const Array3 &v1 = face[(j + 1) % 3];
-            const Array3 &v2 = face[j];
-            e1 = euclideanNorm(orthogonalProjectionPointOnPlane - v1);
-            e2 = euclideanNorm(orthogonalProjectionPointOnPlane - v2);
+            e1 = projectionPointVertexNorms[(j + 1) % 3];
+            e2 = projectionPointVertexNorms[j];
             return e1 == 0.0 || e2 == 0.0;
         })) {
             using namespace util;
@@ -536,6 +530,15 @@ namespace polyhedralGravity {
         }
         //4. case Otherwise P' is located outside the plane S_p and then the singularity equals zero
         return std::make_pair(0.0, Array3{0, 0, 0});
+    }
+
+    Array3 GravityModel::computeOrthogonalProjectionPointVertexNormForPlane(
+            const Array3 &orthogonalProjectionPointOnPlane,
+            const Array3Triplet &face) {
+        using namespace util;
+        return {euclideanNorm(orthogonalProjectionPointOnPlane - face[0]),
+                euclideanNorm(orthogonalProjectionPointOnPlane - face[1]),
+                euclideanNorm(orthogonalProjectionPointOnPlane - face[2])};
     }
 
 
