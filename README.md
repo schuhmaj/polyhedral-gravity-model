@@ -18,7 +18,7 @@ The project uses the following dependencies:
 - spdlog 1.9.2 (required for logging, automatically set-up via CMake)
 - tetgen 1.6 (required for I/O, automatically set-up via CMake)
 - yaml-cpp 0.7.0 (required for I/O, automatically set-up via CMake)
-- thrust 1.16.0 (required for (parallelization TODO) and utility, automatically set-up via CMake)
+- thrust 1.16.0 (required for parallelization and utility, automatically set-up via CMake)
 
 ## Build
 The program is build by using CMake. So first make sure that you installed
@@ -66,13 +66,13 @@ gravityModel:
 The implementation supports multiple common mesh formats for
 the polyhedral source. These include:
 
-|     File Suffix     |                        Name                        | Comment                                                                    |
-|:-------------------:|:--------------------------------------------------:|----------------------------------------------------------------------------|
-| `.node` and `.face` |                   TetGen's files                   | These two files need to be given as a pair to the input.                   |
-|       `.mesh`       |                 Medit's mesh files                 | Single file containing every needed mesh information.                      |
-|       `.ply`        | The Polygon File format/ Stanfoard Triangle format | Single file containing every needed mesh information. Blender File Format. |
-|       `.off`        |                 Object File Format                 | Single file containing every needed mesh information.                      |
-|       `.stl`        |              Stereolithography format              | Single file containing every needed mesh information. Blender File Format. |                                         
+|     File Suffix     |                        Name                        | Comment                                                                                     |
+|:-------------------:|:--------------------------------------------------:|---------------------------------------------------------------------------------------------|
+| `.node` and `.face` |                   TetGen's files                   | These two files need to be given as a pair to the input. [Documentation of TetGen's file](https://wias-berlin.de/software/tetgen/fformats.html) |
+|       `.mesh`       |                 Medit's mesh files                 | Single file containing every needed mesh information.                                       |
+|       `.ply`        | The Polygon File format/ Stanfoard Triangle format | Single file containing every needed mesh information. Blender File Format.                  |
+|       `.off`        |                 Object File Format                 | Single file containing every needed mesh information.                                       |
+|       `.stl`        |              Stereolithography format              | Single file containing every needed mesh information. Blender File Format.                  |                                         
 
 **Notice!** Only the ASCII versions of those respective files are supported! This is especially
 important for e.g. the `.ply` files which also can be in binary format.
