@@ -16,6 +16,7 @@
 #include "thrust/transform_reduce.h"
 #include "thrust/execution_policy.h"
 #include "polyhedralGravity/util/UtilityThrust.h"
+#include "polyhedralGravity/output/Logging.h"
 
 namespace polyhedralGravity {
 

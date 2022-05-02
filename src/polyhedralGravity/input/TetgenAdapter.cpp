@@ -1,5 +1,4 @@
 #include "TetgenAdapter.h"
-#include "spdlog/spdlog.h"
 
 namespace polyhedralGravity {
 
@@ -17,6 +16,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readNode(const std::string &filename) {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Reading the file {}.node", filename);
         this->checkIntegrity(filename, 'v');
         try {
             _tetgenio.load_node(const_cast<char *>(filename.c_str()));
@@ -29,6 +29,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readFace(const std::string &filename) {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Reading the file {}.face", filename);
         this->checkIntegrity(filename, 'f');
         try {
             _tetgenio.load_face(const_cast<char *>(filename.c_str()));
@@ -39,6 +40,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readOff(const std::string &filename) {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Reading the file {}.off", filename);
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_off(const_cast<char *>(filename.c_str()));
@@ -50,6 +52,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readPly(const std::string &filename) {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Reading the file {}.ply", filename);
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_ply(const_cast<char *>(filename.c_str()));
@@ -61,6 +64,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readStl(const std::string &filename) {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Reading the file {}.stl", filename);
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_stl(const_cast<char *>(filename.c_str()));
@@ -79,6 +83,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::readMesh(const std::string &filename) {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Reading the file {}.mesh");
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_medit(const_cast<char *>(filename.c_str()), 0);
@@ -105,9 +110,11 @@ namespace polyhedralGravity {
                     "The Polyhedron already has well defined faces! The information of " + filename
                     + ".node is redundant!");
         }
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "No duplicate information given. Integrity good!");
     }
 
     void TetgenAdapter::addVertices() {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Converting tetgen's vertices to C++ Polyhedron");
         _vertices.clear();
         _vertices.reserve(_tetgenio.numberofpoints);
         for (size_t i = 0; i < _tetgenio.numberofpoints * 3; i += 3) {
@@ -118,6 +125,7 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::addFacesByTrifaces() {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Converting tetgen's trifaces to C++ Polyhedron");
         _faces.clear();
         _faces.reserve(_tetgenio.numberoftrifaces);
         for (size_t i = 0; i < _tetgenio.numberoftrifaces * 3; i += 3) {
@@ -128,6 +136,10 @@ namespace polyhedralGravity {
     }
 
     void TetgenAdapter::addFacesByFacetList() {
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger() , "Converting tetgen's arbitrarily shaped facets to "
+                                                       "C++ Polyhedron. If something is not working with the input, "
+                                                       "the error is probably here. "
+                                                       "Because here, only triangles are accepted!");
         _faces.clear();
         _faces.reserve(_tetgenio.numberoffacets);
         for (size_t i = 0; i < _tetgenio.numberoffacets; ++i) {

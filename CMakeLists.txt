@@ -56,6 +56,8 @@ if(NOT PARALLELIZATION_DEVICE STREQUAL "CPP")
     add_compile_definitions(DEVICE)
 endif()
 
+add_compile_definitions(SPDLOG_ACTIVE_LEVEL=0)
+
 # Building the standalone Executable
 add_executable(${PROJECT_NAME} ${mainFile})
 

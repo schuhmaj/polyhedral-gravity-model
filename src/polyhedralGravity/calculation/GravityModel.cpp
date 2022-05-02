@@ -5,11 +5,15 @@ namespace polyhedralGravity {
     GravityModelResult GravityModel::evaluate(
             const Polyhedron &polyhedron, double density, const Array3 &computationPoint) {
         using namespace util;
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger(),
+                            "Evaluation for computation point P = [{}, {}, {}] started, given density = {} kg/m^3",
+                            computationPoint[0], computationPoint[1], computationPoint[2], density);
         /*
          * Calculate V and Vx, Vy, Vz and Vxx, Vyy, Vzz, Vxy, Vxz, Vyz
          */
         auto polyhedronIterator = transformPolyhedron(polyhedron, computationPoint);
 
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Starting to iterate over the planes...");
         GravityModelResult result{};
         result = thrust::transform_reduce(
 #ifdef DEVICE
@@ -17,41 +21,64 @@ namespace polyhedralGravity {
 #endif
                 polyhedronIterator.first, polyhedronIterator.second, [](const Array3Triplet &face) {
                     using namespace util;
+                    SPDLOG_LOGGER_TRACE(POLYHEDRAL_GRAVITY_LOGGER.getLogger(),
+                                        "Evaluating the plane with vertices: v1 = [{}, {}, {}], v2 = [{}, {}, {}], "
+                                        "v3 = [{}, {}, {}]",
+                                        face[0][0], face[0][1], face[0][2],
+                                        face[1][0], face[1][1], face[1][2],
+                                        face[2][0], face[2][1], face[2][2]);
                     //1. Step: Compute ingredients for current plane
+                    //1-01 Step: Compute Segment Vectors G_pq which describe each one the edge between two vertices
                     Array3Triplet segmentVectors = computeSegmentVectorsForPlane(face[0],
                                                                                  face[1],
                                                                                  face[2]);
+                    //1-02 Step: Compute the Plane Unit Normals N_p (pointing outside the polyhedron)
                     Array3 planeUnitNormal = computePlaneUnitNormalForPlane(segmentVectors[0],
                                                                             segmentVectors[1]);
+                    //1-03 Step: Compute Segment Unit Normals n_pq (normal pointing away from each segment)
                     Array3Triplet segmentUnitNormals = computeSegmentUnitNormalForPlane(
                             segmentVectors,
                             planeUnitNormal);
+                    //1-04 Step: Compute Plane Normal Orientation sigma_p (direction of N_p in relation to P)
                     double planeNormalOrientation = computePlaneNormalOrientationForPlane(
                             planeUnitNormal, face[0]);
+                    //1-05 Step: Compute Hessian Normal Plane Representation
                     HessianPlane hessianPlane = computeHessianPlane(face[0], face[1],
                                                                     face[2]);
+                    //1-06 Step: Compute distance h_p between P and P'
                     double planeDistance = computePlaneDistanceForPlane(hessianPlane);
+                    //1-07 Step: Compute the actual position of P' (projection of P on the plane)
                     Array3 orthogonalProjectionPointOnPlane =
                             computeOrthogonalProjectionPointsOnPlaneForPlane(
                                     planeUnitNormal, planeDistance, hessianPlane);
+                    //1-08 Step: Compute the segment normal orientation sigma_pq (direction of n_pq in relation to P')
                     Array3 segmentNormalOrientations = computeSegmentNormalOrientationsForPlane(
                             face, orthogonalProjectionPointOnPlane, segmentUnitNormals);
+                    //1-09 Step: Compute the orthogonal projection point P'' of P' on each segment
                     Array3Triplet orthogonalProjectionPointsOnSegmentsForPlane =
                             computeOrthogonalProjectionPointsOnSegmentsForPlane(
                                     orthogonalProjectionPointOnPlane,
                                     segmentNormalOrientations, face);
+                    //1-10 Step: Compute the segment distances h_pq between P'' and P'
                     Array3 segmentDistances = computeSegmentDistancesForPlane(
                             orthogonalProjectionPointOnPlane,
                             orthogonalProjectionPointsOnSegmentsForPlane);
+                    //1-11 Step: Compute the 3D distances l1, l2 (between P and vertices)
+                    // and 1D distances s1, s2 (between P'' and vertices)
                     std::array<Distance, 3> distances = computeDistancesForPlane(
                             segmentVectors, orthogonalProjectionPointsOnSegmentsForPlane,
                             face);
+                    //1-12 Step: Compute the euclidian Norms of the vectors consisting of P and the vertices
+                    // they are later used for determining the position of P in relation to the plane
                     Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNormForPlane(
                             orthogonalProjectionPointOnPlane, face);
+                    //1-13 Step: Compute the transcendental Expressions LN_pq and AN_pq
                     std::array<TranscendentalExpression, 3> transcendentalExpressions =
                             computeTranscendentalExpressionsForPlane(distances, planeDistance,
                                                                      segmentDistances, segmentNormalOrientations,
                                                                      projectionPointVertexNorms);
+                    //1-14 Step: Compute the singularities sing A and sing B if P' is located in the plane,
+                    // on any vertex, or on one segment (G_pq)
                     std::pair<double, Array3> singularities =
                             computeSingularityTermsForPlane(segmentVectors,
                                                             segmentNormalOrientations,
@@ -137,6 +164,7 @@ namespace polyhedralGravity {
                     };
                 });
 
+        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Finished the sums. Applying final prefix.");
         //9. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
         const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
@@ -144,8 +172,6 @@ namespace polyhedralGravity {
         result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
         result.gravitationalPotentialDerivative = abs(result.gravitationalPotentialDerivative * prefix);
         result.gradiometricTensor = result.gradiometricTensor * prefix;
-
-        result.p = computationPoint;
         return result;
     }
 

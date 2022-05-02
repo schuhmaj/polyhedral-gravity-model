@@ -10,6 +10,7 @@
 #include <utility>
 #include <exception>
 #include <stdexcept>
+#include "polyhedralGravity/output/Logging.h"
 #include "polyhedralGravity/util/UtilityContainer.h"
 
 namespace polyhedralGravity {
