@@ -13,30 +13,37 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
-    auto poly = config->getDataSource()->getPolyhedron();
-    auto density = config->getDensity();
-    auto point = config->getPointsOfInterest()[0];
+    try {
 
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "The calculation started...");
-    auto start = std::chrono::high_resolution_clock::now();
-    auto result = GravityModel::evaluate(poly, density, point);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = end - start;
-    auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(),
-                       "The calculation finished. It took {} microseconds.", ms.count());
+        std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
+        auto poly = config->getDataSource()->getPolyhedron();
+        auto density = config->getDensity();
+        auto point = config->getPointsOfInterest()[0];
 
-    //The results
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "V= {}", result.gravitationalPotential);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vx= {}", result.gravitationalPotentialDerivative[0]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vy= {}", result.gravitationalPotentialDerivative[1]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vz= {}", result.gravitationalPotentialDerivative[2]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vxx= {}", result.gradiometricTensor[0]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vyy= {}", result.gradiometricTensor[1]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vzz= {}", result.gradiometricTensor[2]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vxy= {}", result.gradiometricTensor[3]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vxz= {}", result.gradiometricTensor[4]);
-    SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vyz= {}", result.gradiometricTensor[5]);
-    return 0;
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "The calculation started...");
+        auto start = std::chrono::high_resolution_clock::now();
+        auto result = GravityModel::evaluate(poly, density, point);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = end - start;
+        auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(),
+                           "The calculation finished. It took {} microseconds.", ms.count());
+
+        //The results
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "V= {}", result.gravitationalPotential);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vx= {}", result.gravitationalPotentialDerivative[0]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vy= {}", result.gravitationalPotentialDerivative[1]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vz= {}", result.gravitationalPotentialDerivative[2]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vxx= {}", result.gradiometricTensor[0]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vyy= {}", result.gradiometricTensor[1]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vzz= {}", result.gradiometricTensor[2]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vxy= {}", result.gradiometricTensor[3]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vxz= {}", result.gradiometricTensor[4]);
+        SPDLOG_LOGGER_INFO(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Vyz= {}", result.gradiometricTensor[5]);
+        return 0;
+
+    } catch (const std::exception &e) {
+        SPDLOG_LOGGER_ERROR(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "{}", e.what());
+        return -1;
+    }
 }

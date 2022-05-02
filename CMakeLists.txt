@@ -14,6 +14,13 @@ set(PARALLELIZATION_DEVICE "CPP" CACHE STRING "Device parallelization chosen by 
  (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks, CUDA = Nvida Cuda")
 set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB, CUDA)
 
+# Set the Logging Level
+set(LOGGING_LEVEL "2" CACHE STRING "Set the Logging level, default (INFO=2), available options:
+TRACE=0, DEBUG=1, INFO=2, WARN=3, ERROR=4, CRITICAL=5, OFF=6")
+set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS 0, 1, 2, 3, 4, 5, 6)
+
+add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${LOGGING_LEVEL})
+
 # Appends the the module path to contain additional CMake modules for this project
 # and include everything necessary
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -55,8 +62,6 @@ target_link_libraries(${PROJECT_NAME}_lib
 if(NOT PARALLELIZATION_DEVICE STREQUAL "CPP")
     add_compile_definitions(DEVICE)
 endif()
-
-add_compile_definitions(SPDLOG_ACTIVE_LEVEL=0)
 
 # Building the standalone Executable
 add_executable(${PROJECT_NAME} ${mainFile})
