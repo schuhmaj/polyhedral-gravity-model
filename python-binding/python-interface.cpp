@@ -8,11 +8,6 @@
 
 namespace py = pybind11;
 
-//TODO Wrapper required! Otherwise segfault if parallelized!
-polyhedralGravity::GravityModelResult eval(const polyhedralGravity::Polyhedron &polyhedron) {
-    return polyhedralGravity::GravityModel::evaluate(polyhedron, 2760.0);
-}
-
 PYBIND11_MODULE(polyhedral_gravity, m) {
     m.doc() = "Computes the full gravity tensor for a given constant density polyhedron at a given computation point P";
 
@@ -29,8 +24,8 @@ PYBIND11_MODULE(polyhedral_gravity, m) {
             .def("vertices", &polyhedralGravity::Polyhedron::getVertices)
             .def("faces", &polyhedralGravity::Polyhedron::getFaces);
 
-    m.def("evaluate", &eval,
+    m.def("evaluate", &polyhedralGravity::GravityModel::evaluate,
           "Evaluate the full gravity tensor for a given constant density polyhedron at a given computation point P",
-          py::arg("polyhedron"));
+          py::arg("polyhedron"), py::arg("density"), py::arg("computation_point"));
 
 }
