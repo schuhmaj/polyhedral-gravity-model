@@ -80,3 +80,11 @@ if (BUILD_POLYHEDRAL_GRAVITY_TESTS)
     # Subdirectory where the tests are located
     add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 endif ()
+
+# Option to build the python interface
+option(BUILD_POLYHEDRAL_PYTHON_INTERFACE "Set this to on if the python interface should be built (Default: ON)" ON)
+# Build the polyhedral gravity python interface
+if(BUILD_POLYHEDRAL_PYTHON_INTERFACE)
+    message(STATUS "Building the Polyhedral Gravity Python Interface")
+    add_subdirectory(${PROJECT_SOURCE_DIR}/python-binding)
+endif()
