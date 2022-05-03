@@ -40,7 +40,6 @@ namespace polyhedralGravity {
      *
      * Typically a calculate() functions calls repeatedly foreach plane p the compute*ForPlane() method which then calls
      * the compute*ForSegment() foreach segment q (triangle faces --> three times)
-     * TODO: insert ::detail namespace for 'private' methods
      */
     namespace GravityModel {
 
@@ -57,6 +56,20 @@ namespace polyhedralGravity {
                 const Polyhedron &polyhedron,
                 double density,
                 const Array3 &computationPoint = {0.0, 0.0, 0.0});
+
+        /**
+         * Evaluates the polyhedrale gravity model for a given constant density polyhedron at multiple computation
+         * points.
+         * @param polyhedron - the polyhedron consisting of vertices and triangular faces
+         * @param density - the constant density in [kg/m^3]
+         * @param computationPoints - vector of computation points
+         * @return he GravityModelResult containing the potential, the acceleration and the change of acceleration
+         * foreach computation Point P
+         */
+        std::vector<GravityModelResult> evaluate(
+                const Polyhedron &polyhedron,
+                double density,
+                const std::vector<Array3> &computationPoints);
 
         /**
          * Computes the segment vectors G_ij for one plane of the polyhedron according to Tsoulis (18).

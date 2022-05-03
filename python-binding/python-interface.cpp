@@ -9,23 +9,30 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(polyhedral_gravity, m) {
+    using namespace polyhedralGravity;
     m.doc() = "Computes the full gravity tensor for a given constant density polyhedron at a given computation point P";
 
-    py::class_<polyhedralGravity::GravityModelResult>(m, "GravityModelResult")
+    py::class_<GravityModelResult>(m, "GravityModelResult")
             .def(py::init<>())
             .def(py::init<double, const std::array<double, 3> &, const std::array<double, 6> &>())
-            .def_readwrite("potential", &polyhedralGravity::GravityModelResult::gravitationalPotential)
-            .def_readwrite("acceleration", &polyhedralGravity::GravityModelResult::gravitationalPotentialDerivative)
-            .def_readwrite("tensor", &polyhedralGravity::GravityModelResult::gradiometricTensor);
+            .def_readwrite("potential", &GravityModelResult::gravitationalPotential)
+            .def_readwrite("acceleration", &GravityModelResult::gravitationalPotentialDerivative)
+            .def_readwrite("tensor", &GravityModelResult::gradiometricTensor);
 
     py::class_<polyhedralGravity::Polyhedron>(m, "Polyhedron")
             .def(py::init<>())
             .def(py::init<std::vector<std::array<double, 3>>, std::vector<std::array<size_t, 3>>>())
-            .def("vertices", &polyhedralGravity::Polyhedron::getVertices)
-            .def("faces", &polyhedralGravity::Polyhedron::getFaces);
+            .def("vertices", &Polyhedron::getVertices)
+            .def("faces", &Polyhedron::getFaces);
 
-    m.def("evaluate", &polyhedralGravity::GravityModel::evaluate,
-          "Evaluate the full gravity tensor for a given constant density polyhedron at a given computation point P",
+    m.def("evaluate", py::overload_cast<const Polyhedron &, double, const Array3 &>(&GravityModel::evaluate),
+          "Evaluate the full gravity tensor for a given constant density polyhedron "
+          "at a given computation point P",
           py::arg("polyhedron"), py::arg("density"), py::arg("computation_point"));
 
+    m.def("evaluate",
+          py::overload_cast<const Polyhedron &, double, const std::vector<Array3> &>(&GravityModel::evaluate),
+          "Evaluate the full gravity tensor for a given constant density polyhedron "
+          "at multiple given computation points",
+          py::arg("polyhedron"), py::arg("density"), py::arg("vector_computation_points"));
 }

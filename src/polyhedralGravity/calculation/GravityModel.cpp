@@ -175,6 +175,16 @@ namespace polyhedralGravity {
         return result;
     }
 
+    std::vector<GravityModelResult> GravityModel::evaluate(
+            const Polyhedron &polyhedron, double density, const std::vector<Array3> &computationPoints) {
+        std::vector<GravityModelResult> result{computationPoints.size()};
+        thrust::transform(computationPoints.begin(), computationPoints.end(), result.begin(),
+                          [&polyhedron, density](const Array3 &computationPoint) {
+            return evaluate(polyhedron, density, computationPoint);
+        });
+        return result;
+    }
+
     Array3Triplet GravityModel::computeSegmentVectorsForPlane(
             const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2) {
         using util::operator-;
