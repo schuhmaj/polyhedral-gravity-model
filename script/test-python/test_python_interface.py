@@ -29,14 +29,14 @@ cube_faces = [
 ]
 
 tsoulis_vertices = [
-    [-20.0, 0.0, 25.0],
-    [0.0, 0.0, 25.0],
-    [0.0, 10.0, 25.0],
-    [-20.0, 10.0, 25.0],
-    [-20.0, 0.0, 15.0],
-    [0.0, 0.0, 15.0],
-    [0.0, 10.0, 15.0],
-    [-20.0, 10.0, 15.0]
+    np.array([-20.0, 0.0, 25.0]),
+    np.array([0.0, 0.0, 25.0]),
+    np.array([0.0, 10.0, 25.0]),
+    np.array([-20.0, 10.0, 25.0]),
+    np.array([-20.0, 0.0, 15.0]),
+    np.array([0.0, 0.0, 15.0]),
+    np.array([0.0, 10.0, 15.0]),
+    np.array([-20.0, 10.0, 15.0])
 ]
 
 tsoulis_faces = [
@@ -61,7 +61,7 @@ for x in range(-50, 50):
         computation_points.append((x, y, 0.0))
 
 density = 2670.0
-polyhedron = pg.Polyhedron(cube_vertices, cube_faces)
+polyhedron = pg.Polyhedron(tsoulis_vertices, tsoulis_faces)
 
 result = pg.evaluate(polyhedron, density, computation_points)
 
