@@ -22,9 +22,10 @@ namespace polyhedralGravity {
         /**
          * Constructs a new PolyhedraleGravityLogger. Further, it registers the new logger in  spdlog's registry with
          * the name POLYHEDRAL_GRAVITY_LOGGER.
+         * TODO async_factory causes bug on Windows OS --> Deadlock on finish (no return 0/ exit)
          */
         PolyhedraleGravityLogger()
-                : _logger(spdlog::stdout_color_mt<spdlog::async_factory>("POLYHEDRAL_GRAVITY_LOGGER")) {
+                : _logger(spdlog::stdout_color_mt<spdlog::synchronous_factory>("POLYHEDRAL_GRAVITY_LOGGER")) {
             _logger->set_level(spdlog::level::trace);
         }
 
