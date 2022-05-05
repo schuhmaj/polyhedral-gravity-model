@@ -90,9 +90,10 @@ namespace polyhedralGravity {
             this->addVertices();
             this->addFacesByFacetList();
             // Additionally .mesh files start counting the index at 1, instead of 0, so decrement all faces by one
-            std::transform(_faces.begin(), _faces.end(), _faces.begin(), [](const std::array<size_t, 3> &face) {
+            std::transform(_faces.begin(), _faces.end(),
+                           _faces.begin(), [](const std::array<size_t, 3> &face) -> std::array<size_t, 3> {
                 using namespace util;
-                return face - 1;
+                return {face[0] - 1, face[1] - 1, face[2] - 1};
             });
 
         } catch (...) {
