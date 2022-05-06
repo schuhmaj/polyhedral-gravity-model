@@ -20,6 +20,10 @@ set(LOGGING_LEVEL "2" CACHE STRING "Set the Logging level, default (INFO=2), ava
 TRACE=0, DEBUG=1, INFO=2, WARN=3, ERROR=4, CRITICAL=5, OFF=6")
 set_property(CACHE LOGGING_LEVEL PROPERTY STRINGS 0, 1, 2, 3, 4, 5, 6)
 
+# Enforce to use an already installed tbb library instead of compiling from source
+option(USE_LOCAL_TBB "Uses the local tbb installation rather than on using the automatically fetched version from
+GitHub via CMake (Default: OFF)" OFF)
+
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${LOGGING_LEVEL})
 
 # Appends the the module path to contain additional CMake modules for this project
@@ -53,9 +57,10 @@ target_link_libraries(${PROJECT_NAME}_lib
         yaml-cpp
         )
 
-# Get a version of tbb from the github repository, simplifies compiliation for the user since tbb does not need to be
+# Get a version of tbb from the github repository, simplifies compilation for the user since tbb does not need to be
 # preinstalled but rather gets automatically set up via CMake
-if (${PARALLELIZATION_HOST} STREQUAL "TBB" OR ${PARALLELIZATION_DEVICE} STREQUAL "TBB")
+# Still the option to enforce a local installation exists
+if (NOT USE_LOCAL_TBB AND (${PARALLELIZATION_HOST} STREQUAL "TBB" OR ${PARALLELIZATION_DEVICE} STREQUAL "TBB"))
     include(tbb)
     thrust_set_TBB_target(tbb)
 endif ()

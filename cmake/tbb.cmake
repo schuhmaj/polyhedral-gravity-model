@@ -1,6 +1,6 @@
 include(FetchContent)
 
-message(STATUS "Setting up tbb")
+message(STATUS "Setting up tbb via CMake")
 
 #Fetches the version v2021.5.0 from the official github of tbb
 FetchContent_Declare(tbb
