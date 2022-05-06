@@ -8,10 +8,18 @@
 
 namespace polyhedralGravity {
 
+    class PolyhedraleGravityLogger;
+
     /**
      * Wrapper Class for spdlog logger
      */
     class PolyhedraleGravityLogger {
+
+    public:
+
+        const static PolyhedraleGravityLogger DEFAULT_LOGGER;
+
+    private:
 
         /**
          * The actual spdlog::logger
@@ -29,15 +37,9 @@ namespace polyhedralGravity {
             _logger->set_level(spdlog::level::trace);
         }
 
-        std::shared_ptr<spdlog::logger> getLogger() {
+        [[nodiscard]] std::shared_ptr<spdlog::logger> getLogger() const {
             return _logger;
         }
     };
-
-    /**
-     * Single Logger of the Polyhedrale Gravity Model in C++
-     * Static initialized
-     */
-    inline PolyhedraleGravityLogger POLYHEDRAL_GRAVITY_LOGGER{};
 
 }

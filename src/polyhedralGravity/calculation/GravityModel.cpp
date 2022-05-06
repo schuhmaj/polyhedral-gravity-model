@@ -5,7 +5,7 @@ namespace polyhedralGravity {
     GravityModelResult GravityModel::evaluate(
             const Polyhedron &polyhedron, double density, const Array3 &computationPoint) {
         using namespace util;
-        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger(),
+        SPDLOG_LOGGER_DEBUG(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger(),
                             "Evaluation for computation point P = [{}, {}, {}] started, given density = {} kg/m^3",
                             computationPoint[0], computationPoint[1], computationPoint[2], density);
         /*
@@ -13,7 +13,8 @@ namespace polyhedralGravity {
          */
         auto polyhedronIterator = transformPolyhedron(polyhedron, computationPoint);
 
-        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Starting to iterate over the planes...");
+        SPDLOG_LOGGER_DEBUG(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger(),
+                            "Starting to iterate over the planes...");
         GravityModelResult result{};
         result = thrust::transform_reduce(
 #ifdef DEVICE
@@ -21,7 +22,7 @@ namespace polyhedralGravity {
 #endif
                 polyhedronIterator.first, polyhedronIterator.second, [](const Array3Triplet &face) {
                     using namespace util;
-                    SPDLOG_LOGGER_TRACE(POLYHEDRAL_GRAVITY_LOGGER.getLogger(),
+                    SPDLOG_LOGGER_TRACE(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger(),
                                         "Evaluating the plane with vertices: v1 = [{}, {}, {}], v2 = [{}, {}, {}], "
                                         "v3 = [{}, {}, {}]",
                                         face[0][0], face[0][1], face[0][2],
@@ -164,7 +165,8 @@ namespace polyhedralGravity {
                     };
                 });
 
-        SPDLOG_LOGGER_DEBUG(POLYHEDRAL_GRAVITY_LOGGER.getLogger(), "Finished the sums. Applying final prefix.");
+        SPDLOG_LOGGER_DEBUG(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger(),
+                            "Finished the sums. Applying final prefix.");
         //9. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
         const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
