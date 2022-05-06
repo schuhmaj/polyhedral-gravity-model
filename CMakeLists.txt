@@ -53,13 +53,22 @@ target_link_libraries(${PROJECT_NAME}_lib
         yaml-cpp
         )
 
-# Thrust set-up i.e. the parallelization library
+# Get a version of tbb from the github repository, simplifies compiliation for the user since tbb does not need to be
+# preinstalled but rather gets automatically set up via CMake
+if (${PARALLELIZATION_HOST} STREQUAL "TBB" OR ${PARALLELIZATION_DEVICE} STREQUAL "TBB")
+    include(tbb)
+    thrust_set_TBB_target(tbb)
+endif ()
+
+# Thrust set-up i.e. the parallelization library, create targets according to the users specification
 thrust_create_target(Thrust HOST ${PARALLELIZATION_HOST} DEVICE ${PARALLELIZATION_DEVICE})
 message(STATUS "Set Parallelization: HOST ${PARALLELIZATION_HOST} DEVICE ${PARALLELIZATION_DEVICE}")
 target_link_libraries(${PROJECT_NAME}_lib
         Thrust
         )
-# This definitions will set the main eval(..) routine to be executed on the DEVICE
+
+# This definitions will set the main eval(..) routine to be executed on the DEVICE if the users has given
+# an option parallelize on the Device
 if(NOT PARALLELIZATION_DEVICE STREQUAL "CPP")
     add_compile_definitions(DEVICE)
 endif()
