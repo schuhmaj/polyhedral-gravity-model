@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 project(polyhedralGravity)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Best Combo: HOST CPP, DEVICE OMP
 # Parallelization on the HOST
@@ -17,7 +18,7 @@ set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB, CUDA)
 # Set the Logging Level
 set(LOGGING_LEVEL "2" CACHE STRING "Set the Logging level, default (INFO=2), available options:
 TRACE=0, DEBUG=1, INFO=2, WARN=3, ERROR=4, CRITICAL=5, OFF=6")
-set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS 0, 1, 2, 3, 4, 5, 6)
+set_property(CACHE LOGGING_LEVEL PROPERTY STRINGS 0, 1, 2, 3, 4, 5, 6)
 
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${LOGGING_LEVEL})
 

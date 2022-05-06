@@ -48,14 +48,14 @@ namespace polyhedralGravity {
          * point P.
          * @param polyhedron - the polyhedron consisting of vertices and triangular faces
          * @param density - the constant density in [kg/m^3]
-         * @param computationPoint - the computation Point P (default: {0,0,0})
+         * @param computationPoint - the computation Point P
          * @return the GravityModelResult containing the potential, the acceleration and the change of acceleration
          * at computation Point P
          */
         GravityModelResult evaluate(
                 const Polyhedron &polyhedron,
                 double density,
-                const Array3 &computationPoint = {0.0, 0.0, 0.0});
+                const Array3 &computationPoint);
 
         /**
          * Evaluates the polyhedrale gravity model for a given constant density polyhedron at multiple computation
