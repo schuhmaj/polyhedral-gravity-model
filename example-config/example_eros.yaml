@@ -2,8 +2,8 @@
 gravityModel:
   input:
     polyhedron:
-      - "/Users/schuhmaj/Programming/CLion/polyhedral-gravity-model-cpp/example-config/data/Eros.node"
-      - "/Users/schuhmaj/Programming/CLion/polyhedral-gravity-model-cpp/example-config/data/Eros.face"
+      - "../example-config/data/tsoulis.node"
+      - "../example-config/data/tsoulis.face"
     density: 2670.0
     points:
       - [0, 0, 0]
