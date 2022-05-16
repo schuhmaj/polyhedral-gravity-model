@@ -485,9 +485,20 @@ namespace polyhedralGravity {
                     if (planeDistance < EPSILON || segmentDistance < EPSILON) {
                         transcendentalExpressionPerSegment.an = 0.0;
                     } else {
-                        transcendentalExpressionPerSegment.an =
-                                std::atan((planeDistance * distance.s2) / (segmentDistance * distance.l2)) -
-                                std::atan((planeDistance * distance.s1) / (segmentDistance * distance.l1));
+//                        transcendentalExpressionPerSegment.an =
+//                                std::atan((planeDistance * distance.s2) / (segmentDistance * distance.l2)) -
+//                                std::atan((planeDistance * distance.s1) / (segmentDistance * distance.l1));
+
+                        xsimd::batch<double> reg1({distance.s2, distance.s1});
+                        xsimd::batch<double> reg2({distance.l2, distance.l1});
+
+                        reg1 = xsimd::mul(reg1, planeDistance);
+                        reg2 = xsimd::mul(reg2, segmentDistance);
+
+                        reg1 = xsimd::div(reg1, reg2);
+                        reg1 = xsimd::atan(reg1);
+
+                        transcendentalExpressionPerSegment.an = reg1.get(0) - reg1.get(1);
                     }
 
                     return transcendentalExpressionPerSegment;

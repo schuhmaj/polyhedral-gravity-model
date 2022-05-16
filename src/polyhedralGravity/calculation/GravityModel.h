@@ -17,6 +17,7 @@
 #include "thrust/execution_policy.h"
 #include "polyhedralGravity/util/UtilityThrust.h"
 #include "polyhedralGravity/output/Logging.h"
+#include "xsimd/xsimd.hpp"
 
 namespace polyhedralGravity {
 

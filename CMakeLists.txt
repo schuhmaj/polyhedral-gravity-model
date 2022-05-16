@@ -34,6 +34,7 @@ include(spdlog)
 include(tetgen)
 include(yaml)
 include(thrust)
+include(xsimd)
 
 # Main file, containing the gravity model's driver
 set(mainFile ${PROJECT_SOURCE_DIR}/src/main.cpp)
@@ -55,6 +56,7 @@ target_link_libraries(${PROJECT_NAME}_lib
         spdlog
         tetgen
         yaml-cpp
+        xsimd
         )
 
 # Get a version of tbb from the github repository, simplifies compilation for the user since tbb does not need to be
