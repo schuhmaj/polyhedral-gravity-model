@@ -26,7 +26,7 @@ namespace polyhedralGravity::util {
         xsimd::batch<double> reg3({array2[1], array2[2]});
         reg1 = xsimd::mul(reg1, reg1);
         reg2 = xsimd::mul(reg2, reg2);
-        reg2 = xsimd::mul(reg3, reg3);
+        reg3 = xsimd::mul(reg3, reg3);
 
         reg1 = xsimd::batch<double>({reg1.get(0) + reg1.get(1) + reg2.get(0), reg2.get(1) + reg3.get(0) + reg3.get(1)});
         reg1 = xsimd::sqrt(reg1);
