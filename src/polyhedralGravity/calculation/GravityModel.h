@@ -18,6 +18,7 @@
 #include "polyhedralGravity/util/UtilityThrust.h"
 #include "polyhedralGravity/output/Logging.h"
 #include "xsimd/xsimd.hpp"
+#include "polyhedralGravity/util/UtilitySimd.h"
 
 namespace polyhedralGravity {
 

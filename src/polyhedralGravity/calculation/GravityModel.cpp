@@ -379,12 +379,19 @@ namespace polyhedralGravity {
 
                     //Calculate the 3D distances between P (0, 0, 0) and
                     // the segment endpoints face[j] and face[(j + 1) % 3])
-                    distance.l1 = euclideanNorm(face[j]);
-                    distance.l2 = euclideanNorm(face[(j + 1) % 3]);
+//                    distance.l1 = euclideanNorm(face[j]);
+//                    distance.l2 = euclideanNorm(face[(j + 1) % 3]);
+                    auto pair = euclideanNorm(face[j], face[(j + 1) % 3]);
+                    distance.l1 = pair.first;
+                    distance.l2 = pair.second;
                     //Calculate the 1D distances between P'' (every segment has its own) and
                     // the segment endpoints face[j] and face[(j + 1) % 3])
-                    distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
-                    distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
+//                    distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
+//                    distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
+                    pair = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j],
+                                         orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
+                    distance.s1 = pair.first;
+                    distance.s2 = pair.second;
 
                     /*
                      * Additional remark:
@@ -476,8 +483,13 @@ namespace polyhedralGravity {
                          std::abs(distance.l1 + distance.l2) < EPSILON)) {
                         transcendentalExpressionPerSegment.ln = 0.0;
                     } else {
-                        transcendentalExpressionPerSegment.ln =
-                                std::log((distance.s2 + distance.l2) / (distance.s1 + distance.l1));
+//                        transcendentalExpressionPerSegment.ln =
+//                                std::log((distance.s2 + distance.l2) / (distance.s1 + distance.l1));
+
+                        xsimd::batch<double> reg1({distance.s2, distance.s1});
+                        xsimd::batch<double> reg2({distance.l2, distance.l1});
+                        reg1 = xsimd::add(reg1, reg2);
+                        transcendentalExpressionPerSegment.ln = std::log(reg1.get(0) / reg1.get(1));
                     }
 
                     //Compute AN_pq according to (15)
@@ -594,9 +606,13 @@ namespace polyhedralGravity {
             const Array3 &orthogonalProjectionPointOnPlane,
             const Array3Triplet &face) {
         using namespace util;
-        return {euclideanNorm(orthogonalProjectionPointOnPlane - face[0]),
-                euclideanNorm(orthogonalProjectionPointOnPlane - face[1]),
-                euclideanNorm(orthogonalProjectionPointOnPlane - face[2])};
+//        return {euclideanNorm(orthogonalProjectionPointOnPlane - face[0]),
+//                euclideanNorm(orthogonalProjectionPointOnPlane - face[1]),
+//                euclideanNorm(orthogonalProjectionPointOnPlane - face[2])};
+        return euclideanNorm(
+                orthogonalProjectionPointOnPlane - face[0],
+                orthogonalProjectionPointOnPlane - face[1],
+                orthogonalProjectionPointOnPlane - face[2]);
     }
 
 
