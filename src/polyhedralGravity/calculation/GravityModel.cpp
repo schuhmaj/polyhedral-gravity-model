@@ -379,19 +379,12 @@ namespace polyhedralGravity {
 
                     //Calculate the 3D distances between P (0, 0, 0) and
                     // the segment endpoints face[j] and face[(j + 1) % 3])
-//                    distance.l1 = euclideanNorm(face[j]);
-//                    distance.l2 = euclideanNorm(face[(j + 1) % 3]);
-                    auto pair = euclideanNorm(face[j], face[(j + 1) % 3]);
-                    distance.l1 = pair.first;
-                    distance.l2 = pair.second;
+                    distance.l1 = euclideanNorm(face[j]);
+                    distance.l2 = euclideanNorm(face[(j + 1) % 3]);
                     //Calculate the 1D distances between P'' (every segment has its own) and
                     // the segment endpoints face[j] and face[(j + 1) % 3])
-//                    distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
-//                    distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
-                    pair = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j],
-                                         orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
-                    distance.s1 = pair.first;
-                    distance.s2 = pair.second;
+                    distance.s1 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[j]);
+                    distance.s2 = euclideanNorm(orthogonalProjectionPointsOnSegment - face[(j + 1) % 3]);
 
                     /*
                      * Additional remark:
@@ -606,13 +599,9 @@ namespace polyhedralGravity {
             const Array3 &orthogonalProjectionPointOnPlane,
             const Array3Triplet &face) {
         using namespace util;
-//        return {euclideanNorm(orthogonalProjectionPointOnPlane - face[0]),
-//                euclideanNorm(orthogonalProjectionPointOnPlane - face[1]),
-//                euclideanNorm(orthogonalProjectionPointOnPlane - face[2])};
-        return euclideanNorm(
-                orthogonalProjectionPointOnPlane - face[0],
-                orthogonalProjectionPointOnPlane - face[1],
-                orthogonalProjectionPointOnPlane - face[2]);
+        return {euclideanNorm(orthogonalProjectionPointOnPlane - face[0]),
+                euclideanNorm(orthogonalProjectionPointOnPlane - face[1]),
+                euclideanNorm(orthogonalProjectionPointOnPlane - face[2])};
     }
 
 
