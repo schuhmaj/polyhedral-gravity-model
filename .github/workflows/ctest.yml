@@ -48,8 +48,8 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make
+          cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+          nmake
 
       - name: Test
         run: cd build/test && ./polyhedralGravity_test
