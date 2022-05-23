@@ -61,7 +61,7 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 # Get a version of tbb from the github repository, simplifies compilation for the user since tbb does not need to be
 # preinstalled but rather gets automatically set up via CMake
-# Still the option to enforce a local installation exists
+# Nevertheless, there is still the option to enforce to use a local installation if one exists
 if (NOT USE_LOCAL_TBB AND (${PARALLELIZATION_HOST} STREQUAL "TBB" OR ${PARALLELIZATION_DEVICE} STREQUAL "TBB"))
     include(tbb)
     thrust_set_TBB_target(tbb)
