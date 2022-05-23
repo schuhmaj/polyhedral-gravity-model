@@ -30,7 +30,7 @@ jobs:
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          make
+          cmake --build .
           
       - name: Test
         run: cd build/test && ./polyhedralGravity_test
@@ -48,9 +48,9 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-          nmake
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          cmake --build .
 
       - name: Test
-        run: cd build/test && ./polyhedralGravity_test
+        run: cd build && ctest
       
