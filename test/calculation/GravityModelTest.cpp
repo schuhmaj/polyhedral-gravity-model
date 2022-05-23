@@ -7,6 +7,8 @@
 #include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/model/Polyhedron.h"
 
+#include "GravityModelVectorUtility.h"
+
 /**
  * Contains Tests based on the example from Tsoulis FORTRAN implementation.
  * Hardcoded values taken from his implementation's results.
@@ -43,7 +45,7 @@ protected:
             }
     };
 
-    polyhedralGravity::GravityModel systemUnderTest{_polyhedron};
+    std::array<double, 3> _computationPoint{0.0, 0.0, 0.0};
 
     std::vector<std::array<std::array<double, 3>, 3>> expectedGij{
             std::array<std::array<double, 3>, 3>{{{20.0, 0.0, 0.0}, {-20.0, 10.0, 0.0}, {0.0, -10.0, 0.0}}},
@@ -61,18 +63,18 @@ protected:
     };
 
     std::vector<std::array<double, 3>> expectedPlaneUnitNormals{
-            {0.0,  -0.0, 1.0},
-            {0.0,  -0.0, 1.0},
-            {0.0,  -1.0, 0.0},
-            {0.0,  -1.0, 0.0},
+            {0.0, -0.0, 1.0},
+            {0.0, -0.0, 1.0},
+            {0.0, -1.0, 0.0},
+            {0.0, -1.0, 0.0},
             {-1.0, -0.0, -0.0},
-            {-1.0, 0.0,  0.0},
-            {1.0,  -0.0, 0.0},
-            {1.0,  -0.0, 0.0},
-            {0.0,  1.0,  0.0},
-            {0.0,  1.0,  0.0},
-            {0.0,  0.0,  -1.0},
-            {0.0,  0.0,  -1.0}
+            {-1.0, 0.0, 0.0},
+            {1.0, -0.0, 0.0},
+            {1.0, -0.0, 0.0},
+            {0.0, 1.0, 0.0},
+            {0.0, 1.0, 0.0},
+            {0.0, 0.0, -1.0},
+            {0.0, 0.0, -1.0}
     };
 
     std::vector<std::array<std::array<double, 3>, 3>> expectedSegmentUnitNormals{
@@ -119,7 +121,18 @@ protected:
             {0.0,    0.0,    -200.0, 3000.0}
     };
 
-    std::vector<double> expectedPlaneDistances{25.0, 25.0, 0.0, 0.0, 20.0, 20.0, 0.0, 0.0, 10.0, 10.0, 15.0, 15.0};
+    std::vector<double> expectedPlaneDistances{25.0,
+                                               25.0,
+                                               0.0,
+                                               0.0,
+                                               20.0,
+                                               20.0,
+                                               0.0,
+                                               0.0,
+                                               10.0,
+                                               10.0,
+                                               15.0,
+                                               15.0};
 
     std::vector<std::array<double, 3>> expectedOrthogonalProjectionPointsOnPlane{
             {0.0,   0.0,  25.0},
@@ -167,18 +180,18 @@ protected:
     };
 
     std::vector<std::array<double, 3>> expectedSegmentDistances{
-            {0.0,                0.0,                20.0},
-            {0.0,                10.0,               0.0},
-            {20.0,               15.0,               13.416407864998739},
-            {13.416407864998739, 0.0,                25.0},
-            {17.67766952966369,  15.0,               0.0},
-            {25.0,               10.0,               17.67766952966369},
-            {0.0,                15.0,               17.67766952966369},
-            {17.67766952966369,  10.0,               25.0},
-            {13.416407864998739, 15.0,               20.0},
-            {0.0,                13.416407864998739, 25.0},
-            {8.94427190999916,   0.0,                0.0},
-            {20.0,               10.0,               8.94427190999916}
+            {0.0, 0.0, 20.0},
+            {0.0, 10.0, 0.0},
+            {20.0, 15.0, 13.416407864998739},
+            {13.416407864998739, 0.0, 25.0},
+            {17.67766952966369, 15.0, 0.0},
+            {25.0, 10.0, 17.67766952966369},
+            {0.0, 15.0, 17.67766952966369},
+            {17.67766952966369, 10.0, 25.0},
+            {13.416407864998739, 15.0, 20.0},
+            {0.0, 13.416407864998739, 25.0},
+            {8.94427190999916, 0.0, 0.0},
+            {20.0, 10.0, 8.94427190999916}
     };
 
     std::vector<std::array<std::array<double, 2>, 3>> expected3DDistancesPerSegmentEndpoint{
@@ -290,17 +303,17 @@ protected:
 
     std::vector<std::array<double, 3>> expectedBetaSingularityTerms{
             {-0.46364760900080615, -0.46364760900080615, -0.46364760900080615},
-            {-1.1071487177940904,  -1.1071487177940904,  -1.1071487177940904},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {0.0,                  0.0,                  0.0},
-            {-1.5707963705062866,  -1.5707963705062866,  -1.5707963705062866},
-            {0.0,                  0.0,                  0.0}
+            {-1.1071487177940904, -1.1071487177940904, -1.1071487177940904},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0},
+            {-1.5707963705062866, -1.5707963705062866, -1.5707963705062866},
+            {0.0, 0.0, 0.0}
     };
 
 public:
@@ -329,7 +342,7 @@ public:
 TEST_F(GravityModelTest, GijVectors) {
     using namespace testing;
 
-    auto actualGij = systemUnderTest.calculateGij();
+    auto actualGij = polyhedralGravity::GravityModel::calculateSegmentVectors(_polyhedron);
 
     ASSERT_THAT(actualGij, ContainerEq(expectedGij));
 }
@@ -337,7 +350,7 @@ TEST_F(GravityModelTest, GijVectors) {
 TEST_F(GravityModelTest, PlaneUnitNormals) {
     using namespace testing;
 
-    auto actualPlaneUnitNormals = systemUnderTest.calculatePlaneUnitNormals(expectedGij);
+    auto actualPlaneUnitNormals = polyhedralGravity::GravityModel::calculatePlaneUnitNormals(expectedGij);
 
     ASSERT_THAT(actualPlaneUnitNormals, ContainerEq(expectedPlaneUnitNormals));
 }
@@ -345,7 +358,8 @@ TEST_F(GravityModelTest, PlaneUnitNormals) {
 TEST_F(GravityModelTest, SegmentUnitNormals) {
     using namespace testing;
 
-    auto actualSegmentUnitNormals = systemUnderTest.calculateSegmentUnitNormals(expectedGij, expectedPlaneUnitNormals);
+    auto actualSegmentUnitNormals = polyhedralGravity::GravityModel::calculateSegmentUnitNormals(expectedGij,
+                                                                                                 expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualSegmentUnitNormals, ContainerEq(expectedSegmentUnitNormals));
 }
@@ -353,7 +367,8 @@ TEST_F(GravityModelTest, SegmentUnitNormals) {
 TEST_F(GravityModelTest, PlaneNormalOrientations) {
     using namespace testing;
 
-    auto actualPlaneNormalOrientations = systemUnderTest.calculatePlaneNormalOrientations(expectedPlaneUnitNormals);
+    auto actualPlaneNormalOrientations = polyhedralGravity::GravityModel::calculatePlaneNormalOrientations(
+            _computationPoint, _polyhedron, expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualPlaneNormalOrientations, ContainerEq(expectedPlaneNormalOrientations));
 }
@@ -364,7 +379,7 @@ TEST_F(GravityModelTest, SimpleHessianPlane) {
 
     HessianPlane expectedHessian{2, -8, 5, -18};
 
-    auto actualHessianPlane = systemUnderTest.computeHessianPlane({1, -2, 0}, {3, 1, 4}, {0, -1, 2});
+    auto actualHessianPlane = polyhedralGravity::GravityModel::computeHessianPlane({1, -2, 0}, {3, 1, 4}, {0, -1, 2});
 
     ASSERT_DOUBLE_EQ(actualHessianPlane.a, expectedHessian.a);
     ASSERT_DOUBLE_EQ(actualHessianPlane.b, expectedHessian.b);
@@ -376,7 +391,8 @@ TEST_F(GravityModelTest, HessianPlane) {
     using namespace testing;
     using namespace polyhedralGravity;
 
-    auto actualHessianPlane = systemUnderTest.calculateFacesToHessianPlanes();
+    auto actualHessianPlane =
+            polyhedralGravity::GravityModel::calculateFacesToHessianPlanes(_computationPoint, _polyhedron);
 
     ASSERT_EQ(actualHessianPlane, expectedHessianPlanes);
 }
@@ -384,7 +400,7 @@ TEST_F(GravityModelTest, HessianPlane) {
 TEST_F(GravityModelTest, PlaneDistances) {
     using namespace testing;
 
-    auto actualPlaneDistances = systemUnderTest.calculatePlaneDistances(expectedHessianPlanes);
+    auto actualPlaneDistances = polyhedralGravity::GravityModel::calculatePlaneDistances(expectedHessianPlanes);
 
     ASSERT_THAT(actualPlaneDistances, ContainerEq(expectedPlaneDistances));
 }
@@ -392,7 +408,7 @@ TEST_F(GravityModelTest, PlaneDistances) {
 TEST_F(GravityModelTest, OrthogonalProjectionPointsOnPlane) {
     using namespace testing;
 
-    auto actualOrthogonalProjectionPointsOnPlane = systemUnderTest.calculateOrthogonalProjectionPointsOnPlane(
+    auto actualOrthogonalProjectionPointsOnPlane = polyhedralGravity::GravityModel::calculateOrthogonalProjectionPointsOnPlane(
             expectedHessianPlanes, expectedPlaneUnitNormals, expectedPlaneDistances);
 
     ASSERT_THAT(actualOrthogonalProjectionPointsOnPlane, ContainerEq(expectedOrthogonalProjectionPointsOnPlane));
@@ -402,8 +418,9 @@ TEST_F(GravityModelTest, SegmentNormalOrientations) {
     using namespace testing;
 
     auto actualSegmentNormalOrientations =
-            systemUnderTest.calculateSegmentNormalOrientations(expectedSegmentUnitNormals,
-                                                               expectedOrthogonalProjectionPointsOnPlane);
+            polyhedralGravity::GravityModel::calculateSegmentNormalOrientations(_computationPoint, _polyhedron,
+                                                                                expectedSegmentUnitNormals,
+                                                                                expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualSegmentNormalOrientations, ContainerEq(expectedSegmentNormalOrientations));
 }
@@ -412,8 +429,10 @@ TEST_F(GravityModelTest, OrthogonalProjectionPointsOnSegment) {
     using namespace testing;
 
     auto actualOrthogonalProjectionPointsOnSegment =
-            systemUnderTest.calculateOrthogonalProjectionPointsOnSegments(expectedOrthogonalProjectionPointsOnPlane,
-                                                                          expectedSegmentNormalOrientations);
+            polyhedralGravity::GravityModel::calculateOrthogonalProjectionPointsOnSegments(
+                    _computationPoint, _polyhedron,
+                    expectedOrthogonalProjectionPointsOnPlane,
+                    expectedSegmentNormalOrientations);
 
     ASSERT_THAT(actualOrthogonalProjectionPointsOnSegment, ContainerEq(expectedOrthogonalProjectionPointsOnSegment));
 }
@@ -422,8 +441,8 @@ TEST_F(GravityModelTest, SegmentDistances) {
     using namespace testing;
 
     auto actualSegmentDistances =
-            systemUnderTest.calculateSegmentDistances(expectedOrthogonalProjectionPointsOnPlane,
-                                                      expectedOrthogonalProjectionPointsOnSegment);
+            polyhedralGravity::GravityModel::calculateSegmentDistances(expectedOrthogonalProjectionPointsOnPlane,
+                                                                       expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualSegmentDistances, ContainerEq(expectedSegmentDistances));
 }
@@ -432,7 +451,8 @@ TEST_F(GravityModelTest, DistancesPerSegmentEndpoint) {
     using namespace testing;
 
     auto actualDistancesPerSegmentEndpoint =
-            systemUnderTest.calculateDistances(expectedGij, expectedOrthogonalProjectionPointsOnSegment);
+            polyhedralGravity::GravityModel::calculateDistances(_computationPoint, _polyhedron, expectedGij,
+                                                                expectedOrthogonalProjectionPointsOnSegment);
 
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
 }
@@ -441,11 +461,12 @@ TEST_F(GravityModelTest, TranscendentalExpressions) {
     using namespace testing;
 
     auto actualTranscendentalExpressions =
-            systemUnderTest.calculateTranscendentalExpressions(expectedDistancesPerSegmentEndpoint,
-                                                               expectedPlaneDistances,
-                                                               expectedSegmentDistances,
-                                                               expectedSegmentNormalOrientations,
-                                                               expectedOrthogonalProjectionPointsOnPlane);
+            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
+                                                                                expectedDistancesPerSegmentEndpoint,
+                                                                                expectedPlaneDistances,
+                                                                                expectedSegmentDistances,
+                                                                                expectedSegmentNormalOrientations,
+                                                                                expectedOrthogonalProjectionPointsOnPlane);
 
     ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
 }
@@ -454,10 +475,12 @@ TEST_F(GravityModelTest, SingularityTerms) {
     using namespace testing;
 
     auto actualSingularityTerms =
-            systemUnderTest.calculateSingularityTerms(expectedGij, expectedSegmentNormalOrientations,
-                                                      expectedOrthogonalProjectionPointsOnPlane,
-                                                      expectedPlaneDistances, expectedPlaneNormalOrientations,
-                                                      expectedPlaneUnitNormals);
+            polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
+                                                                       expectedSegmentNormalOrientations,
+                                                                       expectedOrthogonalProjectionPointsOnPlane,
+                                                                       expectedPlaneDistances,
+                                                                       expectedPlaneNormalOrientations,
+                                                                       expectedPlaneUnitNormals);
 
     ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
 }

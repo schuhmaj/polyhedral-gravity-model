@@ -8,12 +8,21 @@ import tetgen
 import meshio as mio
 import openmesh as om
 
+"""
+General info:
+This script contains methods to transform/ convert between different kinds of mesh files.
+"""
+
 
 def read_pk_file(filename):
     """
     Reads in a .pk file and returns the vertices and triangles (faces)
-    :param filename: String
-    :return: tuple of vertices and faces
+    Args:
+        filename (str): The filename of the .pk file
+
+    Returns:
+        mesh_points, mesh_triangles (tuple): list of mesh points and list of mesh triangles
+
     """
     with open(filename, "rb") as f:
         mesh_points, mesh_triangles = pk.load(f)
@@ -29,13 +38,17 @@ def read_pk_file(filename):
 
 def write_to_node_faces_ele_file(path, filename, nodes, faces, ele):
     """
-    Write to a .node, .face and .ele file
-    :param path: String of the path where to write
-    :param filename: String of the file names
-    :param nodes: list of node coordinates
-    :param faces: list of faces
-    :param ele: list of polyhedral elements
-    :return: void
+    Write to a .node, .face and .ele file.
+    Args:
+        path (str): the path where to write
+        filename (str): the filename of the file to create
+        nodes (list): list of vertices (cartesian coordinates)
+        faces (list): list of faces (triangles consisting of vertices' indices)
+        ele (list): list of polyhedral elements
+
+    Returns:
+        None
+
     """
     with open(path + filename + ".node", "w") as f:
         f.write("# Node count, 3 dimensions, no attribute, no boundary marker\n")
@@ -65,12 +78,15 @@ def write_to_node_faces_ele_file(path, filename, nodes, faces, ele):
 
 def write__tsoulis_fortran_files(path, nodes, faces):
     """
-    Writes to a topout, xyposnew and dataut file - exactly the input file which the FORTRAN implementation
-    by Tsoulis uses.
-    :param path: String of the path where to write
-    :param nodes: list of node coordinates
-    :param faces: list of faces
-    :return: void
+    Writes to a topout, xyposnew and dataut file - exactly the input file which the
+    FORTRAN implementation by Tsoulis requires as input.
+    Args:
+        path (str):  the path where to write
+        nodes (list): list of vertices (cartesian coordinates)
+        faces (list): list of faces (triangles consisting of vertices' indices)
+
+    Returns:
+        None
     """
     with open(path + "topoaut", "w") as f:
         for fac in faces:
@@ -84,16 +100,29 @@ def write__tsoulis_fortran_files(path, nodes, faces):
 
 
 def write_other(path, name, nodes, faces):
+    """
+    Writes other files like .ply files.
+    Args:
+        path (str):  the path where to write
+        name (str): the name of the file to be created, the suffix determines the concrete write operation
+        nodes (list): list of vertices (cartesian coordinates)
+        faces (list): list of faces (triangles consisting of vertices' indices)
+
+    Returns:
+        None
+    """
     mesh = om.TriMesh()
     mesh.add_vertices(nodes)
     mesh.add_faces(faces)
     om.write_mesh((path+name), mesh)
+    # Alternative Framework - Code
     # cells = [("triangle", faces)]
     # mesh = mio.Mesh(nodes, cells)
     # mesh.write((path + name))
 
 
 def main():
+    # TODO Pass file names via terminal?
     # Read the input .pk file
     print("Reading file...")
     mesh_points, mesh_triangles = read_pk_file("../mesh/input/Eros.pk")

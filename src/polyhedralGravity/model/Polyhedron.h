@@ -16,10 +16,10 @@ namespace polyhedralGravity {
     class Polyhedron {
 
         /**
-         * A vector containing the nodes of the polyhedron.
+         * A vector containing the vertices of the polyhedron.
          * Each node is an array of size three containing the xyz coordinates.
          */
-        const std::vector<std::array<double, 3>> _nodes;
+        const std::vector<std::array<double, 3>> _vertices;
 
         /**
          * A vector containing the faces (triangles) of the polyhedron.
@@ -37,7 +37,7 @@ namespace polyhedralGravity {
          * Generates an empty polyhedron.
          */
         Polyhedron()
-                : _nodes{},
+                : _vertices{},
                   _faces{} {}
 
         /**
@@ -49,7 +49,7 @@ namespace polyhedralGravity {
          * @throws runtime_error if no face contains the node zero indicating mathematical index
          */
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
-                : _nodes{std::move(nodes)},
+                : _vertices{std::move(nodes)},
                   _faces{std::move(faces)} {
             //Checks that the node with index zero is actually used
             if (_faces.end() == std::find_if(_faces.begin(), _faces.end(), [&](auto &face) {
@@ -63,20 +63,20 @@ namespace polyhedralGravity {
 
         ~Polyhedron() = default;
 
-        [[nodiscard]] const std::vector<std::array<double, 3>> &getNodes() const {
-            return _nodes;
+        [[nodiscard]] const std::vector<std::array<double, 3>> &getVertices() const {
+            return _vertices;
         }
 
-        [[nodiscard]] const std::array<double, 3> &getNode(size_t index) const {
-            return _nodes[index];
+        [[nodiscard]] const std::array<double, 3> &getVertex(size_t index) const {
+            return _vertices[index];
         }
 
         /**
          * The number of points (nodes) that make up the polyhedron.
          * @return a size_t
          */
-        [[nodiscard]] size_t countNodes() const {
-            return _nodes.size();
+        [[nodiscard]] size_t countVertices() const {
+            return _vertices.size();
         }
 
         /**

@@ -7,6 +7,9 @@ Implementation of the Polyhedral Gravity Model in C++ 17.
 The implementation is based on the paper [Tsoulis, D., 2012. Analytical computation of the full gravity tensor of a homogeneous arbitrarily shaped polyhedral source using line integrals. Geophysics, 77(2), pp.F1-F11.](http://dx.doi.org/10.1190/geo2010-0334.1)
 and its corresponding [implementation in FORTRAN](https://software.seg.org/2012/0001/index.html).
 
+Supplementary details can be found in the more recent paper [TSOULIS, Dimitrios; GAVRIILIDOU, Georgia. A computational review of the line integral analytical formulation of the polyhedral gravity signal. Geophysical Prospecting, 2021, 69. Jg., Nr. 8-9, S. 1745-1760.](https://doi.org/10.1111/1365-2478.13134)
+and its corresponding [implementation in MATLAB](https://github.com/Gavriilidou/GPolyhedron),
+which is strongly based on the former implementation in FORTRAN.
 
 ## Requirements
 The project uses the following dependencies:
@@ -15,7 +18,7 @@ The project uses the following dependencies:
 - spdlog 1.9.2 (required for logging, automatically set-up via CMake)
 - tetgen 1.6 (required for I/O, automatically set-up via CMake)
 - yaml-cpp 0.7.0 (required for I/O, automatically set-up via CMake)
-- thrust 1.16.0 (required for (parallelization TODO) and utility, automatically set-up via CMake)
+- thrust 1.16.0 (required for parallelization and utility, automatically set-up via CMake)
 
 ## Build
 The program is build by using CMake. So first make sure that you installed
@@ -23,8 +26,25 @@ CMake and then follow these steps:
 
     mkdir build
     cd build
-    cmake ..
+    cmake .. <options>
     make
+
+The following options are available:
+
+|         Name (Default)         |                                                       Options and Remark                                                       |
+|:------------------------------:|:------------------------------------------------------------------------------------------------------------------------------:|
+|  PARALLELIZATION_HOST (`CPP`)  |              `CPP` = Serial Execution on Host, `OMP`/ `TBB` = Parallel Execution on Host with OpenMP or Intel's TBB              |
+| PARALLELIZATION_DEVICE (`CPP`) | `CPP`= Serial Execution on Device, `OMP`/ `TBB`/ `CUDA` = Parallel Execution on Device with OpenMP or Intel's TBB or Nvidia's CUDA |
+|      LOGGING_LEVEL (`2`)       |                          `0`= TRACE, `1`=DEBUG, `2`=INFO, `3`=WARN, `4`=ERROR, `5`=CRITICAL, `6`=OFF                           |
+
+During testing the combination PARALLELIZATION_HOST=`CPP` and PARALLELIZATION_DEVICE=`TBB`
+has been the most performant.
+It is further not recommend to change the LOGGING_LEVEL to something else than `INFO=2`.
+
+The recommended CMake command would look like this (we only need to change `PARALLELIZATION_DEVICE`, since
+the defaults of the others are already correctly set):
+
+    cmake .. -DPARALLELIZATION_DEVICE="TBB"
 
 ## Execution
 
@@ -32,7 +52,7 @@ CMake and then follow these steps:
 
 After the build, the gravity model can be run by executing:
 
-    ./polyhedralGravity [YAML-Configuration-File]
+    ./polyhedralGravity <YAML-Configuration-File>
 
 where the YAML-Configuration-File contains the required parameters.
 Examples for Configuration Files and Polyhedral Source Files can be
@@ -63,13 +83,13 @@ gravityModel:
 The implementation supports multiple common mesh formats for
 the polyhedral source. These include:
 
-|     File Suffix     |                        Name                        | Comment                                                                    |
-|:-------------------:|:--------------------------------------------------:|----------------------------------------------------------------------------|
-| `.node` and `.face` |                   TetGen's files                   | These two files need to be given as a pair to the input.                   |
-|       `.mesh`       |                 Medit's mesh files                 | Single file containing every needed mesh information.                      |
-|       `.ply`        | The Polygon File format/ Stanfoard Triangle format | Single file containing every needed mesh information. Blender File Format. |
-|       `.off`        |                 Object File Format                 | Single file containing every needed mesh information.                      |
-|       `.stl`        |              Stereolithography format              | Single file containing every needed mesh information. Blender File Format. |                                         
+|     File Suffix     |                        Name                        | Comment                                                                                                                                          |
+|:-------------------:|:--------------------------------------------------:|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.node` and `.face` |                   TetGen's files                   | These two files need to be given as a pair to the input. [Documentation of TetGen's files](https://wias-berlin.de/software/tetgen/fformats.html) |
+|       `.mesh`       |                 Medit's mesh files                 | Single file containing every needed mesh information.                                                                                            |
+|       `.ply`        | The Polygon File format/ Stanfoard Triangle format | Single file containing every needed mesh information. Blender File Format.                                                                       |
+|       `.off`        |                 Object File Format                 | Single file containing every needed mesh information.                                                                                            |
+|       `.stl`        |              Stereolithography format              | Single file containing every needed mesh information. Blender File Format.                                                                       |                                         
 
 **Notice!** Only the ASCII versions of those respective files are supported! This is especially
 important for e.g. the `.ply` files which also can be in binary format.

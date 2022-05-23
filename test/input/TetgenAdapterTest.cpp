@@ -49,7 +49,7 @@ TEST_F(TetgenAdapterTest, readSimpleNode) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
 }
 
 
@@ -77,7 +77,7 @@ TEST_F(TetgenAdapterTest, readSimpleMesh) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
     ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
 }
 
@@ -91,7 +91,7 @@ TEST_F(TetgenAdapterTest, readSimpleOff) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
     ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
 }
 
@@ -105,7 +105,7 @@ TEST_F(TetgenAdapterTest, readSimplePly) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getNodes(), ContainerEq(_expectedNodes));
+    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
     ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
 }
 
@@ -119,7 +119,7 @@ TEST_F(TetgenAdapterTest, readSimpleStl) {
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    for (const auto &actualVertice : actualPolyhedron.getNodes()) {
+    for (const auto &actualVertice : actualPolyhedron.getVertices()) {
         ASSERT_THAT(_expectedNodes, Contains(actualVertice));
     }
 }

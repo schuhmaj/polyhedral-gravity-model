@@ -2,6 +2,7 @@
 
 #include <array>
 #include <ostream>
+#include "polyhedralGravity/util/UtilityContainer.h"
 
 namespace polyhedralGravity {
 
@@ -89,11 +90,6 @@ namespace polyhedralGravity {
     public:
 
         /**
-         * The point P at which the gravity model was evaluated.
-         */
-        const std::array<double, 3> p;
-
-        /**
          * The gravitational potential in [m^2/s^2] <--> [J/kg] at point P.
          * @related Equation (1) and (11) of Tsoulis Paper, here referred as V
          */
@@ -114,17 +110,28 @@ namespace polyhedralGravity {
         std::array<double, 6> gradiometricTensor{};
 
         /**
-         * Creates a new empty Result for the origin in P(0, 0, 0)
+         * Creates new empty Result
          */
-        GravityModelResult()
-                : p{0, 0, 0} {}
+        GravityModelResult() = default;
 
         /**
-         * Creates new empty Result for a specific point P
-         * @param p1 - point p
+         * Creates a new Result with the given values
+         * @param gravitationalPotential - the potential
+         * @param gravitationalPotentialDerivative - the acceleration
+         * @param gradiometricTensor - the gradiometric tensor i.e. the second derivatives
          */
-        explicit GravityModelResult(const std::array<double, 3> &p1)
-                : p{p1} {}
+        GravityModelResult(double gravitationalPotential, const std::array<double, 3> &gravitationalPotentialDerivative,
+                           const std::array<double, 6> &gradiometricTensor)
+                : gravitationalPotential(gravitationalPotential),
+                  gravitationalPotentialDerivative(gravitationalPotentialDerivative),
+                  gradiometricTensor(gradiometricTensor) {}
+
+        friend std::ostream &operator<<(std::ostream &os, const GravityModelResult &result) {
+            using util::operator<<;
+            os << "gravitationalPotential: " << result.gravitationalPotential << " gravitationalPotentialDerivative: "
+               << result.gravitationalPotentialDerivative << " gradiometricTensor: " << result.gradiometricTensor;
+            return os;
+        }
 
     };
 

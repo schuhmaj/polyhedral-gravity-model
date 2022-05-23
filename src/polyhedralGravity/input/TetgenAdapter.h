@@ -10,6 +10,7 @@
 #include <utility>
 #include <exception>
 #include <stdexcept>
+#include "polyhedralGravity/output/Logging.h"
 #include "polyhedralGravity/util/UtilityContainer.h"
 
 namespace polyhedralGravity {
@@ -22,6 +23,11 @@ namespace polyhedralGravity {
  * The Adapter further keeps en eye on the already read in files in order to give feedback if data is in conflict.
  */
     class TetgenAdapter : public DataSource {
+
+        static constexpr char DEFAULT_EXCEPTION_MSG[] =
+                "The faces were not read because of an error in Tetgen! This could indicate several "
+                "issues, e. g. issues with the node assignment like they appear if either no nodes were "
+                "read in at all or if no assignment was possible.";
 
         /**
          * Delegates the call to the library tetgen
@@ -122,10 +128,9 @@ namespace polyhedralGravity {
          * Checks if the polyhedron is integer and not already defined by other properties
          * @param filename - string with the current read file, for more detailed exceptions
          * @param what - what to check: f = faces, v = vertices, a = all
-         * @return true if everything is ok
          * @throws an exception if not
          */
-        [[nodiscard]] bool checkIntegrity(const std::string &filename, char what) const;
+        void checkIntegrity(const std::string &filename, char what) const;
 
         /**
          * Adds the Vertices of the tetgenio structure to the resulting polyhedron's vertices.

@@ -1,7 +1,25 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.18)
 project(polyhedralGravity)
 
 set(CMAKE_CXX_STANDARD 17)
+
+# Best Combo: HOST CPP, DEVICE OMP
+# Parallelization on the HOST
+set(PARALLELIZATION_HOST "CPP" CACHE STRING "Host parallelization chosen by the user
+ (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks")
+set_property(CACHE PARALLELIZATION_HOST PROPERTY STRINGS CPP, OMP, TBB)
+
+# Parallelization on the DEVICE
+set(PARALLELIZATION_DEVICE "CPP" CACHE STRING "Device parallelization chosen by the user
+ (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks, CUDA = Nvida Cuda")
+set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB, CUDA)
+
+# Set the Logging Level
+set(LOGGING_LEVEL "2" CACHE STRING "Set the Logging level, default (INFO=2), available options:
+TRACE=0, DEBUG=1, INFO=2, WARN=3, ERROR=4, CRITICAL=5, OFF=6")
+set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS 0, 1, 2, 3, 4, 5, 6)
+
+add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${LOGGING_LEVEL})
 
 # Appends the the module path to contain additional CMake modules for this project
 # and include everything necessary
@@ -34,12 +52,16 @@ target_link_libraries(${PROJECT_NAME}_lib
         yaml-cpp
         )
 
-# TODO, Make this an option for the user
-# CPP = Serial execution, We also set the DEVICE to CPP since the default CUDA should not be a dependency
-thrust_create_target(Thrust HOST CPP DEVICE CPP)
+# Thrust set-up i.e. the parallelization library
+thrust_create_target(Thrust HOST ${PARALLELIZATION_HOST} DEVICE ${PARALLELIZATION_DEVICE})
+message(STATUS "Set Parallelization: HOST ${PARALLELIZATION_HOST} DEVICE ${PARALLELIZATION_DEVICE}")
 target_link_libraries(${PROJECT_NAME}_lib
         Thrust
         )
+# This definitions will set the main eval(..) routine to be executed on the DEVICE
+if(NOT PARALLELIZATION_DEVICE STREQUAL "CPP")
+    add_compile_definitions(DEVICE)
+endif()
 
 # Building the standalone Executable
 add_executable(${PROJECT_NAME} ${mainFile})
