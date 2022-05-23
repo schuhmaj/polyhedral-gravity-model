@@ -10,7 +10,7 @@ namespace polyhedralGravity {
                            const Array3 &vertex0 = polyhedron.getVertex(face[0]);
                            const Array3 &vertex1 = polyhedron.getVertex(face[1]);
                            const Array3 &vertex2 = polyhedron.getVertex(face[2]);
-                           return computeSegmentVectorsForPlane(vertex0, vertex1, vertex2);
+                           return computeSegmentVectors(vertex0, vertex1, vertex2);
                        });
         return segmentVectors;
     }
@@ -20,7 +20,7 @@ namespace polyhedralGravity {
         //Calculate N_p for every plane given as input: G_i0 and G_i1 of every plane
         std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.begin(),
                        [](const Array3Triplet &segmentVectorsForPlane) -> Array3 {
-                           return computePlaneUnitNormalForPlane(segmentVectorsForPlane[0], segmentVectorsForPlane[1]);
+                           return computePlaneUnitNormal(segmentVectorsForPlane[0], segmentVectorsForPlane[1]);
                        });
         return planeUnitNormals;
     }
@@ -33,7 +33,7 @@ namespace polyhedralGravity {
         std::transform(segmentVectors.cbegin(), segmentVectors.cend(), planeUnitNormals.cbegin(),
                        segmentUnitNormals.begin(),
                        [](const Array3Triplet &segmentVectorsForPlane, const Array3 &planeUnitNormal) {
-                           return computeSegmentUnitNormalForPlane(segmentVectorsForPlane, planeUnitNormal);
+                           return computeSegmentUnitNormal(segmentVectorsForPlane, planeUnitNormal);
                        });
         return segmentUnitNormals;
     }
@@ -48,7 +48,7 @@ namespace polyhedralGravity {
                        planeNormalOrientations.begin(),
                        [](const Array3 &planeUnitNormal, const Array3Triplet &face) {
                            //The first vertices' coordinates of the given face consisting of G_i's
-                           return computePlaneNormalOrientationForPlane(planeUnitNormal, face[0]);
+                           return computePlaneNormalOrientation(planeUnitNormal, face[0]);
                        });
         return planeNormalOrientations;
     }
@@ -72,7 +72,7 @@ namespace polyhedralGravity {
         //For each plane compute h_p
         std::transform(plane.cbegin(), plane.cend(), planeDistances.begin(),
                        [](const HessianPlane &plane) -> double {
-                           return computePlaneDistanceForPlane(plane);
+                           return computePlaneDistance(plane);
                        });
         return planeDistances;
     }
@@ -92,7 +92,7 @@ namespace polyhedralGravity {
             const Array3 &planeUnitNormal = thrust::get<0>(tuple);
             const double planeDistance = thrust::get<1>(tuple);
             const HessianPlane &hessianPlane = thrust::get<2>(tuple);
-            return computeOrthogonalProjectionPointsOnPlaneForPlane(planeUnitNormal, planeDistance, hessianPlane);
+            return computeOrthogonalProjectionPointsOnPlane(planeUnitNormal, planeDistance, hessianPlane);
         });
         return orthogonalProjectionPointsOfP;
     }
@@ -116,8 +116,8 @@ namespace polyhedralGravity {
             const Array3 &projectionPointOnPlaneForPlane = thrust::get<1>(tuple);
             const Array3Triplet &segmentUnitNormalsForPlane = thrust::get<2>(tuple);
 
-            return computeSegmentNormalOrientationsForPlane(face, projectionPointOnPlaneForPlane,
-                                                            segmentUnitNormalsForPlane);
+            return computeSegmentNormalOrientations(face, projectionPointOnPlaneForPlane,
+                                                    segmentUnitNormalsForPlane);
         });
         return segmentNormalOrientations;
     }
@@ -142,7 +142,7 @@ namespace polyhedralGravity {
             const Array3 &orthogonalProjectionPointOnPlane = thrust::get<0>(tuple);
             const Array3 &segmentNormalOrientationsForPlane = thrust::get<1>(tuple);
             const Array3Triplet &face = thrust::get<2>(tuple);
-            return computeOrthogonalProjectionPointsOnSegmentsForPlane(
+            return computeOrthogonalProjectionPointsOnSegments(
                     orthogonalProjectionPointOnPlane, segmentNormalOrientationsForPlane, face);
         });
 
@@ -157,7 +157,7 @@ namespace polyhedralGravity {
         std::transform(orthogonalProjectionPointsOnPlane.cbegin(), orthogonalProjectionPointsOnPlane.cend(),
                        orthogonalProjectionPointsOnSegment.cbegin(), segmentDistances.begin(),
                        [](const Array3 projectionPointOnPlane, const Array3Triplet &projectionPointOnSegments) {
-                           return computeSegmentDistancesForPlane(projectionPointOnPlane, projectionPointOnSegments);
+                           return computeSegmentDistances(projectionPointOnPlane, projectionPointOnSegments);
                        });
         return segmentDistances;
     }
@@ -180,7 +180,7 @@ namespace polyhedralGravity {
             const Array3Triplet &segmentVectorsForPlane = thrust::get<0>(tuple);
             const Array3Triplet &orthogonalProjectionPointsOnSegmentForPlane = thrust::get<1>(tuple);
             const Array3Triplet &face = thrust::get<2>(tuple);
-            return computeDistancesForPlane(segmentVectorsForPlane, orthogonalProjectionPointsOnSegmentForPlane, face);
+            return computeDistances(segmentVectorsForPlane, orthogonalProjectionPointsOnSegmentForPlane, face);
         });
         return distances;
     }
@@ -212,12 +212,12 @@ namespace polyhedralGravity {
             const Array3 &projectionPointOnPlane = thrust::get<4>(tuple);
             const Array3Triplet &face = thrust::get<5>(tuple);
 
-            const Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNormForPlane(
+            const Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNorm(
                     projectionPointOnPlane, face);
 
-            return computeTranscendentalExpressionsForPlane(distancesForPlane, planeDistance, segmentDistancesForPlane,
-                                                            segmentNormalOrientationsForPlane,
-                                                            projectionPointVertexNorms);
+            return computeTranscendentalExpressions(distancesForPlane, planeDistance, segmentDistancesForPlane,
+                                                    segmentNormalOrientationsForPlane,
+                                                    projectionPointVertexNorms);
         });
         return transcendentalExpressions;
     }
@@ -252,12 +252,12 @@ namespace polyhedralGravity {
             const double planeNormalOrientation = thrust::get<5>(tuple);
             const Array3Triplet &face = thrust::get<6>(tuple);
 
-            const Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNormForPlane(
+            const Array3 projectionPointVertexNorms = computeOrthogonalProjectionPointVertexNorm(
                     orthogonalProjectionPointOnPlane, face);
 
-            return computeSingularityTermsForPlane(segmentVectorsForPlane, segmentNormalOrientationForPlane,
-                                                   projectionPointVertexNorms, planeUnitNormal, planeDistance,
-                                                   planeNormalOrientation);
+            return computeSingularityTerms(segmentVectorsForPlane, segmentNormalOrientationForPlane,
+                                           projectionPointVertexNorms, planeUnitNormal, planeDistance,
+                                           planeNormalOrientation);
         });
         return singularities;
     }
