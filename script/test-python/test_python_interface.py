@@ -1,6 +1,7 @@
-# Import causes Segfault?!!!
 import numpy as np
+import datetime
 import polyhedral_gravity as pg
+
 
 cube_vertices = [
     [-1, -1, -1],
@@ -56,18 +57,22 @@ tsoulis_faces = [
 
 computation_points = []
 
-for x in range(-50, 50):
-    for y in range(-50, 50):
-        computation_points.append((x, y, 0.0))
+for x in range(1000):
+    computation_points.append(np.array([0.0, 0.0, 0.0]))
 
 density = 2670.0
 
 eros_vertices = '../../example-config/data/Eros.node'
 eros_face = '../../example-config/data/Eros.face'
 
-potential, acceleration, tensor = pg.evaluate(tsoulis_vertices, tsoulis_faces, density, [0, 0, 0])
+start = datetime.datetime.now()
+result = pg.evaluate([eros_vertices, eros_face], density, computation_points)
+end = datetime.datetime.now()
 
-print(potential, acceleration, tensor)
+duration = end - start
+average = duration.microseconds / 1000.0
+
+print("Average: {} microsecond".format(average))
 
 # u = 0
 # for x in range(-50, 50):

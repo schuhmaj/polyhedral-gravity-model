@@ -52,28 +52,28 @@ PYBIND11_MODULE(polyhedral_gravity, m) {
           py::arg("vertices"), py::arg("faces"), py::arg("density"), py::arg("computation_points"));
 
     /*
-     * Methods for vertices and faces from .node and .face files via TetGen
+     * Methods for vertices and faces from files via TetgenAdapter
      */
 
     m.def("evaluate",
-          [](const std::string &node_file, const std::string &face_file,
+          [](const std::vector<std::string> &filenames,
              double density, const std::array<double, 3> &computationPoint) {
-              TetgenAdapter tetgen{{node_file, face_file}};
+              TetgenAdapter tetgen{filenames};
               return convertToTuple(GravityModel::evaluate(tetgen.getPolyhedron(), density, computationPoint));
           },
           "Evaluate the full gravity tensor for a given constant density polyhedron which consists of some vertices"
-          "and triangular faces at a given computation point P. The vertices and faces are read from .node and .face "
-          "files.",
-          py::arg("node_file"), py::arg("face_file"), py::arg("density"), py::arg("computation_point"));
+          "and triangular faces at a given computation point P. The vertices and faces are read from input "
+          "files (either .node/.face, mesh, .ply, .off, .stl). File-Order matters in case of the first option!",
+          py::arg("input_files"), py::arg("density"), py::arg("computation_point"));
 
     m.def("evaluate",
-          [](const std::string &node_file, const std::string &face_file,
+          [](const std::vector<std::string> &filenames,
              double density, const std::vector<std::array<double, 3>> &computationPoints) {
-              TetgenAdapter tetgen{{node_file, face_file}};
+              TetgenAdapter tetgen{filenames};
               return convertToTupleVector(GravityModel::evaluate(tetgen.getPolyhedron(), density, computationPoints));
           },
           "Evaluate the full gravity tensor for a given constant density polyhedron which consists of some vertices "
           "and triangular faces at multiple given computation points. The vertices and faces are read from "
-          ".node and .face files.",
-          py::arg("node_file"), py::arg("face_file"), py::arg("density"), py::arg("computation_points"));
+          "input files (either .node/.face, mesh, .ply, .off, .stl). File-Order matters in case of the first option!",
+          py::arg("input_files"), py::arg("density"), py::arg("computation_points"));
 }
