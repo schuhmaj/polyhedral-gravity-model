@@ -36,7 +36,7 @@ namespace polyhedralGravity {
      * Namespace containing the methods used to evaluate the polyhedrale Gravity Model
      * @note Naming scheme corresponds to the following:
      * evaluate()           --> main Method for evaluating the gravity model
-     * compute*()           --> methods which calculate a property of ONE plane
+     * *()                  --> Methods calculating one property for the evaluation
      */
     namespace GravityModel {
 
@@ -78,7 +78,7 @@ namespace polyhedralGravity {
          * @return the segment vectors for a plane
          */
         Array3Triplet
-        computeSegmentVectors(const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2);
+        buildVectorsOfSegments(const Array3 &vertex0, const Array3 &vertex1, const Array3 &vertex2);
 
         /**
          * Computes the plane unit normal N_p for one plane p of the polyhedron according to Tsoulis (19).
@@ -87,7 +87,7 @@ namespace polyhedralGravity {
          * @param segmentVector2 - second edge
          * @return plane unit normal
          */
-        Array3 computePlaneUnitNormal(const Array3 &segmentVector1, const Array3 &segmentVector2);
+        Array3 buildUnitNormalOfPlane(const Array3 &segmentVector1, const Array3 &segmentVector2);
 
 
         /**
@@ -98,10 +98,10 @@ namespace polyhedralGravity {
          * @return segment unit normals n_pq for plane p with q = {0, 1, 2}
          */
         Array3Triplet
-        computeSegmentUnitNormal(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
+        buildUnitNormalOfSegments(const Array3Triplet &segmentVectors, const Array3 &planeUnitNormal);
 
         /**
-         * Computes the plane unit normal orientation sigma_p for one plane p of the polyhedron
+         * Computes the plane unit normal orientation/ direction sigma_p for one plane p of the polyhedron
          * according to Tsoulis (21).
          * The plane unit normal orientation values represents the relative position of computation point P
          * with respect to the pointing direction of N_p. E. g. if N_p points to the half-space containing P, the
@@ -111,7 +111,7 @@ namespace polyhedralGravity {
          * @param vertex0 - the first vertex of the plane
          * @return plane normal orientation
          */
-        double computePlaneNormalOrientation(const Array3 &planeUnitNormal, const Array3 &vertex0);
+        double computeUnitNormalOfPlaneDirection(const Array3 &planeUnitNormal, const Array3 &vertex0);
 
         /**
          * Calculates the Hessian Plane form spanned by three given points p, q, and r.
@@ -124,13 +124,13 @@ namespace polyhedralGravity {
         HessianPlane computeHessianPlane(const Array3 &p, const Array3 &q, const Array3 &r);
 
         /**
-         * Calculates the plane distances h_p of computation point P to the plane S_p given in Hessian Form
+         * Calculates the (plane) distances h_p of computation point P to the plane S_p given in Hessian Form
          * according to the following equation:
          * h_p = D / sqrt(A^2+B^2+C^2)
          * @param hessianPlane - Hessian Plane Form of S_p
          * @return plane distance h_p
          */
-        double computePlaneDistance(const HessianPlane &hessianPlane);
+        double distanceBetweenOriginAndPlane(const HessianPlane &hessianPlane);
 
         /**
          * Computes P' for a given plane p according to equation (22) of Tsoulis paper.
@@ -140,21 +140,24 @@ namespace polyhedralGravity {
          * @param hessianPlane - the Hessian Plane Form
          * @return P' for this plane
          */
-        Array3 computeOrthogonalProjectionPointsOnPlane(
+        Array3 projectPointOrthogonallyOntoPlane(
                 const Array3 &planeUnitNormal,
                 double planeDistance,
                 const HessianPlane &hessianPlane);
 
         /**
-         * Computes the segment normal orientations sigma_pq for a given plane p.
+         * Computes the segment normal orientations/ directions sigma_pq for a given plane p.
+         * If sigma_pq is negative, this denotes that n_pq points to the half-plane containing P'. Nn case
+         * sigma_pq is positive, P' resides in the other half-plane and if sigma_pq is zero, then P' lies directly
+         * on the segment pq.
          * @param vertices - the vertices of this plane
          * @param projectionPointOnPlane - the projection point P' for this plane
          * @param segmentUnitNormalsForPlane - the segment unit normals sigma_pq for this plane
          * @return the segment normal orientations for the plane p
          */
-        Array3 computeSegmentNormalOrientations(const Array3Triplet &vertices,
-                                                const Array3 &projectionPointOnPlane,
-                                                const Array3Triplet &segmentUnitNormalsForPlane);
+        Array3 computeUnitNormalOfSegmentsDirections(const Array3Triplet &vertices,
+                                                     const Array3 &projectionPointOnPlane,
+                                                     const Array3Triplet &segmentUnitNormalsForPlane);
 
         /**
          * Computes the orthogonal projection Points P'' foreach segment q of a given plane p.
@@ -163,7 +166,7 @@ namespace polyhedralGravity {
          * @param face - the vertices of the plane p
          * @return the orthogonal projection points of P on the segment P'' foreach segment q of p
          */
-        Array3Triplet computeOrthogonalProjectionPointsOnSegments(
+        Array3Triplet projectPointOrthogonallyOntoSegments(
                 const Array3 &projectionPointOnPlane,
                 const Array3 &segmentNormalOrientations,
                 const Array3Triplet &face);
@@ -177,21 +180,21 @@ namespace polyhedralGravity {
          * @return P'' for this segment
          * @note If sigma_pq is zero then P'' == P', this is not checked by this method, but has to be assured first
          */
-        Array3 computeOrthogonalProjectionPointOnSegment(const Array3 &vertex1, const Array3 &vertex2,
-                                                         const Array3 &orthogonalProjectionPointOnPlane);
+        Array3 projectPointOrthogonallyOntoSegment(const Array3 &vertex1, const Array3 &vertex2,
+                                                   const Array3 &orthogonalProjectionPointOnPlane);
 
         /**
-         * Computes the segment distances h_pq between P' for a given plane p and P'' for a given segment q of plane p.
+         * Computes the (segment) distances h_pq between P' for a given plane p and P'' for a given segment q of plane p.
          * @param orthogonalProjectionPointOnPlane - the orthogonal projection point P' for p
          * @param orthogonalProjectionPointOnSegments - the orthogonal projection points P'' for each segment q of p
          * @return distances h_pq for plane p
          */
-        Array3 computeSegmentDistances(
+        Array3 distancesBetweenProjectionPoints(
                 const Array3 &orthogonalProjectionPointOnPlane,
                 const Array3Triplet &orthogonalProjectionPointOnSegments);
 
         /**
-         * Computes the 3D distances between l1_pq and l2_pq between the computation point P and the line
+         * Computes the 3D distances l1_pq and l2_pq between the computation point P and the line
          * segment endpoints of each polyhedral segment for one plane.
          * Computes the 1D distances s1_pq and s2_pq between orthogonal projection of P on the line
          * segment P''_pq and the line segment endpoints for each polyhedral segment for one plane
@@ -200,7 +203,7 @@ namespace polyhedralGravity {
          * @param face - the vertices of plane p
          * @return distances l1_pq and l2_pq and s1_pq and s2_pq foreach segment q of plane p
          */
-        std::array<Distance, 3> computeDistances(
+        std::array<Distance, 3> distancesToSegmentEndpoints(
                 const Array3Triplet &segmentVectorsForPlane,
                 const Array3Triplet &orthogonalProjectionPointsOnSegmentForPlane,
                 const Array3Triplet &face);
@@ -243,13 +246,13 @@ namespace polyhedralGravity {
                                                           double planeNormalOrientation);
 
         /**
-         * Computes the norms of the orthogonal projection point P' on a plane p with each vertex of that plane p.
+         * Computes the L2 norms of the orthogonal projection point P' on a plane p with each vertex of that plane p.
          * The values are later used to determine if P' is situated at a vertex.
          * @param orthogonalProjectionPointOnPlane - the orthogonal projection point P'
          * @param face - the vertices of plane p
          * @return the norms of p and each vertex
          */
-        Array3 computeOrthogonalProjectionPointVertexNorm(
+        Array3 computeNormsOfProjectionPointAndVertices(
                 const Array3 &orthogonalProjectionPointOnPlane,
                 const Array3Triplet &face);
 
