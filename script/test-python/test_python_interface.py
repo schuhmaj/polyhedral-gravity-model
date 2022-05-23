@@ -61,12 +61,17 @@ for x in range(-50, 50):
         computation_points.append((x, y, 0.0))
 
 density = 2670.0
-polyhedron = pg.Polyhedron(tsoulis_vertices, tsoulis_faces)
 
-result = pg.evaluate(polyhedron, density, computation_points)
+eros_vertices = '../../example-config/data/Eros.node'
+eros_face = '../../example-config/data/Eros.face'
 
-u = 0
-for x in range(-50, 50):
-    for y in (-50, 50):
-        print("Potential at ({}, {}, {}) = {}".format(x, y, 1.0, result[u].potential))
-        u += 1
+potential, acceleration, tensor = pg.evaluate(tsoulis_vertices, tsoulis_faces, density, [0, 0, 0])
+
+print(potential, acceleration, tensor)
+
+# u = 0
+# for x in range(-50, 50):
+#     for y in (-50, 50):
+#         potential, acceleration, tensor = result[u]
+#         print("Potential at ({}, {}, {}) = {}".format(x, y, 1.0, potential))
+#         u += 1
