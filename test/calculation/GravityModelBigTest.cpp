@@ -57,14 +57,14 @@ protected:
 
     std::vector<std::array<polyhedralGravity::Distance, 3>> expectedDistancesPerSegmentEndpoint;
 
-    std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
-
-
-    std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms;
-
-    std::vector<double> expectedAlphaSingularityTerms;
-
-    std::vector<std::array<double, 3>> expectedBetaSingularityTerms;
+//    std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
+//
+//
+//    std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms;
+//
+//    std::vector<double> expectedAlphaSingularityTerms;
+//
+//    std::vector<std::array<double, 3>> expectedBetaSingularityTerms;
 
 public:
 
@@ -233,18 +233,18 @@ public:
                 readTwoDimensionalValue("resources/GravityModelBigTestExpectedSegmentDistances.txt");
         expectedDistancesPerSegmentEndpoint =
                 readDistances("resources/GravityModelBigTestExpectedDistances.txt");
-        expectedTranscendentalExpressions =
-                readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
-        expectedAlphaSingularityTerms =
-                readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
-        expectedBetaSingularityTerms =
-                readBetaSingularities("resources/GravityModelBigTestExpectedBetaSingularities.txt");
+//        expectedTranscendentalExpressions =
+//                readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
+//        expectedAlphaSingularityTerms =
+//                readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
+//        expectedBetaSingularityTerms =
+//                readBetaSingularities("resources/GravityModelBigTestExpectedBetaSingularities.txt");
 
-        expectedSingularityTerms.resize(expectedAlphaSingularityTerms.size());
-        for (int i = 0; i < expectedAlphaSingularityTerms.size(); ++i) {
-            expectedSingularityTerms[i] =
-                    std::make_pair(expectedAlphaSingularityTerms[i], expectedBetaSingularityTerms[i]);
-        }
+//        expectedSingularityTerms.resize(expectedAlphaSingularityTerms.size());
+//        for (int i = 0; i < expectedAlphaSingularityTerms.size(); ++i) {
+//            expectedSingularityTerms[i] =
+//                    std::make_pair(expectedAlphaSingularityTerms[i], expectedBetaSingularityTerms[i]);
+//        }
     }
 
 };
@@ -370,30 +370,30 @@ TEST_F(GravityModelBigTest, DistancesPerSegmentEndpoint) {
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
 }
 
-TEST_F(GravityModelBigTest, TranscendentalExpressions) {
-    using namespace testing;
-
-    auto actualTranscendentalExpressions =
-            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
-                                                                                expectedDistancesPerSegmentEndpoint,
-                                                                                expectedPlaneDistances,
-                                                                                expectedSegmentDistances,
-                                                                                expectedSegmentNormalOrientations,
-                                                                                expectedOrthogonalProjectionPointsOnPlane);
-
-    ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
-}
-
-TEST_F(GravityModelBigTest, SingularityTerms) {
-    using namespace testing;
-
-    auto actualSingularityTerms =
-            polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
-                                                                       expectedSegmentNormalOrientations,
-                                                                       expectedOrthogonalProjectionPointsOnPlane,
-                                                                       expectedPlaneDistances,
-                                                                       expectedPlaneNormalOrientations,
-                                                                       expectedPlaneUnitNormals);
-
-    ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
-}
+//TEST_F(GravityModelBigTest, TranscendentalExpressions) {
+//    using namespace testing;
+//
+//    auto actualTranscendentalExpressions =
+//            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
+//                                                                                expectedDistancesPerSegmentEndpoint,
+//                                                                                expectedPlaneDistances,
+//                                                                                expectedSegmentDistances,
+//                                                                                expectedSegmentNormalOrientations,
+//                                                                                expectedOrthogonalProjectionPointsOnPlane);
+//
+//    ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
+//}
+//
+//TEST_F(GravityModelBigTest, SingularityTerms) {
+//    using namespace testing;
+//
+//    auto actualSingularityTerms =
+//            polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
+//                                                                       expectedSegmentNormalOrientations,
+//                                                                       expectedOrthogonalProjectionPointsOnPlane,
+//                                                                       expectedPlaneDistances,
+//                                                                       expectedPlaneNormalOrientations,
+//                                                                       expectedPlaneUnitNormals);
+//
+//    ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
+//}
