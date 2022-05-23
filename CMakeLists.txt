@@ -12,8 +12,8 @@ set_property(CACHE PARALLELIZATION_HOST PROPERTY STRINGS CPP, OMP, TBB)
 
 # Parallelization on the DEVICE
 set(PARALLELIZATION_DEVICE "CPP" CACHE STRING "Device parallelization chosen by the user
- (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks, CUDA = Nvida Cuda")
-set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB, CUDA)
+ (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks")
+set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB)
 
 # Set the Logging Level
 set(LOGGING_LEVEL "2" CACHE STRING "Set the Logging level, default (INFO=2), available options:
