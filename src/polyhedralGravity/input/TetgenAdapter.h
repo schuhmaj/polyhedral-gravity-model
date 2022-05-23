@@ -25,7 +25,7 @@ namespace polyhedralGravity {
     class TetgenAdapter : public DataSource {
 
         static constexpr char DEFAULT_EXCEPTION_MSG[] =
-                "The faces were not read because of an error in Tetgen! This could indicate several "
+                "The mesh was not read because of an error in Tetgen! This could indicate several "
                 "issues, e. g. issues with the node assignment like they appear if either no nodes were "
                 "read in at all or if no assignment was possible.";
 

@@ -22,9 +22,7 @@ namespace polyhedralGravity {
             _tetgenio.load_node(const_cast<char *>(filename.c_str()));
             this->addVertices();
         } catch (...) {
-            throw std::runtime_error(
-                    "The nodes were not read because of an error in Tetgen!"
-            );
+            throw std::runtime_error(DEFAULT_EXCEPTION_MSG);
         }
     }
 
@@ -35,7 +33,10 @@ namespace polyhedralGravity {
             _tetgenio.load_face(const_cast<char *>(filename.c_str()));
             this->addFacesByTrifaces();
         } catch (...) {
-            throw std::runtime_error(DEFAULT_EXCEPTION_MSG);
+            std::string message{DEFAULT_EXCEPTION_MSG};
+            message.append(" A second possible issue could be a wrong file order, e.g. the .face file was read before "
+                           "the .node file. In this case just reverse the parameters in the input file list.");
+            throw std::runtime_error(message);
         }
     }
 
