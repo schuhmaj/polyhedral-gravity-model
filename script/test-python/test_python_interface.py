@@ -55,10 +55,7 @@ tsoulis_faces = [
     [4, 7, 6]
 ]
 
-computation_points = []
-
-for x in range(1000):
-    computation_points.append(np.array([0.0, 0.0, 0.0]))
+computation_points = np.zeros((1000, 3))
 
 density = 2670.0
 

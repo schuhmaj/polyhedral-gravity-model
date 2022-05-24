@@ -2,6 +2,6 @@
 
 namespace polyhedralGravity {
 
-    const PolyhedraleGravityLogger PolyhedraleGravityLogger::DEFAULT_LOGGER{};
+    const PolyhedralGravityLogger PolyhedralGravityLogger::DEFAULT_LOGGER{};
 
 }

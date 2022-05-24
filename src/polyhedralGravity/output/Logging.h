@@ -8,16 +8,16 @@
 
 namespace polyhedralGravity {
 
-    class PolyhedraleGravityLogger;
+    class PolyhedralGravityLogger;
 
     /**
      * Wrapper Class for spdlog logger
      */
-    class PolyhedraleGravityLogger {
+    class PolyhedralGravityLogger {
 
     public:
 
-        const static PolyhedraleGravityLogger DEFAULT_LOGGER;
+        const static PolyhedralGravityLogger DEFAULT_LOGGER;
 
     private:
 
@@ -28,11 +28,11 @@ namespace polyhedralGravity {
 
     public:
         /**
-         * Constructs a new PolyhedraleGravityLogger. Further, it registers the new logger in  spdlog's registry with
+         * Constructs a new PolyhedralGravityLogger. Further, it registers the new logger in  spdlog's registry with
          * the name POLYHEDRAL_GRAVITY_LOGGER.
          * TODO async_factory causes bug on Windows OS --> Deadlock on finish (no return 0/ exit)
          */
-        PolyhedraleGravityLogger()
+        PolyhedralGravityLogger()
                 : _logger(spdlog::stdout_color_mt<spdlog::synchronous_factory>("POLYHEDRAL_GRAVITY_LOGGER")) {
             _logger->set_level(spdlog::level::trace);
         }

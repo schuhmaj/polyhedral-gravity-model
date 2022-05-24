@@ -3,7 +3,7 @@
 namespace polyhedralGravity {
 
     double YAMLConfigReader::getDensity() {
-        SPDLOG_LOGGER_DEBUG(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger() ,
+        SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger() ,
                             "Reading the density from the configuration file.");
         if (_file[ROOT][INPUT] && _file[ROOT][INPUT][INPUT_DENSITY]) {
             return _file[ROOT][INPUT][INPUT_DENSITY].as<double>();
@@ -13,7 +13,7 @@ namespace polyhedralGravity {
     }
 
     std::vector<std::array<double, 3>> YAMLConfigReader::getPointsOfInterest() {
-        SPDLOG_LOGGER_DEBUG(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger() ,
+        SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger() ,
                             "Reading the computation points from the configuration file.");
         if (_file[ROOT][INPUT] && _file[ROOT][INPUT][INPUT_POINTS]) {
             return _file[ROOT][INPUT][INPUT_POINTS].as<std::vector<std::array<double, 3>>>();
@@ -24,7 +24,7 @@ namespace polyhedralGravity {
     }
 
     std::shared_ptr<DataSource> YAMLConfigReader::getDataSource() {
-        SPDLOG_LOGGER_DEBUG(PolyhedraleGravityLogger::DEFAULT_LOGGER.getLogger() ,
+        SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger() ,
                             "Reading the data sources (file names) from the configuration file.");
         if (_file[ROOT][INPUT] && _file[ROOT][INPUT][INPUT_POLYHEDRON]) {
             auto vectorOfFiles = _file[ROOT][INPUT][INPUT_POLYHEDRON].as<std::vector<std::string>>();
