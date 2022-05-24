@@ -24,6 +24,8 @@ set_property(CACHE LOGGING_LEVEL PROPERTY STRINGS 0, 1, 2, 3, 4, 5, 6)
 option(USE_LOCAL_TBB "Uses the local tbb installation rather than on using the automatically fetched version from
 GitHub via CMake (Default: OFF)" OFF)
 
+option(BUILD_POLYHEDRAL_GRAVITY_DOCS "Builds the documentation (Default: OFF)" OFF)
+
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=${LOGGING_LEVEL})
 
 # Appends the the module path to contain additional CMake modules for this project
@@ -85,6 +87,10 @@ add_executable(${PROJECT_NAME} ${mainFile})
 
 # Link executable with library
 target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_lib)
+
+if (BUILD_POLYHEDRAL_GRAVITY_DOCS)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/docs)
+endif ()
 
 # Option to build tests or not
 option(BUILD_POLYHEDRAL_GRAVITY_TESTS "Set to on if the tests should be built (Default: ON)" ON)
