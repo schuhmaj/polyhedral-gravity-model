@@ -26,7 +26,7 @@ class GravityModelBigTest : public ::testing::Test {
 
 protected:
 
-    static constexpr double LOCAL_TEST_EPSILON = 10e-10;
+    static constexpr double LOCAL_TEST_EPSILON = 10e-7;
 
     static constexpr size_t LOCAL_TEST_COUNT_FACES = 14744;
     static constexpr size_t LOCAL_TEST_COUNT_NODES_PER_FACE = 3;
@@ -62,11 +62,7 @@ protected:
     std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
 
 
-//    std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms;
-//
-//    std::vector<double> expectedAlphaSingularityTerms;
-//
-//    std::vector<std::array<double, 3>> expectedBetaSingularityTerms;
+    std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms;
 
 public:
 
@@ -202,10 +198,10 @@ public:
             std::istringstream linestream(line);
             int i, j;
             double sng;
-            if (!(linestream >> j >> i >> sng)) {
+            if (!(linestream >> i >> j >> sng)) {
                 break;
             }
-            result[i][j] = sng;
+            result[i - 1][j - 1] = sng;
         }
         return result;
     }
@@ -237,16 +233,16 @@ public:
                 readDistances("resources/GravityModelBigTestExpectedDistances.txt");
         expectedTranscendentalExpressions =
                 readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
-//        expectedAlphaSingularityTerms =
-//                readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
-//        expectedBetaSingularityTerms =
-//                readBetaSingularities("resources/GravityModelBigTestExpectedBetaSingularities.txt");
+        auto expectedAlphaSingularityTerms =
+                readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
+        auto expectedBetaSingularityTerms =
+                readBetaSingularities("resources/GravityModelBigTestExpectedBetaSingularities.txt");
 
-//        expectedSingularityTerms.resize(expectedAlphaSingularityTerms.size());
-//        for (int i = 0; i < expectedAlphaSingularityTerms.size(); ++i) {
-//            expectedSingularityTerms[i] =
-//                    std::make_pair(expectedAlphaSingularityTerms[i], expectedBetaSingularityTerms[i]);
-//        }
+        expectedSingularityTerms.resize(expectedAlphaSingularityTerms.size());
+        for (int i = 0; i < expectedAlphaSingularityTerms.size(); ++i) {
+            expectedSingularityTerms[i] =
+                    std::make_pair(expectedAlphaSingularityTerms[i], expectedBetaSingularityTerms[i]);
+        }
     }
 
 };
@@ -401,16 +397,26 @@ TEST_F(GravityModelBigTest, TranscendentalExpressions) {
     }
 }
 
-//TEST_F(GravityModelBigTest, SingularityTerms) {
-//    using namespace testing;
-//
-//    auto actualSingularityTerms =
-//            polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
-//                                                                       expectedSegmentNormalOrientations,
-//                                                                       expectedOrthogonalProjectionPointsOnPlane,
-//                                                                       expectedPlaneDistances,
-//                                                                       expectedPlaneNormalOrientations,
-//                                                                       expectedPlaneUnitNormals);
-//
-//    ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
-//}
+TEST_F(GravityModelBigTest, SingularityTerms) {
+    using namespace testing;
+    using namespace polyhedralGravity;
+
+    auto actualSingularityTerms =
+            polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
+                                                                       expectedSegmentNormalOrientations,
+                                                                       expectedOrthogonalProjectionPointsOnPlane,
+                                                                       expectedPlaneDistances,
+                                                                       expectedPlaneNormalOrientations,
+                                                                       expectedPlaneUnitNormals);
+
+    ASSERT_EQ(actualSingularityTerms.size(), actualSingularityTerms.size());
+
+    for (size_t i = 0; i < actualSingularityTerms.size(); ++i) {
+        EXPECT_NEAR(actualSingularityTerms[i].first,
+                    expectedSingularityTerms[i].first, LOCAL_TEST_EPSILON)
+                            << "The sing A value differed for singularity term (i) = (" << i << ')';
+        EXPECT_THAT(actualSingularityTerms[i].second,
+                    Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedSingularityTerms[i].second))
+                            << "The sing B value differed for singularity term (i) = (" << i << ')';
+    }
+}
