@@ -55,7 +55,7 @@ namespace polyhedralGravity {
                 const Array3 &computationPoint);
 
         /**
-         * Evaluates the polyhedrale gravity model for a given constant density polyhedron at multiple computation
+         * Evaluates the polyhedral gravity model for a given constant density polyhedron at multiple computation
          * points.
          * @param polyhedron - the polyhedron consisting of vertices and triangular faces
          * @param density - the constant density in [kg/m^3]
