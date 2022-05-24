@@ -26,8 +26,10 @@ class GravityModelBigTest : public ::testing::Test {
 
 protected:
 
-    const size_t countFaces = 14744;
-    const size_t countNodesPerFace = 3;
+    static constexpr double LOCAL_TEST_EPSILON = 10e-10;
+
+    static constexpr size_t LOCAL_TEST_COUNT_FACES = 14744;
+    static constexpr size_t LOCAL_TEST_COUNT_NODES_PER_FACE = 3;
 
     polyhedralGravity::Polyhedron _polyhedron{
             polyhedralGravity::TetgenAdapter{
@@ -57,9 +59,9 @@ protected:
 
     std::vector<std::array<polyhedralGravity::Distance, 3>> expectedDistancesPerSegmentEndpoint;
 
-//    std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
-//
-//
+    std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> expectedTranscendentalExpressions;
+
+
 //    std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms;
 //
 //    std::vector<double> expectedAlphaSingularityTerms;
@@ -70,7 +72,7 @@ public:
 
     [[nodiscard]] std::vector<std::array<std::array<double, 3>, 3>>
     readTwoDimensionalCartesian(const std::string &filename) const {
-        std::vector<std::array<std::array<double, 3>, 3>> result{countFaces};
+        std::vector<std::array<std::array<double, 3>, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -87,7 +89,7 @@ public:
     }
 
     [[nodiscard]] std::vector<std::array<double, 3>> readOneDimensionalCartesian(const std::string &filename) const {
-        std::vector<std::array<double, 3>> result{countFaces};
+        std::vector<std::array<double, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -104,7 +106,7 @@ public:
     }
 
     [[nodiscard]] std::vector<std::array<double, 3>> readTwoDimensionalValue(const std::string &filename) const {
-        std::vector<std::array<double, 3>> result{countFaces};
+        std::vector<std::array<double, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -121,7 +123,7 @@ public:
     }
 
     [[nodiscard]] std::vector<double> readOneDimensionalValue(const std::string &filename) const {
-        std::vector<double> result(countFaces, 0.0);
+        std::vector<double> result(LOCAL_TEST_COUNT_FACES, 0.0);
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -139,7 +141,7 @@ public:
 
     [[nodiscard]] std::vector<polyhedralGravity::HessianPlane>
     readHessianPlanes(const std::string &filename) const {
-        std::vector<polyhedralGravity::HessianPlane> result{countFaces};
+        std::vector<polyhedralGravity::HessianPlane> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -157,7 +159,7 @@ public:
 
     [[nodiscard]] std::vector<std::array<polyhedralGravity::Distance, 3>>
     readDistances(const std::string &filename) const {
-        std::vector<std::array<polyhedralGravity::Distance, 3>> result{countFaces};
+        std::vector<std::array<polyhedralGravity::Distance, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -175,7 +177,7 @@ public:
 
     [[nodiscard]] std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>>
     readTranscendentalExpressions(const std::string &filename) const {
-        std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> result{countFaces};
+        std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -193,7 +195,7 @@ public:
 
     [[nodiscard]] std::vector<std::array<double, 3>>
     readBetaSingularities(const std::string &filename) const {
-        std::vector<std::array<double, 3>> result{countFaces};
+        std::vector<std::array<double, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         while (std::getline(infile, line)) {
@@ -233,8 +235,8 @@ public:
                 readTwoDimensionalValue("resources/GravityModelBigTestExpectedSegmentDistances.txt");
         expectedDistancesPerSegmentEndpoint =
                 readDistances("resources/GravityModelBigTestExpectedDistances.txt");
-//        expectedTranscendentalExpressions =
-//                readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
+        expectedTranscendentalExpressions =
+                readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
 //        expectedAlphaSingularityTerms =
 //                readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
 //        expectedBetaSingularityTerms =
@@ -370,20 +372,35 @@ TEST_F(GravityModelBigTest, DistancesPerSegmentEndpoint) {
     ASSERT_THAT(actualDistancesPerSegmentEndpoint, ContainerEq(expectedDistancesPerSegmentEndpoint));
 }
 
-//TEST_F(GravityModelBigTest, TranscendentalExpressions) {
-//    using namespace testing;
-//
-//    auto actualTranscendentalExpressions =
-//            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
-//                                                                                expectedDistancesPerSegmentEndpoint,
-//                                                                                expectedPlaneDistances,
-//                                                                                expectedSegmentDistances,
-//                                                                                expectedSegmentNormalOrientations,
-//                                                                                expectedOrthogonalProjectionPointsOnPlane);
-//
-//    ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
-//}
-//
+TEST_F(GravityModelBigTest, TranscendentalExpressions) {
+    using namespace testing;
+
+    auto actualTranscendentalExpressions =
+            polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
+                                                                                expectedDistancesPerSegmentEndpoint,
+                                                                                expectedPlaneDistances,
+                                                                                expectedSegmentDistances,
+                                                                                expectedSegmentNormalOrientations,
+                                                                                expectedOrthogonalProjectionPointsOnPlane);
+
+    ASSERT_EQ(actualTranscendentalExpressions.size(), expectedTranscendentalExpressions.size());
+
+    // For arrays one could use the something like Pointwise(DoubleEqual(), expected_array) for the matcher
+    // here, we have no arrays but a custom data structure (the above is just a hint for the future, to safe time)
+    for (size_t i = 0; i < actualTranscendentalExpressions.size(); ++i) {
+        for (size_t j = 0; j < actualTranscendentalExpressions[i].size(); ++j) {
+            ASSERT_NEAR(actualTranscendentalExpressions[i][j].ln,
+                        expectedTranscendentalExpressions[i][j].ln, LOCAL_TEST_EPSILON)
+                                        << "The LN value differed for transcendental term (i,j) = (" << i << ',' << j
+                                        << ')';
+            ASSERT_NEAR(actualTranscendentalExpressions[i][j].an,
+                        expectedTranscendentalExpressions[i][j].an, LOCAL_TEST_EPSILON)
+                                        << "The AN value differed for transcendental term (i,j) = (" << i << ',' << j
+                                        << ')';
+        }
+    }
+}
+
 //TEST_F(GravityModelBigTest, SingularityTerms) {
 //    using namespace testing;
 //
