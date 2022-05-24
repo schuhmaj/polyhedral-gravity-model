@@ -60,7 +60,7 @@ namespace polyhedralGravity {
          * @param polyhedron - the polyhedron consisting of vertices and triangular faces
          * @param density - the constant density in [kg/m^3]
          * @param computationPoints - vector of computation points
-         * @return he GravityModelResult containing the potential, the acceleration and the change of acceleration
+         * @return the GravityModelResult containing the potential, the acceleration and the change of acceleration
          * foreach computation Point P
          */
         std::vector<GravityModelResult> evaluate(
