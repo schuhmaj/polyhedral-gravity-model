@@ -19,13 +19,14 @@ The full extensive documentation can be found on [readthedocs](https://polyhedra
 
 
 ## Requirements
-The project uses the following dependencies:
+The project uses the following dependencies, 
+all of them are **automatically** set-up via CMake:
 
-- GoogleTest 1.11.0 (only required for testing, automatically set-up via CMake)
-- spdlog 1.9.2 (required for logging, automatically set-up via CMake)
-- tetgen 1.6 (required for I/O, automatically set-up via CMake)
-- yaml-cpp 0.7.0 (required for I/O, automatically set-up via CMake)
-- thrust 1.16.0 (required for parallelization and utility, automatically set-up via CMake)
+- GoogleTest 1.11.0 (only required for testing)
+- spdlog 1.9.2 (required for logging)
+- tetgen 1.6 (required for I/O)
+- yaml-cpp 0.7.0 (required for I/O)
+- thrust 1.16.0 (required for parallelization and utility)
 - xsimd 8.1.0 (required for vectorization of the `atan(..)`)
 
 ## Build
@@ -35,7 +36,7 @@ CMake and then follow these steps:
     mkdir build
     cd build
     cmake .. <options>
-    make
+    cmake --build .
 
 The following options are available:
 

@@ -10,7 +10,9 @@ Welcome to Polyhedral Gravity Model's documentation!
    :caption: QUICK START
    :maxdepth: 2
 
-   quick_start
+   build
+   quick_start_python
+   quick_start_cpp
 
 .. toctree::
    :caption: PYTHON API REFERENCE
