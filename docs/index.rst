@@ -7,12 +7,25 @@ Welcome to Polyhedral Gravity Model's documentation!
 ====================================================
 
 .. toctree::
+   :caption: QUICK START
    :maxdepth: 2
-   :caption: Contents:
 
-.. doxygenindex::
+   quick_start
 
+.. toctree::
+   :caption: PYTHON API REFERENCE
+   :maxdepth: 2
 
+   api/python
+
+.. toctree::
+   :caption: C++ API REFERENCE
+   :maxdepth: 2
+
+   api/input
+   api/model
+   api/calculation
+   api/util
 
 Indices and tables
 ==================
