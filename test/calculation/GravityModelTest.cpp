@@ -16,6 +16,9 @@
 class GravityModelTest : public ::testing::Test {
 
 protected:
+
+    static constexpr double LOCAL_TEST_EPSILON = 10e-7;
+
     //New polyhedron with given vertices and faces
     //this is the base example from Tsoulis
     polyhedralGravity::Polyhedron _polyhedron{
@@ -63,18 +66,18 @@ protected:
     };
 
     std::vector<std::array<double, 3>> expectedPlaneUnitNormals{
-            {0.0, -0.0, 1.0},
-            {0.0, -0.0, 1.0},
-            {0.0, -1.0, 0.0},
-            {0.0, -1.0, 0.0},
+            {0.0,  -0.0, 1.0},
+            {0.0,  -0.0, 1.0},
+            {0.0,  -1.0, 0.0},
+            {0.0,  -1.0, 0.0},
             {-1.0, -0.0, -0.0},
-            {-1.0, 0.0, 0.0},
-            {1.0, -0.0, 0.0},
-            {1.0, -0.0, 0.0},
-            {0.0, 1.0, 0.0},
-            {0.0, 1.0, 0.0},
-            {0.0, 0.0, -1.0},
-            {0.0, 0.0, -1.0}
+            {-1.0, 0.0,  0.0},
+            {1.0,  -0.0, 0.0},
+            {1.0,  -0.0, 0.0},
+            {0.0,  1.0,  0.0},
+            {0.0,  1.0,  0.0},
+            {0.0,  0.0,  -1.0},
+            {0.0,  0.0,  -1.0}
     };
 
     std::vector<std::array<std::array<double, 3>, 3>> expectedSegmentUnitNormals{
@@ -180,18 +183,18 @@ protected:
     };
 
     std::vector<std::array<double, 3>> expectedSegmentDistances{
-            {0.0, 0.0, 20.0},
-            {0.0, 10.0, 0.0},
-            {20.0, 15.0, 13.416407864998739},
-            {13.416407864998739, 0.0, 25.0},
-            {17.67766952966369, 15.0, 0.0},
-            {25.0, 10.0, 17.67766952966369},
-            {0.0, 15.0, 17.67766952966369},
-            {17.67766952966369, 10.0, 25.0},
-            {13.416407864998739, 15.0, 20.0},
-            {0.0, 13.416407864998739, 25.0},
-            {8.94427190999916, 0.0, 0.0},
-            {20.0, 10.0, 8.94427190999916}
+            {0.0,                0.0,                20.0},
+            {0.0,                10.0,               0.0},
+            {20.0,               15.0,               13.416407864998739},
+            {13.416407864998739, 0.0,                25.0},
+            {17.67766952966369,  15.0,               0.0},
+            {25.0,               10.0,               17.67766952966369},
+            {0.0,                15.0,               17.67766952966369},
+            {17.67766952966369,  10.0,               25.0},
+            {13.416407864998739, 15.0,               20.0},
+            {0.0,                13.416407864998739, 25.0},
+            {8.94427190999916,   0.0,                0.0},
+            {20.0,               10.0,               8.94427190999916}
     };
 
     std::vector<std::array<std::array<double, 2>, 3>> expected3DDistancesPerSegmentEndpoint{
@@ -254,7 +257,7 @@ protected:
             {1.034567981131622,  0.5108256237659907,  0.7326682560454109},
             {0.4894110007366263, 0.3900353197707153,  0.3544458320893134},
             {0.3074795287283993, 0.33382573681901684, 0.4894110007366262},
-            {0.0,                0.6251451172504167,  0.6826834766703017},
+            {-0.510825623765990, 0.6251451172504167,  0.6826834766703017},
             {0.6826834766703017, 0.4524679290839864,  0.3900353197707153},
             {0.9286653985398196, 0.9566555518497877,  0.33382573681901667},
             {0.4524679290839866, 0.928665398539819,   0.6873622553564511},
@@ -282,38 +285,38 @@ protected:
 
     std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms{
             std::make_pair(-11.591190225020153,
-                           std::array<double, 3>{-0.46364760900080615, -0.46364760900080615, -0.46364760900080615}),
+                           std::array<double, 3>{-0.0, -0.0, -0.46364760900080615}),
             std::make_pair(-27.67871794485226,
-                           std::array<double, 3>{-1.1071487177940904, -1.1071487177940904, -1.1071487177940904}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0}),
+                           std::array<double, 3>{-0.0, -0.0, -1.1071487177940904}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, 0.0,  -0.0}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, 0.0,  -0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0,  0.0,  0.0}),
+            std::make_pair(0.0, std::array<double, 3>{0.0,  -0.0, -0.0}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, -0.0, -0.0}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, -0.0, -0.0}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, -0.0, -0.0}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, -0.0, -0.0}),
             std::make_pair(-23.5619455575943,
-                           std::array<double, 3>{-1.5707963705062866, -1.5707963705062866, -1.5707963705062866}),
-            std::make_pair(0.0, std::array<double, 3>{0.0, 0.0, 0.0})
+                           std::array<double, 3>{-0.0, -0.0, -1.5707963705062866}),
+            std::make_pair(0.0, std::array<double, 3>{-0.0, -0.0, 0.0})
     };
 
     std::vector<double> expectedAlphaSingularityTerms{-11.591190225020153, -27.67871794485226, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                       0.0, 0.0, 0.0, -23.5619455575943, 0.0};
 
     std::vector<std::array<double, 3>> expectedBetaSingularityTerms{
-            {-0.46364760900080615, -0.46364760900080615, -0.46364760900080615},
-            {-1.1071487177940904, -1.1071487177940904, -1.1071487177940904},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {0.0, 0.0, 0.0},
-            {-1.5707963705062866, -1.5707963705062866, -1.5707963705062866},
-            {0.0, 0.0, 0.0}
+            {-0.0, -0.0, -0.46364760900080615},
+            {-0.0, -0.0, -1.1071487177940904},
+            {-0.0, 0.0,  -0.0},
+            {-0.0, 0.0,  -0.0},
+            {0.0,  0.0,  0.0},
+            {0.0,  -0.0, -0.0},
+            {-0.0, -0.0, -0.0},
+            {-0.0, -0.0, -0.0},
+            {-0.0, -0.0, -0.0},
+            {-0.0, -0.0, -0.0},
+            {-0.0, -0.0, -1.5707963705062866},
+            {-0.0, -0.0, 0.0}
     };
 
 public:
@@ -459,6 +462,7 @@ TEST_F(GravityModelTest, DistancesPerSegmentEndpoint) {
 
 TEST_F(GravityModelTest, TranscendentalExpressions) {
     using namespace testing;
+    using namespace polyhedralGravity;
 
     auto actualTranscendentalExpressions =
             polyhedralGravity::GravityModel::calculateTranscendentalExpressions(_computationPoint, _polyhedron,
@@ -468,11 +472,27 @@ TEST_F(GravityModelTest, TranscendentalExpressions) {
                                                                                 expectedSegmentNormalOrientations,
                                                                                 expectedOrthogonalProjectionPointsOnPlane);
 
-    ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
+    ASSERT_EQ(actualTranscendentalExpressions.size(), expectedTranscendentalExpressions.size());
+
+    // For arrays one could use the something like Pointwise(DoubleEqual(), expected_array) for the matcher
+    // here, we have no arrays but a custom data structure (the above is just a hint for the future, to safe time)
+    for (size_t i = 0; i < actualTranscendentalExpressions.size(); ++i) {
+        for (size_t j = 0; j < actualTranscendentalExpressions[i].size(); ++j) {
+            ASSERT_NEAR(actualTranscendentalExpressions[i][j].ln,
+                        expectedTranscendentalExpressions[i][j].ln, LOCAL_TEST_EPSILON)
+                                        << "The LN value differed for transcendental term (i,j) = (" << i << ',' << j
+                                        << ')';
+            ASSERT_NEAR(actualTranscendentalExpressions[i][j].an,
+                        expectedTranscendentalExpressions[i][j].an, LOCAL_TEST_EPSILON)
+                                        << "The AN value differed for transcendental term (i,j) = (" << i << ',' << j
+                                        << ')';
+        }
+    }
 }
 
 TEST_F(GravityModelTest, SingularityTerms) {
     using namespace testing;
+    using namespace polyhedralGravity;
 
     auto actualSingularityTerms =
             polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
@@ -482,5 +502,14 @@ TEST_F(GravityModelTest, SingularityTerms) {
                                                                        expectedPlaneNormalOrientations,
                                                                        expectedPlaneUnitNormals);
 
-    ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
+    ASSERT_EQ(actualSingularityTerms.size(), actualSingularityTerms.size());
+
+    for (size_t i = 0; i < actualSingularityTerms.size(); ++i) {
+        EXPECT_NEAR(actualSingularityTerms[i].first,
+                    expectedSingularityTerms[i].first, LOCAL_TEST_EPSILON)
+                            << "The sing A value differed for singularity term (i) = (" << i << ')';
+        EXPECT_THAT(actualSingularityTerms[i].second,
+                    Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedSingularityTerms[i].second))
+                            << "The sing B value differed for singularity term (i) = (" << i << ')';
+    }
 }

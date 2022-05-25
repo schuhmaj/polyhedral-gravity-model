@@ -19,6 +19,7 @@ The project uses the following dependencies:
 - tetgen 1.6 (required for I/O, automatically set-up via CMake)
 - yaml-cpp 0.7.0 (required for I/O, automatically set-up via CMake)
 - thrust 1.16.0 (required for parallelization and utility, automatically set-up via CMake)
+- xsimd 8.1.0 (required for vectorization of the `atan(..)`)
 
 ## Build
 The program is build by using CMake. So first make sure that you installed
@@ -31,11 +32,11 @@ CMake and then follow these steps:
 
 The following options are available:
 
-|         Name (Default)         |                                                       Options and Remark                                                       |
-|:------------------------------:|:------------------------------------------------------------------------------------------------------------------------------:|
-|  PARALLELIZATION_HOST (`CPP`)  |              `CPP` = Serial Execution on Host, `OMP`/ `TBB` = Parallel Execution on Host with OpenMP or Intel's TBB              |
-| PARALLELIZATION_DEVICE (`CPP`) | `CPP`= Serial Execution on Device, `OMP`/ `TBB`/ `CUDA` = Parallel Execution on Device with OpenMP or Intel's TBB or Nvidia's CUDA |
-|      LOGGING_LEVEL (`2`)       |                          `0`= TRACE, `1`=DEBUG, `2`=INFO, `3`=WARN, `4`=ERROR, `5`=CRITICAL, `6`=OFF                           |
+|         Name (Default)         |                                                       Options and Remark                                                      |
+|:------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------:|
+|  PARALLELIZATION_HOST (`CPP`)  |             `CPP` = Serial Execution on Host, `OMP`/ `TBB` = Parallel Execution on Host with OpenMP or Intel's TBB              |
+| PARALLELIZATION_DEVICE (`CPP`) | `CPP`= Serial Execution on Device, `OMP`/ `TBB` = Parallel Execution on Device with OpenMP or Intel's TBB |
+|      LOGGING_LEVEL (`2`)       |                          `0`= TRACE, `1`=DEBUG, `2`=INFO, `3`=WARN, `4`=ERROR, `5`=CRITICAL, `6`=OFF                          |
 
 During testing the combination PARALLELIZATION_HOST=`CPP` and PARALLELIZATION_DEVICE=`TBB`
 has been the most performant.

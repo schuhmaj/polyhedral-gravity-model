@@ -16,7 +16,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build-and-test"
-  build-and-test:
+  build-and-test-linux:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -24,17 +24,33 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
-      - name: Prepare
-        run: sudo apt install libtbb-dev
-              
+
       - name: Build
         run: |
           mkdir build
           cd build
-          cmake ..
-          make
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          cmake --build .
           
       - name: Test
-        run: cd build && ctest        
+        run: cd build/test && ./polyhedralGravity_test
+
+  build-and-test-windows:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          cmake --build .
+
+      - name: Test
+        run: cd build && ctest
       

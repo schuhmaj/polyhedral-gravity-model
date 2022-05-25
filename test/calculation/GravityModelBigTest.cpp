@@ -26,8 +26,10 @@ class GravityModelBigTest : public ::testing::Test {
 
 protected:
 
-    const size_t countFaces = 14744;
-    const size_t countNodesPerFace = 3;
+    static constexpr double LOCAL_TEST_EPSILON = 10e-7;
+
+    static constexpr size_t LOCAL_TEST_COUNT_FACES = 14744;
+    static constexpr size_t LOCAL_TEST_COUNT_NODES_PER_FACE = 3;
 
     polyhedralGravity::Polyhedron _polyhedron{
             polyhedralGravity::TetgenAdapter{
@@ -62,15 +64,11 @@ protected:
 
     std::vector<std::pair<double, std::array<double, 3>>> expectedSingularityTerms;
 
-    std::vector<double> expectedAlphaSingularityTerms;
-
-    std::vector<std::array<double, 3>> expectedBetaSingularityTerms;
-
 public:
 
     [[nodiscard]] std::vector<std::array<std::array<double, 3>, 3>>
     readTwoDimensionalCartesian(const std::string &filename) const {
-        std::vector<std::array<std::array<double, 3>, 3>> result{countFaces};
+        std::vector<std::array<std::array<double, 3>, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -87,7 +85,7 @@ public:
     }
 
     [[nodiscard]] std::vector<std::array<double, 3>> readOneDimensionalCartesian(const std::string &filename) const {
-        std::vector<std::array<double, 3>> result{countFaces};
+        std::vector<std::array<double, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -104,7 +102,7 @@ public:
     }
 
     [[nodiscard]] std::vector<std::array<double, 3>> readTwoDimensionalValue(const std::string &filename) const {
-        std::vector<std::array<double, 3>> result{countFaces};
+        std::vector<std::array<double, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -121,7 +119,7 @@ public:
     }
 
     [[nodiscard]] std::vector<double> readOneDimensionalValue(const std::string &filename) const {
-        std::vector<double> result(countFaces, 0.0);
+        std::vector<double> result(LOCAL_TEST_COUNT_FACES, 0.0);
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -139,7 +137,7 @@ public:
 
     [[nodiscard]] std::vector<polyhedralGravity::HessianPlane>
     readHessianPlanes(const std::string &filename) const {
-        std::vector<polyhedralGravity::HessianPlane> result{countFaces};
+        std::vector<polyhedralGravity::HessianPlane> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -157,7 +155,7 @@ public:
 
     [[nodiscard]] std::vector<std::array<polyhedralGravity::Distance, 3>>
     readDistances(const std::string &filename) const {
-        std::vector<std::array<polyhedralGravity::Distance, 3>> result{countFaces};
+        std::vector<std::array<polyhedralGravity::Distance, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -175,7 +173,7 @@ public:
 
     [[nodiscard]] std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>>
     readTranscendentalExpressions(const std::string &filename) const {
-        std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> result{countFaces};
+        std::vector<std::array<polyhedralGravity::TranscendentalExpression, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         int i = 0;
@@ -193,17 +191,17 @@ public:
 
     [[nodiscard]] std::vector<std::array<double, 3>>
     readBetaSingularities(const std::string &filename) const {
-        std::vector<std::array<double, 3>> result{countFaces};
+        std::vector<std::array<double, 3>> result{LOCAL_TEST_COUNT_FACES};
         std::ifstream infile(filename);
         std::string line;
         while (std::getline(infile, line)) {
             std::istringstream linestream(line);
             int i, j;
             double sng;
-            if (!(linestream >> j >> i >> sng)) {
+            if (!(linestream >> i >> j >> sng)) {
                 break;
             }
-            result[i][j] = sng;
+            result[i - 1][j - 1] = sng;
         }
         return result;
     }
@@ -235,9 +233,9 @@ public:
                 readDistances("resources/GravityModelBigTestExpectedDistances.txt");
         expectedTranscendentalExpressions =
                 readTranscendentalExpressions("resources/GravityModelBigTestExpectedTranscendentalExpressions.txt");
-        expectedAlphaSingularityTerms =
+        auto expectedAlphaSingularityTerms =
                 readOneDimensionalValue("resources/GravityModelBigTestExpectedAlphaSingularities.txt");
-        expectedBetaSingularityTerms =
+        auto expectedBetaSingularityTerms =
                 readBetaSingularities("resources/GravityModelBigTestExpectedBetaSingularities.txt");
 
         expectedSingularityTerms.resize(expectedAlphaSingularityTerms.size());
@@ -381,11 +379,27 @@ TEST_F(GravityModelBigTest, TranscendentalExpressions) {
                                                                                 expectedSegmentNormalOrientations,
                                                                                 expectedOrthogonalProjectionPointsOnPlane);
 
-    ASSERT_THAT(actualTranscendentalExpressions, ContainerEq(expectedTranscendentalExpressions));
+    ASSERT_EQ(actualTranscendentalExpressions.size(), expectedTranscendentalExpressions.size());
+
+    // For arrays one could use the something like Pointwise(DoubleEqual(), expected_array) for the matcher
+    // here, we have no arrays but a custom data structure (the above is just a hint for the future, to safe time)
+    for (size_t i = 0; i < actualTranscendentalExpressions.size(); ++i) {
+        for (size_t j = 0; j < actualTranscendentalExpressions[i].size(); ++j) {
+            ASSERT_NEAR(actualTranscendentalExpressions[i][j].ln,
+                        expectedTranscendentalExpressions[i][j].ln, LOCAL_TEST_EPSILON)
+                                        << "The LN value differed for transcendental term (i,j) = (" << i << ',' << j
+                                        << ')';
+            ASSERT_NEAR(actualTranscendentalExpressions[i][j].an,
+                        expectedTranscendentalExpressions[i][j].an, LOCAL_TEST_EPSILON)
+                                        << "The AN value differed for transcendental term (i,j) = (" << i << ',' << j
+                                        << ')';
+        }
+    }
 }
 
 TEST_F(GravityModelBigTest, SingularityTerms) {
     using namespace testing;
+    using namespace polyhedralGravity;
 
     auto actualSingularityTerms =
             polyhedralGravity::GravityModel::calculateSingularityTerms(_computationPoint, _polyhedron, expectedGij,
@@ -395,5 +409,14 @@ TEST_F(GravityModelBigTest, SingularityTerms) {
                                                                        expectedPlaneNormalOrientations,
                                                                        expectedPlaneUnitNormals);
 
-    ASSERT_THAT(actualSingularityTerms, ContainerEq(expectedSingularityTerms));
+    ASSERT_EQ(actualSingularityTerms.size(), actualSingularityTerms.size());
+
+    for (size_t i = 0; i < actualSingularityTerms.size(); ++i) {
+        EXPECT_NEAR(actualSingularityTerms[i].first,
+                    expectedSingularityTerms[i].first, LOCAL_TEST_EPSILON)
+                            << "The sing A value differed for singularity term (i) = (" << i << ')';
+        EXPECT_THAT(actualSingularityTerms[i].second,
+                    Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedSingularityTerms[i].second))
+                            << "The sing B value differed for singularity term (i) = (" << i << ')';
+    }
 }
