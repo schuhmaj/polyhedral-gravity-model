@@ -16,8 +16,8 @@ Polyhedron
 
 .. doxygenclass:: polyhedralGravity::Polyhedron
 
-Utility Container
------------------
+Named Tuple
+-----------
 
 .. doxygenstruct:: polyhedralGravity::Distance
 
