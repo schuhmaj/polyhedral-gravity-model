@@ -1,7 +1,6 @@
 # polyhedral-gravity-model-cpp
 
 ![Build and Test](https://github.com/schuhmaj/polyhedral-gravity-model-cpp/actions/workflows/ctest.yml/badge.svg)
-
 [![Documentation Status](https://readthedocs.org/projects/polyhedral-gravity-model-cpp/badge/?version=latest)](https://polyhedral-gravity-model-cpp.readthedocs.io/en/latest/?badge=latest)
 
 Implementation of the Polyhedral Gravity Model in C++ 17.
