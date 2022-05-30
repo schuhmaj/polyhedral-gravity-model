@@ -31,41 +31,69 @@ gravity tensor shall be computed.
     ---
     gravityModel:
       input:
-        polyhedron:                                 #polyhedron source-file(s)
-          - "../example-config/data/tsoulis.node"   #.node contains the vertices
-          - "../example-config/data/tsoulis.face"   #.face contains the triangular faces
-        density: 2670.0                             #constant density in [kg/m^3]
-        points:                                     #Location of the computation point(s) P
-          - [0, 0, 0]                               #Here it is situated at the origin
+        polyhedron:                                 # polyhedron source-file(s)
+          - "../example-config/data/tsoulis.node"   # .node contains the vertices
+          - "../example-config/data/tsoulis.face"   # .face contains the triangular faces
+        density: 2670.0                             # constant density in [kg/m^3]
+        points:                                     # Location of the computation point(s) P
+          - [0, 0, 0]                               # Here it is situated at the origin
 
 
-Polyhedron Source Files
-~~~~~~~~~~~~~~~~~~~~~~~
-
-The implementation supports multiple common mesh formats for
-the polyhedral source. These include:
-
-====================== ==================================================== ==================================================================================================================================================
-File Suffix            Name                                                 Comment
-====================== ==================================================== ==================================================================================================================================================
-  `.node` and `.face`                     TetGen's files                     These two files need to be given as a pair to the input. [Documentation of TetGen's files](https://wias-berlin.de/software/tetgen/fformats.html)
-        `.mesh`                         Medit's mesh files                   Single file containing every needed mesh information.
-        `.ply`          The Polygon File format/ Stanfoard Triangle format   Single file containing every needed mesh information. Blender File Format.
-        `.off`                          Object File Format                   Single file containing every needed mesh information.
-        `.stl`                       Stereolithography format                Single file containing every needed mesh information. Blender File Format.
-====================== ==================================================== ==================================================================================================================================================
-
-**Notice!** Only the ASCII versions of those respective files are supported! This is especially
-important for e.g. the `.ply` files which also can be in binary format.
-
-Good tools to convert your Polyhedron to a supported format (also for interchanging
-ASCII and binary format) are e.g.:
-
-- `Meshio <https://github.com/nschloe/meshio>`__ for Python
-- `OpenMesh <https://openmesh-python.readthedocs.io/en/latest/readwrite.html>`__ for Python
-
+Have a look at :ref:`supported-polyhedron-source-files` to view the available
+options for polyhedral input.
 
 As Library
 ----------
 
-TODO
+The following paragraph gives some examples on how to
+use the polyhedral model as library from within source code
+(All examples with :code:`using namespace polyhedralGravity`).
+
+
+**Example 1:** Evaluating the gravity model for a given polyhedron
+defined from within source code for a specific point and density.
+
+.. code-block:: cpp
+
+        // Defining every input parameter in the source code
+        std::vector<std::array<double, 3>> vertices = ...
+        std::vector<std::array<size_t, 3>> faces = ...
+        double density = ...
+        std::array<double, 3> point = ...
+
+        // Main method, notice that the last argument can also be a
+        // vector of points
+        GravityResult result = GravityModel::evaluate({vertices, faces}, density, point);
+
+
+**Example 2:** Evaluating the gravity model for a given polyhedron
+in some source files for a specific point and density.
+
+.. code-block:: cpp
+
+        // Reading just the polyhedral source from file,
+        // whereas the rest is defined within source-code
+        TetgenAdapter input{{"tsoulis.node", "tsoulis.face"}};
+        Polyhedron poly = input.getPolyhedron();
+        double density = ...
+        std::array<double, 3> point = ...
+
+        // Main method, notice that the last argument can also be a
+        // vector of points
+        GravityResult result = GravityModel::evaluate(poly, density, point);
+
+
+**Example 3:** Evaluating the gravity model for a given configuration
+from a .yaml file.
+
+.. code-block:: cpp
+
+        // Reading the configuration from a yaml file
+        std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>("config.yaml");
+        Polyhedron poly = config->getDataSource()->getPolyhedron();
+        double density = config->getDensity();
+        std::array<double, 3> point = config->getPointsOfInterest()[0];
+
+        // Main method, notice that the last argument can also be a
+        // vector of points
+        GravityResult result = GravityModel::evaluate(poly, density, point);
