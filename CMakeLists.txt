@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.16)
-project(polyhedralGravity)
+cmake_minimum_required(VERSION 3.17)
+project(polyhedralGravity CUDA CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -extended-lambda")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Best Combo: HOST CPP, DEVICE OMP
@@ -12,8 +14,8 @@ set_property(CACHE PARALLELIZATION_HOST PROPERTY STRINGS CPP, OMP, TBB)
 
 # Parallelization on the DEVICE
 set(PARALLELIZATION_DEVICE "CPP" CACHE STRING "Device parallelization chosen by the user
- (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks")
-set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB)
+ (CPP= Serial, OMP = OpenMP, TBB = Intel Threading Building Blocks, CUDA = Nvidia GPU Model")
+set_property(CACHE PARALLELIZATION_DEVICE PROPERTY STRINGS CPP, OMP, TBB, CUDA)
 
 # Set the Logging Level
 set(LOGGING_LEVEL "2" CACHE STRING "Set the Logging level, default (INFO=2), available options:
@@ -39,11 +41,12 @@ include(thrust)
 include(xsimd)
 
 # Main file, containing the gravity model's driver
-set(mainFile ${PROJECT_SOURCE_DIR}/src/main.cpp)
+set(mainFile ${PROJECT_SOURCE_DIR}/src/main.cu)
 
 # Including the actual Polyhedral source files
 file(GLOB_RECURSE SRC
         "${PROJECT_SOURCE_DIR}/src/polyhedralGravity/*.h"
+        "${PROJECT_SOURCE_DIR}/src/polyhedralGravity/*.cu"
         "${PROJECT_SOURCE_DIR}/src/polyhedralGravity/*.cpp")
 
 add_library(${PROJECT_NAME}_lib ${SRC})
