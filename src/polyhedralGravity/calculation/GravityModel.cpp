@@ -1,7 +1,5 @@
 #include "GravityModel.h"
 
-#include <iostream>
-
 namespace polyhedralGravity {
 
     GravityModelResult GravityModel::evaluate(
@@ -174,13 +172,15 @@ namespace polyhedralGravity {
                 });
 
         SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                            "Finished the sums. Applying final prefix.");
-        //9. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
+                            "Finished the sums. Applying final prefix and eliminating rounding errors.");
+
+        //9. Step: Eliminate rounding errors in the result and set those tiny values to "really" zero
+        result.eliminateRoundingErrors();
+
+        //10. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
         const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
-        std::cout << result.acceleration << std::endl;
-
-        //10. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
+        //11. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
         result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
         result.acceleration = result.acceleration * prefix;
         result.gradiometricTensor = result.gradiometricTensor * prefix;

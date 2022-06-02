@@ -2,7 +2,10 @@
 
 #include <array>
 #include <ostream>
+#include <cmath>
+#include <algorithm>
 #include "polyhedralGravity/util/UtilityContainer.h"
+#include "polyhedralGravity/util/UtilityConstants.h"
 
 namespace polyhedralGravity {
 
@@ -131,6 +134,26 @@ namespace polyhedralGravity {
             os << "gravitationalPotential: " << result.gravitationalPotential << " acceleration: "
                << result.acceleration << " gradiometricTensor: " << result.gradiometricTensor;
             return os;
+        }
+
+        /**
+         * Compares the results to used epsilon and if one is smaller resets it to zero.
+         * This step is performed due to rounding errors when calculating with doubles.
+         */
+        inline void eliminateRoundingErrors(){
+            if (std::abs(gravitationalPotential) < util::EPSILON) {
+                gravitationalPotential = 0.0;
+            }
+            for (double &acc : acceleration) {
+                if (std::abs(acc) < util::EPSILON) {
+                    acc = 0.0;
+                }
+            }
+            for (double &secondDev : gradiometricTensor) {
+                if (std::abs(secondDev) < util::EPSILON) {
+                    secondDev = 0.0;
+                }
+            }
         }
 
     };
