@@ -173,7 +173,7 @@ namespace polyhedralGravity {
 
         //10. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
         result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
-        result.gravitationalPotentialDerivative = abs(result.gravitationalPotentialDerivative * prefix);
+        result.gravitationalPotentialDerivative = result.gravitationalPotentialDerivative * prefix;
         result.gradiometricTensor = result.gradiometricTensor * prefix;
         return result;
     }
