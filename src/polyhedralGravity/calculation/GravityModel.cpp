@@ -161,7 +161,7 @@ namespace polyhedralGravity {
                     //8. Step: Accumulate the partial sums
                     return GravityModelResult{
                             a.gravitationalPotential + b.gravitationalPotential,
-                            a.gravitationalPotentialDerivative + b.gravitationalPotentialDerivative,
+                            a.acceleration + b.acceleration,
                             a.gradiometricTensor + b.gradiometricTensor
                     };
                 });
@@ -173,7 +173,7 @@ namespace polyhedralGravity {
 
         //10. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
         result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
-        result.gravitationalPotentialDerivative = result.gravitationalPotentialDerivative * prefix;
+        result.acceleration = result.acceleration * prefix;
         result.gradiometricTensor = result.gradiometricTensor * prefix;
         return result;
     }

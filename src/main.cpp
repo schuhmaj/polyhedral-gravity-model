@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
                            "V= {}", result.gravitationalPotential);
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vx= {}", result.gravitationalPotentialDerivative[0]);
+                           "Vx= {}", result.acceleration[0]);
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vy= {}", result.gravitationalPotentialDerivative[1]);
+                           "Vy= {}", result.acceleration[1]);
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vz= {}", result.gravitationalPotentialDerivative[2]);
+                           "Vz= {}", result.acceleration[2]);
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
                            "Vxx= {}", result.gradiometricTensor[0]);
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),

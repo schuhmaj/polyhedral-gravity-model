@@ -100,7 +100,7 @@ namespace polyhedralGravity {
          * The array contains the derivatives depending on the coordinates x-y-z in this order.
          * @related Equation (2) and (12) of Tsoulis Paper, here referred as Vx, Vy, Vz
          */
-        std::array<double, 3> gravitationalPotentialDerivative{};
+        std::array<double, 3> acceleration{};
 
         /**
          * The second order derivatives or also called gradiometric Tensor in [1/s^2].
@@ -123,13 +123,13 @@ namespace polyhedralGravity {
         GravityModelResult(double gravitationalPotential, const std::array<double, 3> &gravitationalPotentialDerivative,
                            const std::array<double, 6> &gradiometricTensor)
                 : gravitationalPotential(gravitationalPotential),
-                  gravitationalPotentialDerivative(gravitationalPotentialDerivative),
+                  acceleration(gravitationalPotentialDerivative),
                   gradiometricTensor(gradiometricTensor) {}
 
         friend std::ostream &operator<<(std::ostream &os, const GravityModelResult &result) {
             using util::operator<<;
-            os << "gravitationalPotential: " << result.gravitationalPotential << " gravitationalPotentialDerivative: "
-               << result.gravitationalPotentialDerivative << " gradiometricTensor: " << result.gradiometricTensor;
+            os << "gravitationalPotential: " << result.gravitationalPotential << " acceleration: "
+               << result.acceleration << " gradiometricTensor: " << result.gradiometricTensor;
             return os;
         }
 
