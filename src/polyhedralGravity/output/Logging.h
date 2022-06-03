@@ -17,6 +17,9 @@ namespace polyhedralGravity {
 
     public:
 
+        /**
+         * The default logger which is used in the whole implementation for every logging.
+         */
         const static PolyhedralGravityLogger DEFAULT_LOGGER;
 
     private:
@@ -36,9 +39,11 @@ namespace polyhedralGravity {
             _logger->set_level(spdlog::level::trace);
         }
 
-        [[nodiscard]] std::shared_ptr<spdlog::logger> getLogger() const {
+        [[nodiscard]] inline std::shared_ptr<spdlog::logger> getLogger() const {
             return _logger;
         }
+
+
     };
 
 }
