@@ -20,6 +20,9 @@ namespace polyhedralGravity {
         static constexpr char INPUT_POLYHEDRON[] = "polyhedron";
         static constexpr char INPUT_DENSITY[] = "density";
         static constexpr char INPUT_POINTS[] = "points";
+        static constexpr char OUTPUT[] = "output";
+        static constexpr char OUTPUT_FILENAME[] = "filename";
+
 
         const YAML::Node _file;
 
@@ -48,6 +51,13 @@ namespace polyhedralGravity {
                 throw std::runtime_error{"The YAML file does not contain a specification for the \"gravityModel\"!"};
             }
         }
+
+        /**
+         * Returns the specified output filename.
+         * If none is specified an empty string will be returned.
+         * @return a filename a std::string or an empty string if none is specified
+         */
+        std::string getOutputFileName() override;
 
         double getDensity() override;
 

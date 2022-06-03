@@ -30,9 +30,10 @@ And for more details, refer to the **Python API** or **C++ API**.
    :caption: C++ API REFERENCE
    :maxdepth: 2
 
-   api/input
    api/model
    api/calculation
+   api/input
+   api/output
    api/util
 
 Indices and tables

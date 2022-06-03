@@ -3,6 +3,7 @@
 #include "polyhedralGravity/input/YAMLConfigReader.h"
 #include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/output/Logging.h"
+#include "polyhedralGravity/output/CSVWriter.h"
 
 int main(int argc, char *argv[]) {
     using namespace polyhedralGravity;
@@ -18,38 +19,34 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
         auto poly = config->getDataSource()->getPolyhedron();
         auto density = config->getDensity();
-        auto point = config->getPointsOfInterest()[0];
+        auto computationPoints = config->getPointsOfInterest();
+        auto outputFileName = config->getOutputFileName();
 
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(), "The calculation started...");
         auto start = std::chrono::high_resolution_clock::now();
-        auto result = GravityModel::evaluate(poly, density, point);
+        auto result = GravityModel::evaluate(poly, density, computationPoints);
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = end - start;
         auto ms = std::chrono::duration_cast<std::chrono::microseconds>(duration);
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
                            "The calculation finished. It took {} microseconds.", ms.count());
+        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
+                           "Or on average {} microseconds/point",
+                           static_cast<double>(ms.count()) / static_cast<double>(computationPoints.size()));
 
         //The results
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "V= {}", result.gravitationalPotential);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vx= {}", result.acceleration[0]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vy= {}", result.acceleration[1]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vz= {}", result.acceleration[2]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vxx= {}", result.gradiometricTensor[0]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vyy= {}", result.gradiometricTensor[1]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vzz= {}", result.gradiometricTensor[2]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vxy= {}", result.gradiometricTensor[3]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vxz= {}", result.gradiometricTensor[4]);
-        SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                           "Vyz= {}", result.gradiometricTensor[5]);
+        if (!outputFileName.empty()) {
+            SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
+                               "Writing results to specified output file {}", outputFileName);
+            CSVWriter csvWriter{outputFileName};
+            csvWriter.printResult(computationPoints, result);
+            SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
+                               "Writing finished!");
+        } else {
+            SPDLOG_LOGGER_WARN(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
+                               "No output filename was specified!");
+        }
+
         return 0;
 
     } catch (const std::exception &e) {
