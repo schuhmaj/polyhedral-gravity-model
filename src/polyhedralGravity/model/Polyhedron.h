@@ -45,7 +45,7 @@ namespace polyhedralGravity {
          * @param nodes - vector containing the nodes
          * @param faces - vector containing the triangle faces.
          *
-         * ASSERTS PRE-CONDITION
+         * @note ASSERTS PRE-CONDITION that the in the indexing in the faces vector starts with zero!
          * @throws runtime_error if no face contains the node zero indicating mathematical index
          */
         Polyhedron(std::vector<std::array<double, 3>> nodes, std::vector<std::array<size_t, 3>> faces)
@@ -61,12 +61,24 @@ namespace polyhedralGravity {
             }
         }
 
+        /**
+         * Default destructor
+         */
         ~Polyhedron() = default;
 
+        /**
+         * Returns the vertices of this polyhedron
+         * @return vector of cartesian coordinates
+         */
         [[nodiscard]] const std::vector<std::array<double, 3>> &getVertices() const {
             return _vertices;
         }
 
+        /**
+         * Returns the vertex at a specific index
+         * @param index - size_t
+         * @return cartesian coordinates of the vertex at index
+         */
         [[nodiscard]] const std::array<double, 3> &getVertex(size_t index) const {
             return _vertices[index];
         }
@@ -87,6 +99,10 @@ namespace polyhedralGravity {
             return _faces.size();
         }
 
+        /**
+         * Returns the triangular faces of this polyhedron
+         * @return vector of triangular faces, where each element size_t references a vertex in the vertices vector
+         */
         [[nodiscard]] const std::vector<std::array<size_t, 3>> &getFaces() const {
             return _faces;
         }
