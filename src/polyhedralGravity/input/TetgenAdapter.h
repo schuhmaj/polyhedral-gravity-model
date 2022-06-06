@@ -151,9 +151,12 @@ namespace polyhedralGravity {
         void addFacesByTrifaces();
 
         /**
-         * Adds the faces of the tetgenio structure to the resulting polyhedron's faces.
+         * Adds the vertices and faces of the tetgenio structure to the resulting polyhedron's faces after calling
+         * Tetgen's tetrahedralize(..) method.
+         * @note This method is primarily used for formats which can contain non-triangle faces
+         * and to ensure the correct format
          */
-        void addFacesByFacetList();
+        void addVerticesAndFacesByTriangulation();
 
     };
 
