@@ -5,6 +5,10 @@
 #include <vector>
 #include <array>
 #include <utility>
+#include <tuple>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include "polyhedralGravity/calculation/GravityModel.h"
 #include "polyhedralGravity/model/Polyhedron.h"
 
@@ -12,145 +16,76 @@
 /**
  * Contains Tests how the calculation handles a cubic polyhedron
  */
-class GravityModelCubeTest : public ::testing::Test {
+class GravityModelCubeTest :
+        public ::testing::TestWithParam<std::tuple<std::array<double, 3>, double, std::array<double, 3>>> {
 
 protected:
 
-    static constexpr double LOCAL_TEST_EPSILON = 10e-10;
-
-
+    static constexpr double LOCAL_TEST_EPSILON = 10e-20;
+    static constexpr size_t CUBE_DATA_POINTS = 9261;
+    const double _cube_density = 1.0;
     const polyhedralGravity::Polyhedron _cube{{
-                                                {-1.0, -1.0, -1.0},
-                                                {1.0, -1.0, -1.0},
-                                                {1.0, 1.0, -1.0},
-                                                {-1.0, 1.0, -1.0},
-                                                {-1.0, -1.0, 1.0},
-                                                {1.0, -1.0, 1.0},
-                                                {1.0, 1.0, 1.0},
-                                                {-1.0, 1.0, 1.0}},
-                                        {
-                                                {1,    3,    2},
-                                                {0,   3,    1},
-                                                {0,   1,   5},
-                                                {0,    5,   4},
-                                                {0,    7,    3},
-                                                {0,   4,    7},
-                                                {1,   2,   6},
-                                                {1,    6,   5},
-                                                {2, 3, 6},
-                                                {3, 7, 6},
-                                                {4, 5, 6},
-                                                {4, 6, 7}}
+                                                      {-1.0, -1.0, -1.0},
+                                                      {1.0, -1.0, -1.0},
+                                                      {1.0, 1.0, -1.0},
+                                                      {-1.0, 1.0, -1.0},
+                                                      {-1.0, -1.0, 1.0},
+                                                      {1.0, -1.0, 1.0},
+                                                      {1.0, 1.0, 1.0},
+                                                      {-1.0, 1.0, 1.0}},
+                                              {
+                                                      {1,    3,    2},
+                                                      {0,   3,    1},
+                                                      {0,   1,   5},
+                                                      {0,    5,   4},
+                                                      {0,    7,    3},
+                                                      {0,   4,    7},
+                                                      {1,   2,   6},
+                                                      {1,    6,   5},
+                                                      {2, 3, 6},
+                                                      {3, 7, 6},
+                                                      {4, 5, 6},
+                                                      {4, 6, 7}}
     };
 
-    const double _density = 2670.0;
+public:
+
+    [[nodiscard]] static std::vector<std::tuple<std::array<double, 3>, double, std::array<double, 3>>>
+    readCubePoints(const std::string &filename) {
+        std::vector<std::tuple<std::array<double, 3>, double, std::array<double, 3>>> result{};
+        std::ifstream infile(filename);
+        std::string line;
+        while (std::getline(infile, line)) {
+            std::istringstream linestream(line);
+            double p1, p2, p3, potential, acc1, acc2, acc3;
+            if (!(linestream >> p1 >> p2 >> p3 >> potential >> acc1 >> acc2 >> acc3)) {
+                break;
+            }
+            result.emplace_back(std::array<double, 3>{p1, p2, p3}, potential, std::array<double, 3>{acc1, acc2, acc3});
+        }
+        return result;
+    }
+
+
+
 
 };
 
-TEST_F(GravityModelCubeTest, Origin) {
+TEST_P(GravityModelCubeTest, CubePoints) {
     using namespace testing;
     using namespace polyhedralGravity;
 
-    std::array<double, 3> computationPoint = {0.0, 0.0, 0.0};
+    std::tuple<std::array<double, 3>, double, std::array<double, 3>> testData = GetParam();
+    std::array<double, 3> computationPoint = std::get<0>(testData);
+    double expectedPotential = std::get<1>(testData);
+    std::array<double, 3> expectedAcceleration = std::get<2>(testData);
 
-    double expectedPotential = 1.6965555143811e-6;
-    std::array<double, 3> expectedAcceleration = {0.0, 0.0, 0.0};
-
-
-    GravityModelResult actualResult = GravityModel::evaluate(_cube, _density, computationPoint);
-
-    ASSERT_NEAR(actualResult.gravitationalPotential, expectedPotential, LOCAL_TEST_EPSILON);
-
-    ASSERT_THAT(actualResult.acceleration,
-                Pointwise(DoubleEq(), expectedAcceleration));
-}
-
-TEST_F(GravityModelCubeTest, Corner01) {
-    using namespace testing;
-    using namespace polyhedralGravity;
-
-    std::array<double, 3> computationPoint = {1.0, 1.0, 1.0};
-
-    double expectedPotential = 8.482768661715e-7;
-    std::array<double, 3> expectedAcceleration = {3.4540879555272017e-7, 3.4540879555272017e-7, 3.4540879555272017e-7};
-
-
-    GravityModelResult actualResult = GravityModel::evaluate(_cube, _density, computationPoint);
+    GravityModelResult actualResult = GravityModel::evaluate(_cube, _cube_density, computationPoint);
 
     ASSERT_NEAR(actualResult.gravitationalPotential, expectedPotential, LOCAL_TEST_EPSILON);
-
-    ASSERT_THAT(actualResult.acceleration,
-                Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedAcceleration));
+    ASSERT_THAT(actualResult.acceleration, Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedAcceleration));
 }
 
-TEST_F(GravityModelCubeTest, Corner02) {
-    using namespace testing;
-    using namespace polyhedralGravity;
-
-    std::array<double, 3> computationPoint = {-1.0, -1.0, -1.0};
-
-    double expectedPotential = 8.482768661715e-7;
-    std::array<double, 3> expectedAcceleration = {-3.4540879555272017e-7, -3.4540879555272017e-7, -3.4540879555272017e-7};
-
-
-    GravityModelResult actualResult = GravityModel::evaluate(_cube, _density, computationPoint);
-
-    ASSERT_NEAR(actualResult.gravitationalPotential, expectedPotential, LOCAL_TEST_EPSILON);
-
-    ASSERT_THAT(actualResult.acceleration,
-                Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedAcceleration));
-}
-
-TEST_F(GravityModelCubeTest, Plane01) {
-    using namespace testing;
-    using namespace polyhedralGravity;
-
-    std::array<double, 3> computationPoint = {1.0, 0.0, 0.0};
-
-    double expectedPotential = 1.2779422904244e-6;
-    std::array<double, 3> expectedAcceleration = {9.2531666422050232e-7, 0.0, 0.0};
-
-
-    GravityModelResult actualResult = GravityModel::evaluate(_cube, _density, computationPoint);
-
-    ASSERT_NEAR(actualResult.gravitationalPotential, expectedPotential, LOCAL_TEST_EPSILON);
-
-    ASSERT_THAT(actualResult.acceleration,
-                Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedAcceleration));
-}
-
-TEST_F(GravityModelCubeTest, Plane02) {
-    using namespace testing;
-    using namespace polyhedralGravity;
-
-    std::array<double, 3> computationPoint = {0.0, 1.0, 0.0};
-
-    double expectedPotential = 1.2779422904244e-6;
-    std::array<double, 3> expectedAcceleration = {0.0, 9.2531666422050232e-7, 0.0};
-
-
-    GravityModelResult actualResult = GravityModel::evaluate(_cube, _density, computationPoint);
-
-    ASSERT_NEAR(actualResult.gravitationalPotential, expectedPotential, LOCAL_TEST_EPSILON);
-
-    ASSERT_THAT(actualResult.acceleration,
-                Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedAcceleration));
-}
-
-TEST_F(GravityModelCubeTest, Plane03) {
-    using namespace testing;
-    using namespace polyhedralGravity;
-
-    std::array<double, 3> computationPoint = {0.0, 0.0, 1.0};
-
-    double expectedPotential = 1.2779422904244e-6;
-    std::array<double, 3> expectedAcceleration = {0.0, 0.0, 9.2531666422050232e-7};
-
-
-    GravityModelResult actualResult = GravityModel::evaluate(_cube, _density, computationPoint);
-
-    ASSERT_NEAR(actualResult.gravitationalPotential, expectedPotential, LOCAL_TEST_EPSILON);
-
-    ASSERT_THAT(actualResult.acceleration,
-                Pointwise(DoubleNear(LOCAL_TEST_EPSILON), expectedAcceleration));
-}
+INSTANTIATE_TEST_SUITE_P(CubeGravityModelTest, GravityModelCubeTest,
+                         ::testing::ValuesIn(
+                                 GravityModelCubeTest::readCubePoints("resources/analytic_cube_solution.txt")));
