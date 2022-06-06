@@ -1,5 +1,4 @@
 from sympy import *
-from scipy.special import xlogy
 
 """
 This python script computes the analytical solution for the potential and acceleration for an arbitrary point P(X,Y,Z)
