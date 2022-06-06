@@ -13,7 +13,7 @@
 namespace polyhedralGravity {
 
 /**
- * By using spdlog, this class provides methods to print the result of an Breakup event into an CSV file.
+ * By using spdlog, this class provides methods to print the result the polyhedral gravity model into an CSV file.
  * @note The used Logger level is "info", so this should be activated at least if output is wished!
  */
     class CSVWriter {
