@@ -13,7 +13,7 @@ DENSITY = 1.0
 
 # The point to evaluate, replace values here
 X = 1
-Y = 0
+Y = 1
 Z = 0
 
 # Some definitions
@@ -83,7 +83,7 @@ def evaluate_acceleration(X: float, Y: float, Z: float):
         acceleration in the three cartesian directions
 
     """
-    return _evaluate_acceleration(X, Y, Z, 1), _evaluate_acceleration(X, Y, Z, 2), _evaluate_acceleration(X, Y, Z, 2)
+    return _evaluate_acceleration(X, Y, Z, 1), _evaluate_acceleration(X, Y, Z, 2), _evaluate_acceleration(X, Y, Z, 3)
 
 
 if __name__ == '__main__':
