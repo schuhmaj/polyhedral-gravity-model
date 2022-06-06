@@ -21,7 +21,10 @@ class GravityModelCubeTest :
 
 protected:
 
-    static constexpr double LOCAL_TEST_EPSILON = 10e-20;
+    /**
+     * Small epsilon since we compare to ground truth
+     */
+    static constexpr double LOCAL_TEST_EPSILON = 1e-20;
     static constexpr size_t CUBE_DATA_POINTS = 9261;
     const double _cube_density = 1.0;
     const polyhedralGravity::Polyhedron _cube{{
