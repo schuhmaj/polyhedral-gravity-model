@@ -1,4 +1,5 @@
 from sympy import *
+from scipy.special import xlogy
 
 """
 This python script computes the analytical solution for the potential and acceleration for an arbitrary point P(X,Y,Z)
@@ -14,7 +15,7 @@ DENSITY = 1.0
 # The point to evaluate, replace values here
 X = 1
 Y = 1
-Z = 0
+Z = 1
 
 # Some definitions
 _a, _b, _c = symbols('_a _b c')
@@ -37,11 +38,16 @@ def evaluate_potential(X: float, Y: float, Z: float):
         potential
 
     """
-    total_inner = _INNER_SUM_POTENTIAL.subs({_a: _x1}) + _INNER_SUM_POTENTIAL.subs({_a: _x2}) + _INNER_SUM_POTENTIAL.subs({_a: _x3})
-    outer_sum = total_inner.evalf(subs={_x1: 1 - X}) - total_inner.evalf(subs={_x1: -1 - X})
-    outer_sum = outer_sum.evalf(subs={_x2: 1 - Y}) - outer_sum.evalf(subs={_x2: -1 - Y})
-    outer_sum = outer_sum.evalf(subs={_x3: 1 - Z}) - outer_sum.evalf(subs={_x3: -1 - Z})
-    return outer_sum * GRAVITATIONAL_CONSTANT * DENSITY
+    total_sum = _INNER_SUM_POTENTIAL.subs({_a: _x1}) + _INNER_SUM_POTENTIAL.subs({_a: _x2}) + _INNER_SUM_POTENTIAL.subs(
+        {_a: _x3})
+    total_sum = total_sum.evalf(subs={_x1: 1 - X}) - total_sum.evalf(subs={_x1: -1 - X})
+    total_sum = total_sum.evalf(subs={_x2: 1 - Y}) - total_sum.evalf(subs={_x2: -1 - Y})
+
+    # The limit formulation handles the case: 0 * log(..) resulting in zero better than the subs functionality
+    total_sum_1 = total_sum.limit(_x3, 1 - Z)
+    total_sum_2 = total_sum.limit(_x3, -1 - Z)
+    total_sum = (total_sum_1 - total_sum_2).evalf()
+    return total_sum * GRAVITATIONAL_CONSTANT * DENSITY
 
 
 def _evaluate_acceleration(X: float, Y: float, Z: float, i: int):
@@ -66,7 +72,11 @@ def _evaluate_acceleration(X: float, Y: float, Z: float, i: int):
         total_sum = _INNER_SUM_ACCELERATION.subs({_a: _x3, _b: _x2, _c: _x1})
     total_sum = total_sum.evalf(subs={_x1: 1 - X}) - total_sum.evalf(subs={_x1: -1 - X})
     total_sum = total_sum.evalf(subs={_x2: 1 - Y}) - total_sum.evalf(subs={_x2: -1 - Y})
-    total_sum = total_sum.evalf(subs={_x3: 1 - Z}) - total_sum.evalf(subs={_x3: -1 - Z})
+
+    # The limit formulation handles the case: 0 * log(..) resulting in zero better than the subs functionality
+    total_sum_1 = total_sum.limit(_x3, 1 - Z)
+    total_sum_2 = total_sum.limit(_x3, -1 - Z)
+    total_sum = (total_sum_1 - total_sum_2).evalf()
     return total_sum * GRAVITATIONAL_CONSTANT * DENSITY
 
 
