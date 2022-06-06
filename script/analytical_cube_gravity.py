@@ -15,7 +15,7 @@ DENSITY = 1.0
 # The point to evaluate, replace values here
 X = 1
 Y = 1
-Z = 1
+Z = 0
 
 # Some definitions
 _a, _b, _c = symbols('_a _b c')
@@ -44,9 +44,12 @@ def evaluate_potential(X: float, Y: float, Z: float):
     total_sum = total_sum.evalf(subs={_x2: 1 - Y}) - total_sum.evalf(subs={_x2: -1 - Y})
 
     # The limit formulation handles the case: 0 * log(..) resulting in zero better than the subs functionality
-    total_sum_1 = total_sum.limit(_x3, 1 - Z)
-    total_sum_2 = total_sum.limit(_x3, -1 - Z)
-    total_sum = (total_sum_1 - total_sum_2).evalf()
+    if 1 - Z == 0 or -1 - Z == 0:
+        total_sum_1 = total_sum.limit(_x3, 1 - Z)
+        total_sum_2 = total_sum.limit(_x3, -1 - Z)
+        total_sum = (total_sum_1 - total_sum_2).evalf()
+    else:
+        total_sum = total_sum.evalf(subs={_x3: 1 - Z}) - total_sum.evalf(subs={_x3: -1 - Z})
     return total_sum * GRAVITATIONAL_CONSTANT * DENSITY
 
 
@@ -74,9 +77,12 @@ def _evaluate_acceleration(X: float, Y: float, Z: float, i: int):
     total_sum = total_sum.evalf(subs={_x2: 1 - Y}) - total_sum.evalf(subs={_x2: -1 - Y})
 
     # The limit formulation handles the case: 0 * log(..) resulting in zero better than the subs functionality
-    total_sum_1 = total_sum.limit(_x3, 1 - Z)
-    total_sum_2 = total_sum.limit(_x3, -1 - Z)
-    total_sum = (total_sum_1 - total_sum_2).evalf()
+    if 1 - Z == 0 or -1 - Z == 0:
+        total_sum_1 = total_sum.limit(_x3, 1 - Z)
+        total_sum_2 = total_sum.limit(_x3, -1 - Z)
+        total_sum = (total_sum_1 - total_sum_2).evalf()
+    else:
+        total_sum = total_sum.evalf(subs={_x3: 1 - Z}) - total_sum.evalf(subs={_x3: -1 - Z})
     return total_sum * GRAVITATIONAL_CONSTANT * DENSITY
 
 
