@@ -1,32 +1,27 @@
-from mpmath import *
+from sympy import *
 
-"""
-Evaluates the analytical solution of the gravity potential
-for a cube centered around the origin with edge size 2
-for the coordinates (X, Y, Z)
-"""
+init_printing()
 
-# Constants (not used, since only the actual result of the integral is of interest)
 GRAVITATIONAL_CONSTANT = 6.67430e-11
-DEFAULT_CONSTANT_DENSITY = 2670.0
+DEFAULT_CONSTANT_DENSITY = 1.0
 
-# Precision of the calculation
-mp.dps = 20
+X = 0
+Y = 0
+Z = 0
 
-# Coordinates of the point P to evaluate
-X = 1
-Y = 1
-Z = 1
+u = symbols('u')
+x1, x2, x3 = symbols('x y z')
+v = x1 * x2 * x3
+r = sqrt(x1*x1 + x2*x2 + x3*x3)
 
-print("Cube with edge length = 2, centered around the origin.")
-print("Evaluating gravity potential at ({}, {}, {})".format(X, Y, Z))
-print("Precision of the evaluation: {}".format(mp.dps))
+inner_sum = ((v / u) * log(u + r) - (u * u / 2) * atan(v / (u * u * r)))
 
-# The integral of the gravity potential of a cube
-cube_integral = lambda x, y, z: 1.0 / sqrt((X - x) * (X - x) + (Y - y) * (Y - y) + (Z - z) * (Z - z))
+total_inner = inner_sum.subs({u: x1}) + inner_sum.subs({u: x2}) + inner_sum.subs({u: x3})
 
-# The calculation
-result = mp.quad(cube_integral, [-1, 1], [-1, 1], [-1, 1])
+outer_sum = total_inner.evalf(subs={x1: 1-X}) - total_inner.evalf(subs={x1: -1-X})
 
-print()
-print("Gravity Potential Result: {}".format(result))
+outer_sum = outer_sum.evalf(subs={x2: 1-Y}) - outer_sum.evalf(subs={x2: -1-Y})
+
+outer_sum = outer_sum.evalf(subs={x3: 1-Z}) - outer_sum.evalf(subs={x3: -1-Z})
+
+print(outer_sum * GRAVITATIONAL_CONSTANT * DEFAULT_CONSTANT_DENSITY)
