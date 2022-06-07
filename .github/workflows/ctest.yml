@@ -35,7 +35,7 @@ jobs:
       - name: Test
         run: cd build/test && ./polyhedralGravity_test
 
-  build-windows:
+  build-and-test-windows:
     # The type of runner that the job will run on
     runs-on: windows-latest
 
@@ -49,9 +49,8 @@ jobs:
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build .
+          cmake --build . --config Release
 
-# No testing on Windows GitHub since it takes too long; 1 test/second --> more than 2 hours of runtime
-#      - name: Test
-#        run: cd build && ctest
+      - name: Test
+        run: cd build && ctest
       
