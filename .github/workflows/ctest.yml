@@ -35,7 +35,7 @@ jobs:
       - name: Test
         run: cd build/test && ./polyhedralGravity_test
 
-  build-and-test-windows:
+  build-windows:
     # The type of runner that the job will run on
     runs-on: windows-latest
 
@@ -51,6 +51,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release ..
           cmake --build . --config Release
 
-      - name: Test
-        run: cd build && ctest
+# No testing on Windows GitHub since it takes too long
+#      - name: Test
+#        run: cd build && ctest
       
