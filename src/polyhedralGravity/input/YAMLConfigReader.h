@@ -9,6 +9,10 @@
 
 namespace polyhedralGravity {
 
+    /**
+     * The YAMLConfigReader serves as Interface between yaml-cpp and the Polyhedral Gravity Model and
+     * reads in the input from an yaml configuration file.
+     */
     class YAMLConfigReader : public ConfigSource {
 
         /*
@@ -20,7 +24,13 @@ namespace polyhedralGravity {
         static constexpr char INPUT_POLYHEDRON[] = "polyhedron";
         static constexpr char INPUT_DENSITY[] = "density";
         static constexpr char INPUT_POINTS[] = "points";
+        static constexpr char OUTPUT[] = "output";
+        static constexpr char OUTPUT_FILENAME[] = "filename";
 
+
+        /**
+         * The member administering the YAML file/ Connection to yaml-cpp
+         */
         const YAML::Node _file;
 
     public:
@@ -49,10 +59,29 @@ namespace polyhedralGravity {
             }
         }
 
+        /**
+         * Returns the specified output filename.
+         * If none is specified an empty string will be returned.
+         * @return a filename a std::string or an empty string if none is specified
+         */
+        std::string getOutputFileName() override;
+
+        /**
+         * Reads the density from the yaml configuration file.
+         * @return density as double
+         */
         double getDensity() override;
 
+        /**
+         * Reads the computation points from the yaml configuration file.
+         * @return vector of computation points
+         */
         std::vector<std::array<double, 3>> getPointsOfInterest() override;
 
+        /**
+         * Reads the DataSource from the yaml configuration file.
+         * @return shared_ptr to the DataSource Object created
+         */
         std::shared_ptr<DataSource> getDataSource() override;
 
 

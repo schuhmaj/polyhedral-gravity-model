@@ -45,8 +45,7 @@ namespace polyhedralGravity {
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_off(const_cast<char *>(filename.c_str()));
-            this->addVertices();
-            this->addFacesByFacetList();
+            this->addVerticesAndFacesByTriangulation();
         } catch (...) {
             throw std::runtime_error(DEFAULT_EXCEPTION_MSG);
         }
@@ -57,8 +56,7 @@ namespace polyhedralGravity {
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_ply(const_cast<char *>(filename.c_str()));
-            this->addVertices();
-            this->addFacesByFacetList();
+            this->addVerticesAndFacesByTriangulation();
         } catch (...) {
             throw std::runtime_error(DEFAULT_EXCEPTION_MSG);
         }
@@ -69,15 +67,7 @@ namespace polyhedralGravity {
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_stl(const_cast<char *>(filename.c_str()));
-            this->addVertices();
-            this->addFacesByFacetList();
-
-            tetgenbehavior tetgenbehavior;
-            tetgenbehavior.zeroindex = 1;
-            tetrahedralize(&tetgenbehavior, &_tetgenio, &_tetgenio);
-
-            this->addVertices();
-            this->addFacesByTrifaces();
+            this->addVerticesAndFacesByTriangulation();
         } catch (...) {
             throw std::runtime_error(DEFAULT_EXCEPTION_MSG);
         }
@@ -88,15 +78,7 @@ namespace polyhedralGravity {
         this->checkIntegrity(filename, 'a');
         try {
             _tetgenio.load_medit(const_cast<char *>(filename.c_str()), 0);
-            this->addVertices();
-            this->addFacesByFacetList();
-            // Additionally .mesh files start counting the index at 1, instead of 0, so decrement all faces by one
-            std::transform(_faces.begin(), _faces.end(),
-                           _faces.begin(), [](const std::array<size_t, 3> &face) -> std::array<size_t, 3> {
-                using namespace util;
-                return {face[0] - 1, face[1] - 1, face[2] - 1};
-            });
-
+            this->addVerticesAndFacesByTriangulation();
         } catch (...) {
             throw std::runtime_error(DEFAULT_EXCEPTION_MSG);
         }
@@ -140,19 +122,15 @@ namespace polyhedralGravity {
         }
     }
 
-    void TetgenAdapter::addFacesByFacetList() {
+    void TetgenAdapter::addVerticesAndFacesByTriangulation() {
         SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger() ,
-                            "Converting tetgen's arbitrarily shaped facets to "
-                            "C++ Polyhedron. If something is not working with the input, "
-                            "the error is probably here. "
-                            "Because here, only triangles are accepted!");
-        _faces.clear();
-        _faces.reserve(_tetgenio.numberoffacets);
-        for (size_t i = 0; i < _tetgenio.numberoffacets; ++i) {
-            _faces.push_back({static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[0]),
-                              static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[1]),
-                              static_cast<size_t>(_tetgenio.facetlist[i].polygonlist->vertexlist[2])});
-        }
+                            "Converting arbitrarily shaped facets of the tetgenio structure to triangles "
+                            "by using Tetgen's tetrahedralize method");
+        tetgenbehavior tetgenbehavior;
+        tetgenbehavior.zeroindex = 1;
+        tetrahedralize(&tetgenbehavior, &_tetgenio, &_tetgenio);
+        this->addVertices();
+        this->addFacesByTrifaces();
     }
 
 }

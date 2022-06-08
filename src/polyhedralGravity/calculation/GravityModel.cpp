@@ -88,6 +88,7 @@ namespace polyhedralGravity {
                                                     planeNormalOrientation);
                     //2. Step: Compute Sum 1 used for potential and acceleration (first derivative)
                     // sum over: sigma_pq * h_pq * LN_pq
+                    // --> Equation 11/12 the first summation in the brackets
                     auto zipIteratorSum1PotentialAcceleration = util::zipPair(segmentNormalOrientations,
                                                                               segmentDistances,
                                                                               transcendentalExpressions);
@@ -105,6 +106,7 @@ namespace polyhedralGravity {
 
                     //3. Step: Compute Sum 1 used for the gradiometric tensor (second derivative)
                     // sum over: n_pq * LN_pq
+                    // --> Equation 13 the first summation in the brackets
                     auto zipIteratorSum1Tensor = util::zipPair(segmentUnitNormals,
                                                           transcendentalExpressions);
                     const Array3 sum1Tensor = std::accumulate(
@@ -119,6 +121,7 @@ namespace polyhedralGravity {
 
                     //4. Step: Compute Sum 2 which is the same for every result parameter
                     // sum over: sigma_pq * AN_pq
+                    // --> Equation 11/12/13 the second summation in the brackets
                     auto zipIteratorSum2 = util::zipPair(segmentNormalOrientations,
                                                          transcendentalExpressions);
                     const double sum2 = std::accumulate(zipIteratorSum2.first, zipIteratorSum2.second,
@@ -130,11 +133,13 @@ namespace polyhedralGravity {
 
                     //5. Step: Sum for potential and acceleration
                     // consisting of: sum1 + h_p * sum2 + sing A
+                    // --> Equation 11/12 the total sum of the brackets
                     const double planeSumPotentialAcceleration =
                             sum1PotentialAcceleration + planeDistance * sum2 + singularities.first;
 
                     //6. Step: Sum for tensor
                     // consisting of: sum1 + sigma_p * N_p * sum2 + sing B
+                    // --> Equation 13 the total sum of the brackets
                     const Array3 subSum =
                             (sum1Tensor + (planeUnitNormal * (planeNormalOrientation * sum2))) +
                             singularities.second;
@@ -161,19 +166,23 @@ namespace polyhedralGravity {
                     //8. Step: Accumulate the partial sums
                     return GravityModelResult{
                             a.gravitationalPotential + b.gravitationalPotential,
-                            a.gravitationalPotentialDerivative + b.gravitationalPotentialDerivative,
+                            a.acceleration + b.acceleration,
                             a.gradiometricTensor + b.gradiometricTensor
                     };
                 });
 
         SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(),
-                            "Finished the sums. Applying final prefix.");
-        //9. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
+                            "Finished the sums. Applying final prefix and eliminating rounding errors.");
+
+        //9. Step: Eliminate rounding errors in the result and set those tiny values to "really" zero
+        result.eliminateRoundingErrors();
+
+        //10. Step: Compute prefix consisting of GRAVITATIONAL_CONSTANT * density
         const double prefix = util::GRAVITATIONAL_CONSTANT * density;
 
-        //10. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
+        //11. Step: Final expressions after application of the prefix (and a division by 2 for the potential)
         result.gravitationalPotential = (result.gravitationalPotential * prefix) / 2.0;
-        result.gravitationalPotentialDerivative = abs(result.gravitationalPotentialDerivative * prefix);
+        result.acceleration = result.acceleration * prefix;
         result.gradiometricTensor = result.gradiometricTensor * prefix;
         return result;
     }

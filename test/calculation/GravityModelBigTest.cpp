@@ -26,7 +26,10 @@ class GravityModelBigTest : public ::testing::Test {
 
 protected:
 
-    static constexpr double LOCAL_TEST_EPSILON = 10e-7;
+    /**
+     * Relative big epsilon due to deviations between FORTRAN implementation and C++ implementation
+     */
+    static constexpr double LOCAL_TEST_EPSILON = 1e-6;
 
     static constexpr size_t LOCAL_TEST_COUNT_FACES = 14744;
     static constexpr size_t LOCAL_TEST_COUNT_NODES_PER_FACE = 3;

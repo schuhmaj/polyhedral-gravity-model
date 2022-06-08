@@ -23,6 +23,10 @@ def read_pk_file(filename):
     Returns:
         mesh_points, mesh_triangles (tuple): list of mesh points and list of mesh triangles
 
+    Notes:
+        Adapted from
+        https://github.com/darioizzo/geodesyNets/blob/master/archive/Modelling%20Bennu%20with%20mascons.ipynb
+
     """
     with open(filename, "rb") as f:
         mesh_points, mesh_triangles = pk.load(f)
