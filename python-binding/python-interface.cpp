@@ -13,7 +13,7 @@ namespace py = pybind11;
 std::tuple<double, std::array<double, 3>, std::array<double, 6>> convertToTuple(
         const polyhedralGravity::GravityModelResult &result) {
     return std::make_tuple(result.gravitationalPotential,
-                           result.gravitationalPotentialDerivative,
+                           result.acceleration,
                            result.gradiometricTensor);
 }
 

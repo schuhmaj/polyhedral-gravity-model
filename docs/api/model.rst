@@ -25,4 +25,4 @@ Named Tuple
 
 .. doxygenstruct:: polyhedralGravity::HessianPlane
 
-.. doxygenclass:: polyhedralGravity::GravityModelResult
+.. doxygenstruct:: polyhedralGravity::GravityModelResult

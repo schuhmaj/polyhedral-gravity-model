@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 #include "DataSource.h"
 
 namespace polyhedralGravity {
@@ -15,6 +16,12 @@ namespace polyhedralGravity {
     public:
 
         virtual ~ConfigSource() = default;
+
+        /**
+         * Returns the specified output file name.
+         * @return a std::string with the filename
+         */
+        virtual std::string getOutputFileName() = 0;
 
         /**
          * Returns the constant density rho of the given polyhedron in [kg/m^3].

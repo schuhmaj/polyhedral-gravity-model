@@ -73,6 +73,8 @@ It is required to specify the source-files of the polyhedron's mesh (more info
 about the supported file in the [next paragraph](#polyhedron-source-files)), the density
 of the polyhedron, and the wished computation points where the
 gravity tensor shall be computed.
+Further one must specify the name of the .csv output file.
+
 ````yaml
 ---
 gravityModel:
@@ -83,6 +85,8 @@ gravityModel:
     density: 2670.0                             #constant density in [kg/m^3]
     points:                                     #Location of the computation point(s) P
       - [0, 0, 0]                               #Here it is situated at the origin
+  output:
+    filename: "gravity_result.csv"              #The name of the output file 
 
 ````
 

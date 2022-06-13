@@ -17,7 +17,10 @@ class GravityModelTest : public ::testing::Test {
 
 protected:
 
-    static constexpr double LOCAL_TEST_EPSILON = 10e-7;
+    /**
+     * Relative big epsilon due to deviations between FORTRAN implementation and C++ implementation
+     */
+    static constexpr double LOCAL_TEST_EPSILON = 1e-6;
 
     //New polyhedron with given vertices and faces
     //this is the base example from Tsoulis

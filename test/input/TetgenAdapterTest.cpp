@@ -41,9 +41,9 @@ TEST_F(TetgenAdapterTest, readSimpleNode) {
     using namespace testing;
     using namespace ::polyhedralGravity;
 
-    std::vector<std::string> simpleFiles {
-        "resources/TetgenAdapterTestReadSimple.node",
-        "resources/TetgenAdapterTestReadSimple.face",
+    std::vector<std::string> simpleFiles{
+            "resources/TetgenAdapterTestReadSimple.node",
+            "resources/TetgenAdapterTestReadSimple.face",
     };
 
     TetgenAdapter tetgenAdapter{simpleFiles};
@@ -57,9 +57,10 @@ TEST_F(TetgenAdapterTest, readSimpleFace) {
     using namespace testing;
     using namespace ::polyhedralGravity;
 
-    std::vector<std::string> simpleFiles;
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.node");
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.face");
+    std::vector<std::string> simpleFiles{
+            "resources/TetgenAdapterTestReadSimple.node",
+            "resources/TetgenAdapterTestReadSimple.face"
+    };
 
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
@@ -71,55 +72,58 @@ TEST_F(TetgenAdapterTest, readSimpleMesh) {
     using namespace testing;
     using namespace ::polyhedralGravity;
 
-    std::vector<std::string> simpleFiles;
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.mesh");
+    std::vector<std::string> simpleFiles{"resources/TetgenAdapterTestReadSimple.mesh"};
 
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
-    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+    for (const auto &actualVertice: actualPolyhedron.getVertices()) {
+        ASSERT_THAT(_expectedNodes, Contains(actualVertice));
+    }
+    ASSERT_EQ(_expectedFaces.size(), actualPolyhedron.countFaces());
 }
 
 TEST_F(TetgenAdapterTest, readSimpleOff) {
     using namespace testing;
     using namespace ::polyhedralGravity;
 
-    std::vector<std::string> simpleFiles;
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.off");
+    std::vector<std::string> simpleFiles{"resources/TetgenAdapterTestReadSimple.off"};
 
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
-    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+    for (const auto &actualVertice: actualPolyhedron.getVertices()) {
+        ASSERT_THAT(_expectedNodes, Contains(actualVertice));
+    }
+    ASSERT_EQ(_expectedFaces.size(), actualPolyhedron.countFaces());
 }
 
 TEST_F(TetgenAdapterTest, readSimplePly) {
     using namespace testing;
     using namespace ::polyhedralGravity;
 
-    std::vector<std::string> simpleFiles;
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.ply");
+    std::vector<std::string> simpleFiles{"resources/TetgenAdapterTestReadSimple.ply"};
 
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    ASSERT_THAT(actualPolyhedron.getVertices(), ContainerEq(_expectedNodes));
-    ASSERT_THAT(actualPolyhedron.getFaces(), ContainerEq(_expectedFaces));
+    for (const auto &actualVertice: actualPolyhedron.getVertices()) {
+        ASSERT_THAT(_expectedNodes, Contains(actualVertice));
+    }
+    ASSERT_EQ(_expectedFaces.size(), actualPolyhedron.countFaces());
 }
 
 TEST_F(TetgenAdapterTest, readSimpleStl) {
     using namespace testing;
     using namespace ::polyhedralGravity;
 
-    std::vector<std::string> simpleFiles;
-    simpleFiles.emplace_back("resources/TetgenAdapterTestReadSimple.stl");
+    std::vector<std::string> simpleFiles{"resources/TetgenAdapterTestReadSimple.stl"};
 
     TetgenAdapter tetgenAdapter{simpleFiles};
     auto actualPolyhedron = tetgenAdapter.getPolyhedron();
 
-    for (const auto &actualVertice : actualPolyhedron.getVertices()) {
+    for (const auto &actualVertice: actualPolyhedron.getVertices()) {
         ASSERT_THAT(_expectedNodes, Contains(actualVertice));
     }
+    ASSERT_EQ(_expectedFaces.size(), actualPolyhedron.countFaces());
 }

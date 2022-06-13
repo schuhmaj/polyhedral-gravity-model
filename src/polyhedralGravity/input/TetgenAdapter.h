@@ -24,6 +24,9 @@ namespace polyhedralGravity {
  */
     class TetgenAdapter : public DataSource {
 
+        /**
+         * The default exception message
+         */
         static constexpr char DEFAULT_EXCEPTION_MSG[] =
                 "The mesh was not read because of an error in Tetgen! This could indicate several "
                 "issues, e. g. issues with the node assignment like they appear if either no nodes were "
@@ -51,6 +54,11 @@ namespace polyhedralGravity {
 
     public:
 
+        /**
+         * Constructs a new TetgenAdapter from a vector of filenames. These filenames should end on the supported
+         * suffixes
+         * @param fileNames - vector of filenames
+         */
         explicit TetgenAdapter(std::vector<std::string> fileNames)
                 : _tetgenio{},
                   _fileNames{std::move(fileNames)},
@@ -143,9 +151,12 @@ namespace polyhedralGravity {
         void addFacesByTrifaces();
 
         /**
-         * Adds the faces of the tetgenio structure to the resulting polyhedron's faces.
+         * Adds the vertices and faces of the tetgenio structure to the resulting polyhedron's faces after calling
+         * Tetgen's tetrahedralize(..) method.
+         * @note This method is primarily used for formats which can contain non-triangle faces
+         * and to ensure the correct format
          */
-        void addFacesByFacetList();
+        void addVerticesAndFacesByTriangulation();
 
     };
 

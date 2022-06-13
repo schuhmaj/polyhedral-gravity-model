@@ -2,6 +2,16 @@
 
 namespace polyhedralGravity {
 
+    std::string YAMLConfigReader::getOutputFileName() {
+        SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger() ,
+                            "Reading the output filename from the configuration file.");
+        if (_file[ROOT][OUTPUT] && _file[ROOT][OUTPUT][OUTPUT_FILENAME]) {
+            return _file[ROOT][OUTPUT][OUTPUT_FILENAME].as<std::string>();
+        } else {
+            return "";
+        }
+    }
+
     double YAMLConfigReader::getDensity() {
         SPDLOG_LOGGER_DEBUG(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger() ,
                             "Reading the density from the configuration file.");

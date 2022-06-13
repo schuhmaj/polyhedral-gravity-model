@@ -8,7 +8,7 @@ namespace polyhedralGravity::util {
      * @related Used for the sgn() function to determine the sign of a double value. Different compilers
      * produce different results if no EPSILON is applied for the comparison!
      */
-    constexpr double EPSILON = 1e-15;
+    constexpr double EPSILON = 1e-14;
 
 
     /**

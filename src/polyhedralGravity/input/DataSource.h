@@ -11,6 +11,9 @@ namespace polyhedralGravity {
 
     public:
 
+        /**
+         * Default destructor of DataSource
+         */
         virtual ~DataSource() = default;
 
         /**
