@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<ConfigSource> config = std::make_shared<YAMLConfigReader>(argv[1]);
         auto poly = config->getDataSource()->getPolyhedron();
         auto density = config->getDensity();
-        auto computationPoints = std::vector<Array3>(10000, config->getPointsOfInterest()[0]);
+        auto computationPoints = config->getPointsOfInterest();
         auto outputFileName = config->getOutputFileName();
 
         SPDLOG_LOGGER_INFO(PolyhedralGravityLogger::DEFAULT_LOGGER.getLogger(), "The calculation started...");
