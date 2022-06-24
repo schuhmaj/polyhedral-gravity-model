@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 
+#include "xsimd/xsimd.hpp"
+
 namespace polyhedralGravity::util {
 
     /**
@@ -18,44 +20,6 @@ namespace polyhedralGravity::util {
     using Matrix = std::array<std::array<T, N>, M>;
 
     /**
-     * Applies a binary function to elements of two containers piece by piece. The objects must
-     * be iterable and should have the same size!
-     * @tparam Container - an iterable object like an array or vector
-     * @tparam BinOp - a binary function to apply
-     * @param lhs - the first container
-     * @param rhs - the second container
-     * @param binOp - a binary function like +, -, *, /
-     * @return a container containing the result
-     */
-    template<typename Container, typename BinOp>
-    Container applyBinaryFunction(const Container &lhs, const Container &rhs, BinOp binOp) {
-        Container ret = lhs;
-        std::transform(std::begin(lhs), std::end(lhs), std::begin(rhs), std::begin(ret), binOp);
-        return ret;
-    }
-
-    /**
-     * Applies a binary function to elements of one container piece by piece. The objects must
-     * be iterable. The resulting container consist of the containers' object after the application
-     * of the binary function with the scalar as parameter.
-     * @tparam Container - a iterable object like an array or vector
-     * @tparam Scalar - a scalar to use on each element
-     * @tparam BinOp - a binary function to apply
-     * @param lhs - the first container
-     * @param scalar - a scalar to use on each element
-     * @param binOp - a binary function like +, -, *, /
-     * @return a container containing the result
-     */
-    template<typename Container, typename Scalar, typename BinOp>
-    Container applyBinaryFunction(const Container &lhs, const Scalar &scalar, BinOp binOp) {
-        Container ret = lhs;
-        std::transform(std::begin(lhs), std::end(lhs), std::begin(ret), [&binOp, &scalar](const Scalar &element) {
-            return binOp(element, scalar);
-        });
-        return ret;
-    }
-
-    /**
      * Applies the Operation Minus to two Containers piece by piece.
      * @example {1, 2, 3} - {1, 1, 1} = {0, 1, 2}
      * @tparam Container
@@ -64,8 +28,20 @@ namespace polyhedralGravity::util {
      * @return the difference
      */
     template<typename Container>
-    Container operator-(const Container &lhs, const Container &rhs) {
-        return applyBinaryFunction(lhs, rhs, std::minus<>());
+    inline Container operator-(const Container &lhs, const Container &rhs) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
+            xsimd::store_aligned(&result[i], lBatch - rBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] - rhs[i];
+        }
+        return result;
     }
 
     /**
@@ -77,8 +53,20 @@ namespace polyhedralGravity::util {
     * @return the sum
     */
     template<typename Container>
-    Container operator+(const Container &lhs, const Container &rhs) {
-        return applyBinaryFunction(lhs, rhs, std::plus<>());
+    inline Container operator+(const Container &lhs, const Container &rhs) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
+            xsimd::store_aligned(&result[i], lBatch + rBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] + rhs[i];
+        }
+        return result;
     }
 
     /**
@@ -90,8 +78,20 @@ namespace polyhedralGravity::util {
     * @return the product
     */
     template<typename Container>
-    Container operator*(const Container &lhs, const Container &rhs) {
-        return applyBinaryFunction(lhs, rhs, std::multiplies<>());
+    inline Container operator*(const Container &lhs, const Container &rhs) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
+            xsimd::store_aligned(&result[i], lBatch * rBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] * rhs[i];
+        }
+        return result;
     }
 
     /**
@@ -103,8 +103,20 @@ namespace polyhedralGravity::util {
     * @return the product
     */
     template<typename Container>
-    Container operator/(const Container &lhs, const Container &rhs) {
-        return applyBinaryFunction(lhs, rhs, std::divides<>());
+    inline Container operator/(const Container &lhs, const Container &rhs) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
+            xsimd::store_aligned(&result[i], lBatch / rBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] / rhs[i];
+        }
+        return result;
     }
 
     /**
@@ -117,8 +129,20 @@ namespace polyhedralGravity::util {
     * @return a Container
     */
     template<typename Container, typename Scalar>
-    Container operator+(const Container &lhs, const Scalar &scalar) {
-        return applyBinaryFunction(lhs, scalar, std::plus<>());
+    inline Container operator+(const Container &lhs, const Scalar &scalar) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::store_aligned(&result[i], lBatch + scalarBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] + scalar;
+        }
+        return result;
     }
 
     /**
@@ -129,12 +153,23 @@ namespace polyhedralGravity::util {
     * @param lhs - minuend
     * @param scalar - subtrahend
     * @return a Container
-     * TODO This method causes issues with the MVSC 19.31.31107.0? Although it is never used...
     */
-//    template<typename Container, typename Scalar>
-//    Container operator-(const Container &lhs, const Scalar &scalar) {
-//        return applyBinaryFunction(lhs, scalar, std::minus<>());
-//    }
+    template<typename Container, typename Scalar>
+    inline Container operator-(const Container &lhs, const Scalar &scalar) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::store_aligned(&result[i], lBatch - scalarBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] - scalar;
+        }
+        return result;
+    }
 
     /**
     * Applies the Operation - to a Container and a Scalar.
@@ -146,8 +181,20 @@ namespace polyhedralGravity::util {
     * @return a Container
     */
     template<typename Container, typename Scalar>
-    Container operator*(const Container &lhs, const Scalar &scalar) {
-        return applyBinaryFunction(lhs, scalar, std::multiplies<>());
+    inline Container operator*(const Container &lhs, const Scalar &scalar) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::store_aligned(&result[i], lBatch * scalarBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] * scalar;
+        }
+        return result;
     }
 
     /**
@@ -160,8 +207,20 @@ namespace polyhedralGravity::util {
      * @return a Container
      */
     template<typename Container, typename Scalar>
-    Container operator/(const Container &lhs, const Scalar &scalar) {
-        return applyBinaryFunction(lhs, scalar, std::divides<>());
+    inline Container operator/(const Container &lhs, const Scalar &scalar) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
+        Container result{lhs};
+        xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
+            xsimd::store_aligned(&result[i], lBatch / scalarBatch);
+        }
+        for (size_t i = ub; i < std::size(lhs); ++i) {
+            result[i] = lhs[i] / scalar;
+        }
+        return result;
     }
 
     /**
@@ -171,8 +230,19 @@ namespace polyhedralGravity::util {
      * @return an double containing the L2 norm
      */
     template<typename Container>
-    double euclideanNorm(const Container &container) {
-        return std::sqrt(std::inner_product(std::begin(container), std::end(container), std::begin(container), 0.0));
+    inline double euclideanNorm(const Container &container) {
+        typedef typename Container::value_type T;
+        constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
+        const int ub = std::size(container) - (std::size(container) % simd_size);
+        T result{0};
+        for (size_t i = 0; i < ub; i+= simd_size) {
+            xsimd::batch<T> reg = xsimd::load_unaligned(&container[i]);
+            result += xsimd::hadd(reg * reg);
+        }
+        for (size_t i = ub; i < std::size(container); ++i) {
+            result += container[i] * container[i];
+        }
+        return std::sqrt(result);
     }
 
     /**
@@ -182,7 +252,7 @@ namespace polyhedralGravity::util {
      * @return a container with the modified values
      */
     template<typename Container>
-    Container abs(const Container &container) {
+    inline Container abs(const Container &container) {
         Container ret = container;
         std::transform(std::begin(container), std::end(container), std::begin(ret),
                        [](const auto &element) { return std::abs(element); });
@@ -197,7 +267,7 @@ namespace polyhedralGravity::util {
      * @return the determinant
      */
     template<typename T>
-    T det(const Matrix<T, 3, 3> &matrix) {
+    inline T det(const Matrix<T, 3, 3> &matrix) {
         return matrix[0][0] * matrix[1][1] * matrix[2][2] + matrix[0][1] * matrix[1][2] * matrix[2][0]
                + matrix[0][2] * matrix[1][0] * matrix[2][1] - matrix[0][2] * matrix[1][1] * matrix[2][0]
                - matrix[0][0] * matrix[1][2] * matrix[2][1] - matrix[0][1] * matrix[1][0] * matrix[2][2];
@@ -212,7 +282,7 @@ namespace polyhedralGravity::util {
      * @return the transposed
      */
     template<typename T, size_t M, size_t N>
-    Matrix<T, M, N> transpose(const Matrix<T, M, N> &matrix) {
+    inline Matrix<T, M, N> transpose(const Matrix<T, M, N> &matrix) {
         Matrix<T, N, M> transposed;
         for (size_t i = 0; i < M; ++i) {
             for (size_t j = 0; j < N; ++j) {
@@ -230,7 +300,7 @@ namespace polyhedralGravity::util {
     * @return cross product
     */
     template<typename T>
-    std::array<T, 3> cross(const std::array<T, 3> &lhs, const std::array<T, 3> &rhs) {
+    inline std::array<T, 3> cross(const std::array<T, 3> &lhs, const std::array<T, 3> &rhs) {
         std::array<T, 3> result{};
         result[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
         result[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
@@ -246,7 +316,7 @@ namespace polyhedralGravity::util {
     * @return dot product
     */
     template<typename T>
-    T dot(const std::array<T, 3> &lhs, const std::array<T, 3> &rhs) {
+    inline T dot(const std::array<T, 3> &lhs, const std::array<T, 3> &rhs) {
         return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
     }
 
@@ -258,7 +328,7 @@ namespace polyhedralGravity::util {
      * @return -1, 0, 1 depending on the sign an the given EPSILON
      */
     template<typename T>
-    int sgn(T val, double cutoffEpsilon) {
+    inline int sgn(T val, double cutoffEpsilon) {
         return val < -cutoffEpsilon ? -1 : val > cutoffEpsilon ? 1 : 0;
     }
 
@@ -272,7 +342,7 @@ namespace polyhedralGravity::util {
      * @return a new array of size M+N with type T
      */
     template<typename T, size_t M, size_t N>
-    std::array<T, M+N> concat(const std::array<T, M> &first, const std::array<T, N> &second) {
+    inline std::array<T, M+N> concat(const std::array<T, M> &first, const std::array<T, N> &second) {
         std::array<T, M+N> result{};
         size_t index = 0;
         for (const auto &el : first) {
@@ -293,7 +363,7 @@ namespace polyhedralGravity::util {
      * @return ostream
      */
     template<typename T, size_t N>
-    std::ostream &operator<<(std::ostream &os, const std::array<T, N> &array) {
+    inline std::ostream &operator<<(std::ostream &os, const std::array<T, N> &array) {
         os << "[";
         auto it = array.begin();
         auto end = array.end() - 1;

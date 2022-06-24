@@ -461,7 +461,7 @@ namespace polyhedralGravity {
 
         thrust::transform(zip.first, zip.second, counter,
                           transcendentalExpressionsForPlane.begin(), [&](const auto &tuple, const unsigned int j) {
-                    using namespace util;
+                    using util::EPSILON;
                     //distances l1, l2, s1, s1 for this segment q of plane p
                     const Distance &distance = thrust::get<0>(tuple);
                     //segment distance h_pq for this segment q of plane p
@@ -503,17 +503,12 @@ namespace polyhedralGravity {
 
                         //The last subtraction is implemented via -distance.l1 (the minus/ inversion
                         // is sustained through all operations, even the atan(..)
-                        xsimd::batch<double> reg1({distance.s2, distance.s1});
-                        xsimd::batch<double> reg2({distance.l2, - distance.l1});
-
-                        reg1 = xsimd::mul(reg1, planeDistance);
-                        reg2 = xsimd::mul(reg2, segmentDistance);
-
-                        reg1 = xsimd::div(reg1, reg2);
-                        reg1 = xsimd::atan(reg1);
+                        xsimd::batch<double> sDistances({distance.s2, distance.s1});
+                        xsimd::batch<double> lDistances({distance.l2, - distance.l1});
 
                         // "Subtraction" masked as addition (l1 was previously inverted with a minus)
-                        transcendentalExpressionPerSegment.an = xsimd::hadd(reg1);
+                        transcendentalExpressionPerSegment.an = xsimd::hadd(
+                                xsimd::atan((sDistances * planeDistance) / (lDistances * segmentDistance)));
                     }
 
                     return transcendentalExpressionPerSegment;
