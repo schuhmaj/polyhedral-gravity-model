@@ -132,7 +132,7 @@ setup(
         tensor of a constant density polyhedron at given computation points. It is based on a fast, parallelized
         backbone in C++ capable of evaluating the gravity at thousands of computation points in the fraction of a second.
     """,
-    ext_modules=[CMakeExtension("cmake_example")],
+    ext_modules=[CMakeExtension("polyhedral_gravity")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
