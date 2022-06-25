@@ -120,15 +120,18 @@ class CMakeBuild(build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=build_temp)
 
 
-# The information here can also be placed in setup.cfg - better separation of
-# logic and declaration, and simpler if you include description/version in a file.
+# Package information
 setup(
     name="polyhedral_gravity",
     version="1.0.0",
     author="Jonas Schuhmacher",
     author_email="jonas.schuhmacher@tum.de",
-    description="Polyhedral Gravity",  # TODO
-    long_description="",  # TODO
+    description="Package to compute full gravity tensor of a given constant density polyhedron for arbitrary points",
+    long_description="""
+        The package polyhedral_gravity provides a simple to use interface for the evaluation of the full gravity
+        tensor of a constant density polyhedron at given computation points. It is based on a fast, parallelized
+        backbone in C++ capable of evaluating the gravity at thousands of computation points in the fraction of a second.
+    """,
     ext_modules=[CMakeExtension("cmake_example")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
