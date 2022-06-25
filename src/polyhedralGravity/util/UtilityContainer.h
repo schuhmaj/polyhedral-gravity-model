@@ -31,15 +31,11 @@ namespace polyhedralGravity::util {
     inline Container operator-(const Container &lhs, const Container &rhs) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
             xsimd::store_aligned(&result[i], lBatch - rBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] - rhs[i];
         }
         return result;
     }
@@ -56,15 +52,11 @@ namespace polyhedralGravity::util {
     inline Container operator+(const Container &lhs, const Container &rhs) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
             xsimd::store_aligned(&result[i], lBatch + rBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] + rhs[i];
         }
         return result;
     }
@@ -81,15 +73,11 @@ namespace polyhedralGravity::util {
     inline Container operator*(const Container &lhs, const Container &rhs) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
             xsimd::store_aligned(&result[i], lBatch * rBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] * rhs[i];
         }
         return result;
     }
@@ -106,15 +94,11 @@ namespace polyhedralGravity::util {
     inline Container operator/(const Container &lhs, const Container &rhs) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::batch<T> rBatch = xsimd::load_unaligned(&rhs[i]);
             xsimd::store_aligned(&result[i], lBatch / rBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] / rhs[i];
         }
         return result;
     }
@@ -132,15 +116,11 @@ namespace polyhedralGravity::util {
     inline Container operator+(const Container &lhs, const Scalar &scalar) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
         xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::store_aligned(&result[i], lBatch + scalarBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] + scalar;
         }
         return result;
     }
@@ -158,15 +138,11 @@ namespace polyhedralGravity::util {
     inline Container operator-(const Container &lhs, const Scalar &scalar) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
         xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::store_aligned(&result[i], lBatch - scalarBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] - scalar;
         }
         return result;
     }
@@ -184,15 +160,11 @@ namespace polyhedralGravity::util {
     inline Container operator*(const Container &lhs, const Scalar &scalar) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
         xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::store_aligned(&result[i], lBatch * scalarBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] * scalar;
         }
         return result;
     }
@@ -210,15 +182,11 @@ namespace polyhedralGravity::util {
     inline Container operator/(const Container &lhs, const Scalar &scalar) {
         typedef typename Container::value_type T;
         constexpr std::size_t simd_size = xsimd::simd_type<T>::size;
-        const int ub = std::size(lhs) - (std::size(lhs) % simd_size);
         Container result{lhs};
         xsimd::batch<T> scalarBatch = xsimd::broadcast(scalar);
-        for (size_t i = 0; i < ub; i+= simd_size) {
+        for (size_t i = 0; i < std::size(lhs); i+= simd_size) {
             xsimd::batch<T> lBatch = xsimd::load_unaligned(&lhs[i]);
             xsimd::store_aligned(&result[i], lBatch / scalarBatch);
-        }
-        for (size_t i = ub; i < std::size(lhs); ++i) {
-            result[i] = lhs[i] / scalar;
         }
         return result;
     }
