@@ -37,7 +37,7 @@ requirements. Just execute in repository root:
     pip install .
 
 To modify the build options (like parallelization) have a look
-at the `setupy.py` and the [next paragraph](#build-c++).
+at the `setupy.py` and the [next paragraph](#build-c).
 
 ## Build C++
 
