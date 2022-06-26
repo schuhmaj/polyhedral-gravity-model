@@ -6,7 +6,26 @@ import sys
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
-# Adapted from https://github.com/pybind/cmake_example/blob/master/setup.py
+# ---------------------------------------------------------------------------------
+# Modify these variables to customize the build of the polyhedral gravity interface
+# ---------------------------------------------------------------------------------
+# Modify to change the parallelization (Default value: CPP)
+PARALLELIZATION_HOST = "CPP"
+# Modify to change the parallelization (Default value: CPP)
+PARALLELIZATION_DEVICE = "CPP"
+# Default value (INFO=2)
+LOGGING_LEVEL = 2
+# Default value (OFF)
+USE_LOCAL_TBB = "OFF"
+# Not required for the python interface (--> OFF)
+BUILD_POLYHEDRAL_GRAVITY_DOCS = "OFF"
+# Not required for the python interface (--> OFF)
+BUILD_POLYHEDRAL_GRAVITY_TESTS = "OFF"
+# Should be of course ON!
+BUILD_POLYHEDRAL_PYTHON_INTERFACE = "ON"
+# ---------------------------------------------------------------------------------
+
+# The following is adapted from https://github.com/pybind/cmake_example/blob/master/setup.py
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -116,6 +135,19 @@ class CMakeBuild(build_ext):
         if not os.path.exists(build_temp):
             os.makedirs(build_temp)
 
+        # Add project specific arguments
+        # Note that all options are listed here, even if the default value would suffice
+        cmake_args += [
+            f"-DPARALLELIZATION_HOST={PARALLELIZATION_HOST}",
+            f"-DPARALLELIZATION_DEVICE={PARALLELIZATION_DEVICE}",
+            f"-DLOGGING_LEVEL={LOGGING_LEVEL}",
+            f"-DUSE_LOCAL_TBB={USE_LOCAL_TBB}",
+            f"-DBUILD_POLYHEDRAL_GRAVITY_DOCS={BUILD_POLYHEDRAL_GRAVITY_DOCS}",
+            f"-DBUILD_POLYHEDRAL_GRAVITY_TESTS={BUILD_POLYHEDRAL_GRAVITY_TESTS}",
+            f"-DBUILD_POLYHEDRAL_PYTHON_INTERFACE={BUILD_POLYHEDRAL_PYTHON_INTERFACE}"
+        ]
+
+        # Call CMake and build the project
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=build_temp)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=build_temp)
 
