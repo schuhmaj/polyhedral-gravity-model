@@ -25,7 +25,9 @@ BUILD_POLYHEDRAL_GRAVITY_TESTS = "OFF"
 BUILD_POLYHEDRAL_PYTHON_INTERFACE = "ON"
 # ---------------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------------------
 # The following is adapted from https://github.com/pybind/cmake_example/blob/master/setup.py
+# -----------------------------------------------------------------------------------------
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -152,7 +154,12 @@ class CMakeBuild(build_ext):
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=build_temp)
 
 
-# Package information
+# -----------------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------
+# Modify these entries to customize the package metadata of the polyhedral gravity
+# --------------------------------------------------------------------------------
 setup(
     name="polyhedral_gravity",
     version="1.0.0",
@@ -170,3 +177,4 @@ setup(
     extras_require={"test": ["pytest>=6.0"]},
     python_requires=">=3.6",
 )
+# --------------------------------------------------------------------------------
