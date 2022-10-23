@@ -12,6 +12,10 @@ Supplementary details can be found in the more recent paper [TSOULIS, Dimitrios;
 and its corresponding [implementation in MATLAB](https://github.com/Gavriilidou/GPolyhedron),
 which is strongly based on the former implementation in FORTRAN.
 
+### Notice!
+
+The most recent version of the implementation can be found in the following repository: [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model)
+
 ## Documentation
 
 The full extensive documentation can be found on [readthedocs](https://polyhedral-gravity-model-cpp.readthedocs.io/en/latest/).
