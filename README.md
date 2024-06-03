@@ -1,7 +1,7 @@
 # polyhedral-gravity-model
 
 > [!CAUTION]
-> The project was migrated to a new repository inside the European Space Agency's GitHub organization: [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model). Please refer to the ESA repository for questions, issues, contributions and the newest updates!
+> The project **was migrated** to a new repository inside the European Space Agency's GitHub organization: [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model). **Please refer to the ESA repository** for questions, issues, contributions and the newest updates!
 
 ![Build and Test](https://github.com/schuhmaj/polyhedral-gravity-model-cpp/actions/workflows/ctest.yml/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/polyhedral-gravity-model-cpp/badge/?version=latest)](https://polyhedral-gravity-model-cpp.readthedocs.io/en/latest/?badge=latest)
@@ -27,7 +27,7 @@ the python interface.
 ## Documentation (readthedocs)
 
 > [!WARNING]
-> The documentation is **not available** anymore on readthedocs! Please refer to the new repository [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model) for the newest documentation!
+> The documentation is **not available** anymore on readthedocs! Please refer to the new repository [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model) for the newest documentation and version!
 
 The full extensive documentation can be found
 on [readthedocs](https://polyhedral-gravity-model-cpp.readthedocs.io/en/latest/).
@@ -45,6 +45,9 @@ all of them are **automatically** set-up via CMake:
 - xsimd 8.1.0 (required for vectorization of the `atan(..)`)
 
 ## Python interface
+
+> [!WARNING]
+> These installation/ build instructions are still valid for this repository. However, please refer to the new repository [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model) for the newest version. This repository is not updated anymore and still contains the outdated version `1.2.1`.
 
 ### conda
 
