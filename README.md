@@ -1,5 +1,8 @@
 # polyhedral-gravity-model
 
+> [!CAUTION]
+> The project was migrated to a new repository inside the European Space Agency's GitHub organization: [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model). Please refer to the ESA repository for questions, issues, contributions and the newest updates!
+
 ![Build and Test](https://github.com/schuhmaj/polyhedral-gravity-model-cpp/actions/workflows/ctest.yml/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/polyhedral-gravity-model-cpp/badge/?version=latest)](https://polyhedral-gravity-model-cpp.readthedocs.io/en/latest/?badge=latest)
 
@@ -14,10 +17,6 @@ paper [TSOULIS, Dimitrios; GAVRIILIDOU, Georgia. A computational review of the l
 and its corresponding [implementation in MATLAB](https://github.com/Gavriilidou/GPolyhedron),
 which is strongly based on the former implementation in FORTRAN.
 
-### Notice!
-
-The most recent version of the implementation can be found in the following repository: [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model)
-
 ### Results and Plots
 
 Some exemplary results and plots are stored in the
@@ -26,6 +25,9 @@ It also provides a good introduction to the application of
 the python interface.
 
 ## Documentation (readthedocs)
+
+> [!WARNING]
+> The documentation is **not available** anymore on readthedocs! Please refer to the new repository [esa/polyhedral-gravity-model](https://github.com/esa/polyhedral-gravity-model) for the newest documentation!
 
 The full extensive documentation can be found
 on [readthedocs](https://polyhedral-gravity-model-cpp.readthedocs.io/en/latest/).
